@@ -1,14 +1,14 @@
-import supabase from '../utils/supabase';
+import supabase from "../utils/supabase";
 
 export default function Login() {
   const handleGoogleLogin = () => {
-    console.log('Google login');
+    console.log("Google login");
   };
 
   const handleGithubLogin = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'github',
+        provider: "github",
         options: {
           redirectTo: `${import.meta.env.VITE_URL}/login`,
           // redirectTo: `${import.meta.env.VITE_URL}/profile`, // 로그인 후 리다이렉트할 URL
@@ -21,7 +21,7 @@ export default function Login() {
   };
 
   const handleKakaoLogin = () => {
-    console.log('Kakao login');
+    console.log("Kakao login");
   };
   return (
     <div>
