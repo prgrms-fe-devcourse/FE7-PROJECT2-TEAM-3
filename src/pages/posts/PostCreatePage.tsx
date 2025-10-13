@@ -2,21 +2,31 @@ import { Upload, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import supabase from "../../utils/supabase";
 import { useParams } from "react-router";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
+const allowedChannels = ["weird", "today_pick", "new", "best_combo"] as const;
 export default function PostCreatePage() {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [image, setImage] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
   const [channelId, setChannelId] = useState<string | null>(null);
+  const [hashtags, setHashtags] = useState("");
 
   const { channel } = useParams();
 
   useEffect(() => {
-    setChannelId(channel ?? null);
-  }, [channel]);
+    if (
+      channel &&
+      !allowedChannels.includes(
+        channel as "weird" | "today_pick" | "new" | "best_combo"
+      )
+    ) {
+      alert("잘못된 채널입니다.");
+      navigate("/write", { replace: true });
+    } else setChannelId(channel ?? null);
+  }, [channel, navigate]);
 
   useEffect(() => {
     const checkLoginStatus = async () => {
@@ -55,7 +65,6 @@ export default function PostCreatePage() {
         if (!profile) throw new Error("프로필 정보를 찾을 수 없습니다.");
 
         setUserId(profile._id);
-        console.log(userId);
       } catch (e) {
         console.error("사용자 정보 조회 중 오류", e);
       }
@@ -64,8 +73,8 @@ export default function PostCreatePage() {
     fetchProfileId();
   }, [userId]);
 
-  // 이미지 업로드 시 함수
   // TODO: 나중에는 여러 파일을 불러올거라 files[0]가 아니라 files로 불러와서 배열로서 이미지 파일을 불러와야 할듯
+  // 이미지 업로드 시 함수
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
@@ -83,6 +92,9 @@ export default function PostCreatePage() {
   // 폼 제출 시 함수
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const newPostId = crypto.randomUUID();
+    console.log(newPostId);
 
     // 예외처리 부분
     if (!userId || userId.trim() === "") {
@@ -126,22 +138,24 @@ export default function PostCreatePage() {
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
-        <div>
-          <label htmlFor="channel">Channel</label>
-          <select
-            name="channel"
-            id="channel"
-            required
-            value={channelId ?? ""}
-            onChange={(e) => setChannelId(e.target.value)}
-          >
-            <option value="">채널을 선택해주세요</option>
-            <option value="weird">괴식</option>
-            <option value="today_pick">오치추</option>
-            <option value="new">신메뉴</option>
-            <option value="best_combo">꿀조합</option>
-          </select>
-        </div>
+        {!channelId && (
+          <div>
+            <label htmlFor="channel">Channel</label>
+            <select
+              name="channel"
+              id="channel"
+              required
+              value={channelId ?? ""}
+              onChange={(e) => setChannelId(e.target.value)}
+            >
+              <option value="">채널을 선택해주세요</option>
+              <option value="weird">괴식</option>
+              <option value="today_pick">오치추</option>
+              <option value="new">신메뉴</option>
+              <option value="best_combo">꿀조합</option>
+            </select>
+          </div>
+        )}
         <div>
           <label htmlFor="content">Content</label>
           <textarea
@@ -153,7 +167,7 @@ export default function PostCreatePage() {
           ></textarea>
         </div>
         <div>
-          <label htmlFor="thumbnail">Thumbnail Image</label>
+          <p htmlFor="thumbnail">Thumbnail Image</p>
           {image && (
             <>
               <img src={image} alt="Thumbnail preview" />
@@ -165,9 +179,9 @@ export default function PostCreatePage() {
           {!image && (
             <>
               {/* <label htmlFor="thumbnail" style={{ cursor: "pointer" }}> */}
-              <Upload />
+              {/* <Upload /> */}
               {/* </label> */}
-              <p>Upload thumbnail image</p>
+              {/* <p>Upload thumbnail image</p> */}
               <input
                 type="file"
                 id="thumbnail"
