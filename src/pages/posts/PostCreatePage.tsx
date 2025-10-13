@@ -10,6 +10,7 @@ export default function PostCreatePage() {
   const [userId, setUserId] = useState<string | null>(null);
 
   // supabase에서 프로필 id 불러오기
+  // TODO: .eq 부분 현재 임의로 test ID로 설정한 부분 수정하기
   useEffect(() => {
     const fetchProfileId = async () => {
       const { data: profile, error } = await supabase
