@@ -19,6 +19,7 @@ export default function PostsList() {
     const fetchPosts = async () => {
       try {
         const { data: posts, error } = await supabase.from("posts").select("*");
+        console.log("PostList", posts);
         if (error) throw error;
         setPosts(posts);
       } catch (e) {
