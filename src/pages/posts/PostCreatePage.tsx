@@ -28,7 +28,7 @@ export default function PostCreatePage() {
       )
     ) {
       alert("잘못된 채널입니다.");
-      navigate("/write", { replace: true });
+      navigate("/channel/write", { replace: true });
     } else setChannelId(channel ?? null);
   }, [channel, navigate]);
 
