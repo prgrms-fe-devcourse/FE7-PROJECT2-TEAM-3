@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import supabase from "../../utils/supabase";
+import { useParams } from "react-router";
 
 type PostListItem = {
   _id: string;
@@ -16,6 +17,7 @@ type PostListItem = {
 };
 
 export default function PostsList() {
+  const { channel } = useParams();
   const [posts, setPosts] = useState<PostListItem[]>([]);
 
   useEffect(() => {
