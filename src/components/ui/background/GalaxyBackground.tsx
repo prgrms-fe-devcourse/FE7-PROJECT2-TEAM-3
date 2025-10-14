@@ -45,13 +45,13 @@ export default function GalaxyBackground() {
   }, []);
 
   return (
-    <div className="fixed top-0 left-0 w-full h-full -z-10">
+    <div className="absolute top-0 right-0 bottom-0 left-0 -z-10 bg-[radial-gradient(circle_at_25%_75%,_#212C3D_0%,_#182130_100%)]">
       {stars.map((star, index) => (
-        <div
+        <span
           key={index}
           className="absolute bg-white rounded-full animate-twinkleBackground"
           style={star}
-        />
+        ></span>
       ))}
     </div>
   );
