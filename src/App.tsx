@@ -16,6 +16,7 @@ export default function App() {
   return (
     <>
       <Routes>
+        {/* 아래의 코드도 지우기 아마 상아님이 고쳐주실 듯 */}
         <Route element={<Home />}>
           <Route index element={<Navigate to="/home" />} />
           <Route path="/home" element={<Constellation />} />
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/channel/all" element={<PostsList />} />
           {/* 테스트 하고 아래 코드 지우기 */}
           <Route path="/channel/:channel/write" element={<PostCreatePage />} />
+
           <Route path="/channel/write" element={<PostCreatePage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/userSetting" element={<UserSetting />} />

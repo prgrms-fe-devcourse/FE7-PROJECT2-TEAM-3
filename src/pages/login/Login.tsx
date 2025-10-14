@@ -10,7 +10,7 @@ export default function Login() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "github",
         options: {
-          redirectTo: `${import.meta.env.VITE_URL}/login`,
+          redirectTo: `${import.meta.env.VITE_URL}/home`,
           // redirectTo: `${import.meta.env.VITE_URL}/profile`, // 로그인 후 리다이렉트할 URL
         },
       });
