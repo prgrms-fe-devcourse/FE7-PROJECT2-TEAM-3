@@ -1,6 +1,6 @@
 @import "tailwindcss";
-@import "tw-animate-css";
-@custom-variant dark (&:is(.dark *));
+@import "tailwind-scrollbar-hide/v4";
+
 @tailwind utilities;
 @layer utilities {
   /* center */

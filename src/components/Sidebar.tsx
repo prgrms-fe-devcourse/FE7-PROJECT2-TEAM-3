@@ -1,95 +1,68 @@
-import { Flame, Hash, Trophy } from "lucide-react";
 import { Link } from "react-router";
-import Input from "./ui/Input";
-import { twMerge } from "tailwind-merge";
+import NoProfileImage from "../assets/image/no_profile_image.png";
+import { Bell, Search } from "lucide-react";
+import type { Database } from "../types/database";
+import { useState } from "react";
+import Notifications from "./aside/Notifications";
+import SidebarContents from "./aside/SidebarContents";
+import Modal from "./Modal";
+import SearchModal from "./SearchModal";
 
-export default function Sidebar({ className }: { className?: string }) {
+type Notification = Database["public"]["Tables"]["notification"]["Row"];
+
+export default function Sidebar() {
+  const postSearchModalHandler = () => {};
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isNotiOpened, setIsNotiOpened] = useState(false);
+  const [isSearchOpened, setIsSearchOpened] = useState(false);
+
+  const openSearch = () => setIsSearchOpened(true);
+  const closeSearch = () => setIsSearchOpened(false);
+  const toggleNotifications = () => setIsNotiOpened((p) => !p);
+
   return (
     <>
-      <div className={twMerge("w-80 p-5", className)}>
-        <div className="flex flex-col h-full gap-5">
-          <div className="flex gap-5">
-            <div className="glassmoph-bd rounded-4xl flex-1">
-              <Input
-                className="border-none rounded-4xl glassmoph-bg h-full "
-                type="text"
-                placeholder="검색어를 입력하세요..."
-              />
-            </div>
-            <div className="relative">
+      <aside className="w-80 border-l-[#303A4B] overflow-y-scroll scrollbar-hide">
+        <div className="sticky top-0 flex-center gap-2 h-18 px-3 border-b border-b-[#303A4B] bg-[#1A2537]">
+          <button
+            className="flex-1 flex items-center gap-2 h-10 px-3 bg-[#161C27] rounded-lg text-sm font-medium text-gray-300 cursor-pointer hover:opacity-70"
+            onClick={openSearch}
+          >
+            <Search className="w-4 h-4 stroke-gray-300" />
+            Explore...
+          </button>
+          {/* 알림 있을 경우 */}
+          <button
+            className="notification flex-center relative w-10 h-10 rounded-full cursor-pointer hover:bg-[#161C27] hover:opacity-70"
+            onClick={toggleNotifications}
+          >
+            <Bell className="w-6 h-6 stroke-gray-300 fill-gray-300" />
+            {notifications.length > 0 && (
+              <span className="absolute top-1.5 right-2.5 w-2 h-2 bg-[#A62F03] border-2 border-[#1A2537] rounded-full"></span>
+            )}
+          </button>
+          <div className="">
+            <Link
+              to="myPage"
+              className="block w-10 h-10 rounded-full hover:opacity-70"
+            >
+              {/* 프로필 이미지 src */}
+              {/* <img src="" className="w-full h-full object-cover" alt="닉네임" /> */}
+              {/* 없으면 이걸로 */}
               <img
-                src="https://images.unsplash.com/photo-1744872665943-fd335d371059?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                className="w-13 h-13 rounded-full object-cover"
-                alt="유저이름"
+                src={NoProfileImage}
+                className="w-full h-full object-cover"
+                alt="유저 닉넴"
               />
-              {/* 알림 있을 때 */}
-              <div className="absolute top-0.5 right-0.5 w-2.5 h-2.5 bg-red-600 rounded-full"></div>
-            </div>
-          </div>
-          <div className="glassmoph-bd rounded-2xl">
-            <div className="flex flex-col gap-6  glassmoph-bg rounded-2xl p-6.5 ">
-              <div className="title flex gap-4 items-center">
-                <Flame className="w-7 h-7" />
-                <h2 className="text-xl font-black">인기 게시물</h2>
-              </div>
-              <div className="flex flex-col gap-4">
-                <Link to="">바삭바삭</Link>
-              </div>
-            </div>
-          </div>
-          <div className="glassmoph-bd rounded-2xl">
-            <div className="flex flex-col gap-6  glassmoph-bg rounded-2xl p-6.5 ">
-              <div className="title flex gap-4 items-center">
-                <Hash className="w-7 h-7" />
-                <h2 className="text-xl font-black">해시태그</h2>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Link
-                  to=""
-                  className="px-2 py-1 rounded-sm bg-white text-gray-500 font-semibold text-sm"
-                >
-                  # 바삭바삭
-                </Link>
-                <Link
-                  to=""
-                  className="px-2 py-1 rounded-sm bg-white text-gray-500 font-semibold text-sm"
-                >
-                  # 바삭바삭바삭바
-                </Link>
-                <Link
-                  to=""
-                  className="px-2 py-1 rounded-sm bg-white text-gray-500 font-semibold text-sm"
-                >
-                  # 길이길기이
-                </Link>
-              </div>
-            </div>
-          </div>
-          <div className="glassmoph-bd rounded-2xl">
-            <div className="flex flex-col gap-6  glassmoph-bg rounded-2xl p-6.5 ">
-              <div className="title flex gap-4 items-center">
-                <Trophy className="w-7 h-7" />
-                <h2 className="text-xl font-black">유저 랭킹</h2>
-              </div>
-              <div>
-                <div className="flex items-center gap-2.5">
-                  <div className="image w-12.5 h-12.5 bg-amber-200 rounded-full overflow-hidden">
-                    <img
-                      src="https://images.unsplash.com/photo-1759763494786-642b023e8956?q=80&w=780&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                      alt="유저이름"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="nickname flex-1 text-sm">닉네임</div>
-                  <div className="level text-xs font-bold text-gray-500">
-                    Lv.3
-                  </div>
-                </div>
-              </div>
-            </div>
+            </Link>
           </div>
         </div>
-      </div>
+        {isNotiOpened && <Notifications />}
+        {!isNotiOpened && <SidebarContents />}
+      </aside>
+      <Modal isOpen={isSearchOpened} onClose={closeSearch}>
+        <SearchModal onClose={closeSearch} />
+      </Modal>
     </>
   );
 }
