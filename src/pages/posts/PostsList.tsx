@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import supabase from "../../utils/supabase";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import defaultProfile from "../../assets/image/no_profile_image.png";
 
 // TODO: 글쓰기 버튼을 추가해서 누르면 '/channel/${channel}/write로 이동하는 것 구현하기
@@ -24,6 +24,7 @@ type PostListItem = {
 };
 
 export default function PostsList() {
+  const navigate = useNavigate();
   const { channel } = useParams();
   const [posts, setPosts] = useState<PostListItem[]>([]);
 
@@ -84,7 +85,8 @@ export default function PostsList() {
           return (
             <div
               key={post._id}
-              className="flex w-[1024px] h-[210px] gap-3 p-6 mb-6 bg-[#161C27] rounded-[8px]"
+              className="flex w-[1024px] h-[210px] gap-3 p-6 mb-6 bg-[#161C27] rounded-[8px] cursor-pointer"
+              onClick={() => navigate(`/post/${post._id}`)}
             >
               <div id="user-image">
                 <img
