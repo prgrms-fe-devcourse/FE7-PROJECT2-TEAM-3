@@ -77,7 +77,7 @@ export default function Login() {
             .from('profiles')
             .update({
               exp: 0,
-              badge: '초심자',
+              badge: '치킨 미개봉자',
               level: 0,
               is_online: true,
             })
