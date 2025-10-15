@@ -4,6 +4,7 @@ import { useAuthStore } from '../../stores/authStore';
 import supabase from '../../utils/supabase';
 
 export default function UserSetting() {
+  const claims = useAuthStore((state) => state.claims);
   const navigate = useNavigate();
   const profile = useAuthStore((state) => state.profile);
   const [formData, setFormData] = useState({
@@ -17,10 +18,6 @@ export default function UserSetting() {
         .from('profiles')
         .update({
           display_name: formData.name,
-          exp: 0,
-          badge: '초심자',
-          level: 0,
-          is_online: true,
         })
         .eq('_id', profile?._id)
         .select();
@@ -45,12 +42,33 @@ export default function UserSetting() {
   };
 
   useEffect(() => {
+    const fetchUser = async () => {
+      if (claims?.sub) {
+        const { data: profiles, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('_id', claims.sub)
+          .single();
+
+        if (error) {
+          console.error(error);
+          return;
+        }
+
+        if (profiles?.display_name) {
+          navigate('/home');
+        }
+      }
+    };
+
+    fetchUser();
+
     if (profile) {
       setFormData({
         name: profile.display_name || '',
       });
     }
-  }, [profile]);
+  }, [profile, claims?.sub, navigate]);
 
   return (
     <div className="max-w-2xl mx-auto">
