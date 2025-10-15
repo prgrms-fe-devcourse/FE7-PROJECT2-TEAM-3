@@ -3,6 +3,9 @@ import supabase from "../../utils/supabase";
 import { useParams } from "react-router";
 import defaultProfile from "../../assets/image/no_profile_image.png";
 
+// TODO: 글쓰기 버튼을 추가해서 누르면 '/channel/${channel}/write로 이동하는 것 구현하기
+// TODO: 목록을 Link로 연결해서 포스트 디테일로 연결되도록 하기 post._id를 활용
+
 type PostListItem = {
   _id: string;
   title: string;
