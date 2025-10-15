@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 // TODO: 제목 글자 제한, 내용 최소 글자 수 제한
 
-const allowedChannels = ["weird", "today_pick", "new", "best_combo"] as const;
+const allowedChannels = ["weird", "todayPick", "new", "bestCombo"] as const;
 export default function PostCreatePage() {
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
@@ -24,7 +24,7 @@ export default function PostCreatePage() {
     if (
       channel &&
       !allowedChannels.includes(
-        channel as "weird" | "today_pick" | "new" | "best_combo"
+        channel as "weird" | "todayPick" | "new" | "bestCombo"
       )
     ) {
       alert("잘못된 채널입니다.");
@@ -137,6 +137,8 @@ export default function PostCreatePage() {
       return;
     }
 
+    console.log(channelId);
+
     // 실제 포스트 등록 로직
     try {
       // post 등록
@@ -220,9 +222,9 @@ export default function PostCreatePage() {
             >
               <option value="">채널을 선택해주세요</option>
               <option value="weird">괴식</option>
-              <option value="today_pick">오치추</option>
+              <option value="todayPick">오치추</option>
               <option value="new">신메뉴</option>
-              <option value="best_combo">꿀조합</option>
+              <option value="bestCombo">꿀조합</option>
             </select>
           </div>
         )}
