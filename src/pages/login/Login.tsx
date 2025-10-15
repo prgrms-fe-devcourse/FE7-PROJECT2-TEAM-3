@@ -1,9 +1,9 @@
-import supabase from '../../utils/supabase';
-import { useAuthStore } from '../../stores/authStore';
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router';
-import { Github } from 'lucide-react';
-import Logo from '../../assets/image/logo.png';
+import supabase from "../../utils/supabase";
+import { useAuthStore } from "../../stores/authStore";
+import { useEffect } from "react";
+import { useNavigate } from "react-router";
+import { Github } from "lucide-react";
+import Logo from "../../assets/image/logo.png";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ export default function Login() {
   const handleGoogleLogin = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: {
           redirectTo: `${import.meta.env.VITE_URL}/userSetting`, // 로그인 후 리다이렉트할 URL
         },
@@ -27,7 +27,7 @@ export default function Login() {
   const handleGithubLogin = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'github',
+        provider: "github",
         options: {
           redirectTo: `${import.meta.env.VITE_URL}/userSetting`,
         },
@@ -41,7 +41,7 @@ export default function Login() {
   const handleDiscordLogin = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'discord',
+        provider: "discord",
         options: {
           redirectTo: `${import.meta.env.VITE_URL}/userSetting`,
         },
@@ -56,35 +56,35 @@ export default function Login() {
     const fetchUser = async () => {
       if (claims?.sub) {
         const { data: profiles } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('_id', claims.sub)
+          .from("profiles")
+          .select("*")
+          .eq("_id", claims.sub)
           .single();
 
         if (profiles?.exp) {
           const { data } = await supabase
-            .from('profiles')
+            .from("profiles")
             .update({
               is_online: true,
             })
-            .eq('_id', profile?._id)
+            .eq("_id", profile?._id)
             .select();
           if (data) {
-            navigate('/home');
+            navigate("/home");
           }
         } else {
           const { data } = await supabase
-            .from('profiles')
+            .from("profiles")
             .update({
               exp: 0,
-              badge: '치킨 미개봉자',
+              badge: "치킨 미개봉자",
               level: 0,
               is_online: true,
             })
-            .eq('_id', profile?._id)
+            .eq("_id", profile?._id)
             .select();
           if (data) {
-            navigate('/userSetting');
+            navigate("/userSetting");
           }
         }
       }
@@ -97,7 +97,7 @@ export default function Login() {
       <div
         className="bg-[#161C27] rounded-lg p-8 md:p-10 
             shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
-        style={{ border: '1px solid rgba(255,255,255,0.1)' }}
+        style={{ border: "1px solid rgba(255,255,255,0.1)" }}
       >
         <div className="text-center mb-8">
           {/* 로고와 텍스트를 위아래로 분리 */}
