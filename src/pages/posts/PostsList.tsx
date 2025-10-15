@@ -16,7 +16,7 @@ type PostListItem = {
     display_name: string;
     profile_image: string | null;
     exp: number;
-    badges?: string;
+    badge?: string;
   };
   likeCount: number;
   commentCount: number;
@@ -36,7 +36,7 @@ export default function PostsList() {
             content,
             channel_id,
             created_at,
-            user:profiles (display_name,profile_image,exp, badges),
+            user:profiles (display_name,profile_image,exp, badge),
             likes (_id),
             comments (_id),
             hashtags (hashtag)`);
@@ -56,7 +56,7 @@ export default function PostsList() {
           content: post.content,
           channel_id: post.channel_id,
           created_at: post.created_at,
-          user: post.user ?? { display_name: "", profile_image: null, exp: 0 },
+          user: post.user,
           likeCount: Array.isArray(post.likes) ? post.likes.length : 0,
           commentCount: Array.isArray(post.comments) ? post.comments.length : 0,
           hashtags: (post.hashtags || []).map(
@@ -103,7 +103,7 @@ export default function PostsList() {
                     {post.user.exp || "0"}
                   </span>
                   <div className="inline-flex w-[44px] h-[17px] items-center justify-center bg-[#9F9F9F] text-white text-[10px] rounded-[30px] whitespace-nowrap overflow-hidden">
-                    {post.user.badges || "정보 없음"}
+                    {post.user.badge || "정보 없음"}
                   </div>
                 </div>
 
