@@ -1,65 +1,99 @@
 import { NavLink, useNavigate } from "react-router";
-import { House, Pin, Gamepad2, UserRoundSearch, Sun, Moon } from "lucide-react";
 import { twMerge } from "tailwind-merge";
-import Logo from "../assets/image/Logo";
+import Logo from "../assets/image/logo.png";
+import {
+  Gamepad2,
+  House,
+  MoonStar,
+  SatelliteDish,
+  UserRoundSearch,
+} from "lucide-react";
 
-export default function Header({ className }: { className?: string }) {
+export default function Header() {
   const navigate = useNavigate();
+  const darkmodeHandler = () => {
+    document.body.classList.toggle("dark");
+  };
+
   return (
     <>
-      <header className={twMerge("w-35 p-5", className)}>
-        <div className="h-full glassmoph-bd rounded-2xl">
-          <div className="flex flex-col h-full glassmoph-bg rounded-2xl">
-            <h1
-              className="logo flex-center w-25 h-25"
-              onClick={() => navigate("/home")}
-            >
-              <Logo className="w-15 h-15" />
-            </h1>
-            <nav className="flex-center flex-col flex-1 gap-10">
-              <NavLink
-                to="/home"
-                className={({ isActive }) =>
-                  twMerge(
-                    "flex-center relative w-full h-15",
-                    isActive &&
-                      "on before:content-[''] before:absolute before:right-0 before:w-1 before:h-full"
-                  )
-                }
-              >
-                <House className="w-8 h-8" />
-              </NavLink>
-              <NavLink
-                to="/channel"
-                className={({ isActive }) => (isActive ? "on" : "")}
-              >
-                <Pin className="w-8 h-8" />
-              </NavLink>
-              <NavLink
-                to="/game"
-                className={({ isActive }) => (isActive ? "on" : "")}
-              >
-                <Gamepad2 className="w-8 h-8" />
-              </NavLink>
-              <NavLink
-                to="/search"
-                className={({ isActive }) => (isActive ? "on" : "")}
-              >
-                <UserRoundSearch className="w-8 h-8" />
-              </NavLink>
-            </nav>
-            <div className="flex-center w-25 h-25">
-              {/* 라이트모드 */}
-              <div className="flex justify-between items-center px-2 gap-2 relative h-10 rounded-4xl bg-white">
-                <Sun className="w-6 h-6 stroke-gray-300" />
-                <Moon className="w-6 h-6" />
-                <button className="absolute top-1.5 right-2 w-7 h-7 rounded-full bg-gray-300 text-[0px]">
-                  토글
-                </button>
-              </div>
-              {/* 다크모드 */}
+      <header className="flex flex-col justify-between w-80">
+        <h1
+          className="logo flex-center h-18 border-b border-[#303A4B] cursor-pointer"
+          onClick={() => navigate("/home")}
+        >
+          <img className="w-auto h-15" src={Logo} alt="CHICKEN GALAXY" />
+        </h1>
+        <nav className="flex flex-col flex-1 gap-4 px-3 py-5">
+          <NavLink
+            to="/home"
+            className={({ isActive }) =>
+              twMerge(
+                "flex items-center gap-3 px-4 py-3 border border-transparent text-white font-semibold rounded-lg hover:bg-[rgba(0,0,0,0.1)]",
+                isActive &&
+                  "border-[#44387D] bg-[rgba(123,97,255,0.1)] shadow-[0px_0px_20px_0px_rgba(123,97,255,0.2)] hover:bg-[#44387D]"
+              )
+            }
+          >
+            <House className="w-6 h-6 stroke-[#06B6D4]" />홈
+          </NavLink>
+          <NavLink
+            to="/channel/all"
+            className={({ isActive }) =>
+              twMerge(
+                "flex items-center gap-3 px-4 py-3 border border-transparent text-white font-semibold rounded-lg hover:bg-[rgba(0,0,0,0.1)]",
+                isActive &&
+                  "border-[#44387D] bg-[rgba(123,97,255,0.1)] shadow-[0px_0px_20px_0px_rgba(123,97,255,0.2)] hover:bg-[#44387D]"
+              )
+            }
+          >
+            <SatelliteDish className="w-6 h-6 stroke-[#8B5CF6]" />
+            채널
+          </NavLink>
+          <NavLink
+            to="/userSearch"
+            className={({ isActive }) =>
+              twMerge(
+                "flex items-center gap-3 px-4 py-3 border border-transparent text-white font-semibold rounded-lg hover:bg-[rgba(0,0,0,0.1)]",
+                isActive &&
+                  "border-[#44387D] bg-[rgba(123,97,255,0.1)] shadow-[0px_0px_20px_0px_rgba(123,97,255,0.2)] hover:bg-[#44387D]"
+              )
+            }
+          >
+            <UserRoundSearch className="w-6 h-6 stroke-[#F59E0B]" />
+            유저 검색
+          </NavLink>
+          <NavLink
+            to="/search"
+            className={({ isActive }) =>
+              twMerge(
+                "flex items-center gap-3 px-4 py-3 border border-transparent text-white font-semibold rounded-lg hover:bg-[rgba(0,0,0,0.1)]",
+                isActive &&
+                  "border-[#44387D] bg-[rgba(123,97,255,0.1)] shadow-[0px_0px_20px_0px_rgba(123,97,255,0.2)] hover:bg-[#44387D]"
+              )
+            }
+          >
+            <Gamepad2 className="w-6 h-6 stroke-[#EF4444]" />
+            미니 게임
+          </NavLink>
+        </nav>
+        <div className="p-4">
+          {/* 라이트모드 */}
+          <button
+            className="button button flex justify-between items-center w-full px-4 py-3 bg-gradient-to-r from-[#234A45] via-[#31305D] to-[#252849] shadow-[0px_0px_20px_0px_rgba(123,97,255,0.2)] rounded-lg border border-[#44387D] cursor-pointer"
+            onClick={darkmodeHandler}
+          >
+            <div className="flex-center gap-3 text-xl font-bold text-white">
+              <MoonStar className="w-7.5 h-7.5 stroke-[#F59E0B] fill-[#F59E0B]" />
+              다크모드
             </div>
-          </div>
+            <div className="relative w-10 h-5 bg-[#8B5CF6] rounded-4xl">
+              <span className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-white text-[0px]">
+                스위치
+              </span>
+            </div>
+          </button>
+          {/* 다크모드 */}
         </div>
       </header>
     </>
