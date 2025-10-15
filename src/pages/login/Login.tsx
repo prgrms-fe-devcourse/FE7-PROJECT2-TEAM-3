@@ -12,7 +12,6 @@ export default function Login() {
 
   const handleGoogleLogin = async () => {
     try {
-      console.log('Google login');
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -27,7 +26,6 @@ export default function Login() {
 
   const handleGithubLogin = async () => {
     try {
-      console.log('Github login');
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
@@ -42,7 +40,6 @@ export default function Login() {
 
   const handleDiscordLogin = async () => {
     try {
-      console.log('Discord login');
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'discord',
         options: {
@@ -65,9 +62,30 @@ export default function Login() {
           .single();
 
         if (profiles?.exp) {
-          navigate('/home');
+          const { data } = await supabase
+            .from('profiles')
+            .update({
+              is_online: true,
+            })
+            .eq('_id', profile?._id)
+            .select();
+          if (data) {
+            navigate('/home');
+          }
         } else {
-          navigate('/userSetting');
+          const { data } = await supabase
+            .from('profiles')
+            .update({
+              exp: 0,
+              badge: '초심자',
+              level: 0,
+              is_online: true,
+            })
+            .eq('_id', profile?._id)
+            .select();
+          if (data) {
+            navigate('/userSetting');
+          }
         }
       }
     };
@@ -78,7 +96,7 @@ export default function Login() {
     <div className="max-w-md mx-auto">
       <div
         className="bg-[#161C27] rounded-lg p-8 md:p-10 
-             shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
+            shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
         style={{ border: '1px solid rgba(255,255,255,0.1)' }}
       >
         <div className="text-center mb-8">

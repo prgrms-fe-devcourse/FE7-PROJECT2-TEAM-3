@@ -11,6 +11,7 @@ export default function AuthBootstrap() {
 
     // supabase의 인증 상태가 변경될 때마다 실행
     const { data: sub } = supabase.auth.onAuthStateChange(async (event) => {
+      if (event === 'SIGNED_IN') hydrateFromAuth();
       if (event === 'SIGNED_OUT') clearAuth();
     });
     return () => sub.subscription.unsubscribe();
