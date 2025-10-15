@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 const allowedChannels = ["weird", "todayPick", "new", "bestCombo"] as const;
 export default function PostCreatePage() {
   const navigate = useNavigate();
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [image, setImage] = useState<string[]>([]);
@@ -16,6 +17,7 @@ export default function PostCreatePage() {
   const [channelId, setChannelId] = useState<string | null>(null);
   const [hashtags, setHashtags] = useState<string[]>([]);
   const [hashtagInput, setHashtagInput] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { channel } = useParams();
 
@@ -126,6 +128,7 @@ export default function PostCreatePage() {
   // 폼 제출 시 함수
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isSubmitting) return;
 
     // 예외처리 부분
     if (!userId || userId.trim() === "") {
@@ -137,10 +140,9 @@ export default function PostCreatePage() {
       return;
     }
 
-    console.log(channelId);
-
     // 실제 포스트 등록 로직
     try {
+      setIsSubmitting(true);
       // post 등록
       const { data: postData, error: postError } = await supabase
         .from("posts")
@@ -193,7 +195,8 @@ export default function PostCreatePage() {
     } catch (e) {
       console.log(e);
       alert("게시글 등록 중 오류가 발생했습니다.");
-      return;
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -295,7 +298,9 @@ export default function PostCreatePage() {
           />
         </div>
         <div>
-          <button>글 올리기</button>
+          <button disabled={isSubmitting}>
+            {isSubmitting ? "등록 중..." : "글 올리기"}
+          </button>
         </div>
       </form>
     </>
