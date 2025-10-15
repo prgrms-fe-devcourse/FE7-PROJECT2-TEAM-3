@@ -73,7 +73,7 @@ export default function PostsList() {
     };
 
     fetchPosts();
-  }, []);
+  }, [channel]);
 
   return (
     <>
