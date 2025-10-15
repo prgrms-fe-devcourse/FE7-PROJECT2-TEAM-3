@@ -17,7 +17,10 @@ export default function UserSetting() {
         .from('profiles')
         .update({
           display_name: formData.name,
-          exp: 10,
+          exp: 0,
+          badge: '초심자',
+          level: 0,
+          is_online: true,
         })
         .eq('_id', profile?._id)
         .select();
