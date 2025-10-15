@@ -1,30 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
-import { useAuthStore } from '../../stores/authStore';
-import supabase from '../../utils/supabase';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
+import { useAuthStore } from "../../stores/authStore";
+import supabase from "../../utils/supabase";
 
 export default function UserSetting() {
   const claims = useAuthStore((state) => state.claims);
   const navigate = useNavigate();
   const profile = useAuthStore((state) => state.profile);
   const [formData, setFormData] = useState({
-    name: '',
+    name: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const { data, error } = await supabase
-        .from('profiles')
+        .from("profiles")
         .update({
           display_name: formData.name,
         })
-        .eq('_id', profile?._id)
+        .eq("_id", profile?._id)
         .select();
       if (error) throw error;
       if (data) {
-        alert('회원가입이 완료되었습니다!');
-        navigate('/home');
+        alert("회원가입이 완료되었습니다!");
+        navigate("/home");
       }
     } catch (error) {
       console.log(error);
@@ -45,9 +45,9 @@ export default function UserSetting() {
     const fetchUser = async () => {
       if (claims?.sub) {
         const { data: profiles, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('_id', claims.sub)
+          .from("profiles")
+          .select("*")
+          .eq("_id", claims.sub)
           .single();
 
         if (error) {
@@ -56,7 +56,7 @@ export default function UserSetting() {
         }
 
         if (profiles?.display_name) {
-          navigate('/home');
+          navigate("/home");
         }
       }
     };
@@ -65,7 +65,7 @@ export default function UserSetting() {
 
     if (profile) {
       setFormData({
-        name: profile.display_name || '',
+        name: profile.display_name || "",
       });
     }
   }, [profile, claims?.sub, navigate]);
