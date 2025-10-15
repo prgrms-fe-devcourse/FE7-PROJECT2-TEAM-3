@@ -1,13 +1,12 @@
-import { X } from "lucide-react";
+import { Upload, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import supabase from "../../utils/supabase";
 import { useParams } from "react-router";
 import { useNavigate } from "react-router-dom";
 
-// TODO: 해시태그 입력창을 만들고 최대 5개까지 엔터로 해시태그를 넣을 수 있도록 구현
-// TODO: 파일과 해시태그를 어떻게 해야지 posts 테이블과 연동해서 DB에 저장할 수 있을지 알아보기
+// TODO: 제목 글자 제한, 내용 최소 글자 수 제한
 
-const allowedChannels = ["weird", "today_pick", "new", "best_combo"] as const;
+const allowedChannels = ["weird", "todayPick", "new", "bestCombo"] as const;
 export default function PostCreatePage() {
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
@@ -25,11 +24,11 @@ export default function PostCreatePage() {
     if (
       channel &&
       !allowedChannels.includes(
-        channel as "weird" | "today_pick" | "new" | "best_combo"
+        channel as "weird" | "todayPick" | "new" | "bestCombo"
       )
     ) {
       alert("잘못된 채널입니다.");
-      navigate("/write", { replace: true });
+      navigate("/channel/write", { replace: true });
     } else setChannelId(channel ?? null);
   }, [channel, navigate]);
 
@@ -63,26 +62,42 @@ export default function PostCreatePage() {
         setUserId(profile._id);
       } catch (e) {
         console.error("사용자 정보 조회 중 오류", e);
+        alert(`게시글 등록 중 오류가 발생했습니다.\n${(e as Error).message}`);
       }
     };
 
     fetchProfileId();
   }, [userId, navigate]);
 
-  // TODO: 나중에는 여러 파일을 불러올거라 files[0]가 아니라 files로 불러와서 배열로서 이미지 파일을 불러와야 할듯
   // 이미지 업로드 시 함수
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files && e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImage(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const fileArray: string[] = [];
+
+      if (image.length + files.length > 4) {
+        alert("이미지는 최대 4개까지만 업로드 가능합니다.");
+        return;
+      }
+
+      Array.from(files).forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          if (ev.target?.result) {
+            fileArray.push(ev.target.result as string);
+
+            if (fileArray.length === files.length) {
+              setImage((prev) => [...prev, ...fileArray]);
+            }
+          }
+        };
+        reader.readAsDataURL(file);
+      });
     }
   };
-  const removeImage = () => {
-    setImage("");
+
+  const removeImage = (index: number) => {
+    setImage((prev) => prev.filter((_, i) => index !== i));
   };
 
   // 해시 태그 관련 함수들
@@ -95,7 +110,6 @@ export default function PostCreatePage() {
     if (e.key === "Enter") {
       e.preventDefault();
       const trimmed = hashtagInput.trim();
-      console.log(trimmed);
       if (!trimmed) return;
       if (hashtags.includes(trimmed)) return alert("이미 추가한 태그입니다.");
       if (hashtags.length >= 5)
@@ -113,9 +127,6 @@ export default function PostCreatePage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const newPostId = crypto.randomUUID();
-    console.log(newPostId);
-
     // 예외처리 부분
     if (!userId || userId.trim() === "") {
       alert("유효한 사용자 ID가 필요합니다.");
@@ -126,13 +137,15 @@ export default function PostCreatePage() {
       return;
     }
 
+    console.log(channelId);
+
     // 실제 포스트 등록 로직
     try {
-      const { data, error } = await supabase
+      // post 등록
+      const { data: postData, error: postError } = await supabase
         .from("posts")
         .insert([
           {
-            _id: newPostId,
             title,
             content,
             user_id: userId,
@@ -141,16 +154,47 @@ export default function PostCreatePage() {
         ])
         .select()
         .single();
-      if (error) throw error;
-      if (data) {
-        alert("게시글이 등록되었습니다.");
+      if (postError) throw postError;
+
+      // image 등록
+      if (image.length > 0) {
+        const { data: imageData, error: imageError } = await supabase
+          .from("images")
+          .insert(
+            image.map((src) => ({
+              post_id: postData._id,
+              src,
+            }))
+          )
+          .select();
+
+        if (imageError) throw imageError;
+        console.log(imageData);
       }
+
+      // hashtag 등록
+      if (hashtags.length > 0) {
+        const { data: hashtagData, error: hashtagError } = await supabase
+          .from("hashtags")
+          .insert(
+            hashtags.map((hashtag) => ({
+              post_id: postData._id,
+              hashtag,
+            }))
+          )
+          .select();
+
+        if (hashtagError) throw hashtagError;
+        console.log(hashtagData);
+      }
+
+      alert("게시글이 등록되었습니다.");
+      navigate(`/channel/${channelId}`);
     } catch (e) {
       console.log(e);
+      alert("게시글 등록 중 오류가 발생했습니다.");
+      return;
     }
-    // finally {
-    //   navigate(`/channel/${channelId}`);
-    // }
   };
 
   return (
@@ -178,9 +222,9 @@ export default function PostCreatePage() {
             >
               <option value="">채널을 선택해주세요</option>
               <option value="weird">괴식</option>
-              <option value="today_pick">오치추</option>
+              <option value="todayPick">오치추</option>
               <option value="new">신메뉴</option>
-              <option value="best_combo">꿀조합</option>
+              <option value="bestCombo">꿀조합</option>
             </select>
           </div>
         )}
@@ -196,30 +240,37 @@ export default function PostCreatePage() {
         </div>
         <div>
           <p>이미지 첨부 (최대 4개)</p>
-          {image && (
-            <>
-              <img src={image} alt="Thumbnail preview" />
-              <button type="button" onClick={removeImage}>
-                <X />
-              </button>
-            </>
-          )}
-          {!image && (
-            <>
-              {/* <label htmlFor="thumbnail" style={{ cursor: "pointer" }}> */}
-              {/* <Upload /> */}
-              {/* </label> */}
-              {/* <p>Upload thumbnail image</p> */}
-              <input
-                type="file"
-                id="thumbnail"
-                accept="image/*"
-                // required
-                onChange={handleImageUpload}
-              />
-              <label htmlFor="thumbnail">Choose File</label>
-            </>
-          )}
+          {/* {image.length > 0 && <></>}
+          {image.length === 0 && (
+            
+          )} */}
+          <>
+            <p>Upload thumbnail image</p>
+            {image.map((imgSrc, index) => (
+              <div key={imgSrc}>
+                <img
+                  src={imgSrc}
+                  alt={`Thumbnail preview ${index + 1}`}
+                  className="w-40 h-40"
+                />
+                <button type="button" onClick={() => removeImage(index)}>
+                  <X />
+                </button>
+              </div>
+            ))}
+            <input
+              type="file"
+              id="thumbnail"
+              accept="image/*"
+              multiple
+              // required
+              onChange={handleImageUpload}
+            />
+            <label htmlFor="thumbnail" style={{ cursor: "pointer" }}>
+              <Upload />
+            </label>
+            {/* <label htmlFor="thumbnail">Choose File</label> */}
+          </>
         </div>
         <div>
           <p>해시태그 (최대 5개)</p>
