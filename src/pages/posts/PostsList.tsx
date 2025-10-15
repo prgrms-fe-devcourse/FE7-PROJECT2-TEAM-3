@@ -20,6 +20,7 @@ type PostListItem = {
   };
   likeCount: number;
   commentCount: number;
+  hashtags: string[];
 };
 
 export default function PostsList() {
@@ -37,7 +38,8 @@ export default function PostsList() {
             created_at,
             user:profiles (display_name,profile_image,exp, badges),
             likes (_id),
-            comments (_id)`);
+            comments (_id),
+            hashtags (hashtag)`);
 
         if (channel) {
           query = query.eq("channel_id", channel);
@@ -57,8 +59,12 @@ export default function PostsList() {
           user: post.user ?? { display_name: "", profile_image: null, exp: 0 },
           likeCount: Array.isArray(post.likes) ? post.likes.length : 0,
           commentCount: Array.isArray(post.comments) ? post.comments.length : 0,
+          hashtags: (post.hashtags || []).map(
+            (h: { hashtag: string }) => h.hashtag
+          ),
         }));
 
+        console.log(formatted);
         setPosts(formatted);
       } catch (e) {
         console.error("게시글 불러오기 실패:", e);
@@ -88,7 +94,7 @@ export default function PostsList() {
                 />
               </div>
 
-              <div id="user-data" className="flex-1 h-[162px]">
+              <div id="user-data" className="flex-1 h-[168px]">
                 <div id="heading" className="flex items-center mb-4">
                   <span className="text-white text-[16px] font-bold pr-[10px]">
                     {post.user.display_name}
@@ -100,19 +106,43 @@ export default function PostsList() {
                     {post.user.badges || "정보 없음"}
                   </div>
                 </div>
+
                 <div id="content" className="flex flex-col h-[92px] mb-4">
                   <span className="text-white text-[18px] mb-3">
-                    {post.title}
+                    {post.title.length > 50
+                      ? post.title.slice(0, 50) + "..."
+                      : post.title}
                   </span>
-                  <span className="text-[#D1D5DB]">{post.content}</span>
+                  <span className="text-[#D1D5DB] text-[14px]">
+                    {post.content.length > 400
+                      ? post.content.slice(0, 400) + "..."
+                      : post.content}
+                  </span>
                 </div>
-                <div id="footer" className="h-[18px]">
-                  <span className="text-[#9CA3AF] mr-3">
-                    ❤️ {post.likeCount}
-                  </span>
-                  <span className="text-[#9CA3AF] mr-3">
-                    💬 {post.commentCount}
-                  </span>
+
+                <div id="footer" className="h-[18px] flex justify-between">
+                  <div>
+                    <span className="text-[#9CA3AF] mr-3">
+                      ❤️ {post.likeCount}
+                    </span>
+                    <span className="text-[#9CA3AF] mr-3">
+                      💬 {post.commentCount}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {post.hashtags?.map((tag, idx) => (
+                      <button
+                        key={idx}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log(`#${tag} 클릭됨`);
+                        }}
+                        className="text-[#2563EB] cursor-pointer bg-[#EFF6FF] text-xs font-medium px-2 py-1 rounded-full hover:bg-[#DBEAFE] transition"
+                      >
+                        #{tag}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
