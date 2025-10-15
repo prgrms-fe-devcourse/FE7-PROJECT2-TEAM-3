@@ -319,7 +319,7 @@ export type Database = {
       profiles: {
         Row: {
           _id: string;
-          badges: string | null;
+          badge: string | null;
           bio: string | null;
           cover_image: string | null;
           display_name: string;

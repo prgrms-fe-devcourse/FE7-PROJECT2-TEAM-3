@@ -25,4 +25,5 @@ dist-ssr
 
 # Custom
 .env
-src/App.tsx
+
+App.tsx
