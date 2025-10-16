@@ -12,6 +12,7 @@ import PostSearch from "./pages/search/PostSearch";
 import UserSearch from "./pages/search/UserSearch";
 import AuthLayout from "./pages/login/AuthLayout";
 import SubLayout from "./components/SubLayout";
+import UserPage from "./pages/userpage/UserPage";
 
 export default function App() {
   return (
@@ -35,7 +36,7 @@ export default function App() {
             />
             <Route path="/channel/write" element={<PostCreatePage />} />
 
-            <Route path="/myPage" element={<MyPage />} />
+            <Route path="/userPage" element={<UserPage />} />
             <Route path="/postSearch" element={<PostSearch />} />
             <Route path="/userSearch" element={<UserSearch />} />
           </Route>

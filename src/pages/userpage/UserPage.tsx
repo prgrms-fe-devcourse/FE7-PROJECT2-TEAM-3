@@ -1,9 +1,8 @@
 import React from "react";
 import { LogOut, Pencil } from "lucide-react"; // 로그아웃, 수정 아이콘
 
-// 💡 이 컴포넌트는 실제 데이터(닉네임, 레벨, exp 등)를 Props나 Zustand에서 받아 사용해야 합니다.
 export default function ProfileHeaderSection() {
-  // 💡 임시 데이터 설정 (실제로는 useAuthStore에서 가져옵니다)
+  // 💡 임시 데이터 설정 (이전과 동일)
   const isMyProfile = true;
   const profileData = {
     avatarUrl: "/path/to/user/avatar.jpg",
@@ -18,23 +17,18 @@ export default function ProfileHeaderSection() {
   };
 
   const expPercentage = (profileData.currentExp / profileData.maxExp) * 100;
+  // 🚀 레벨업까지 남은 경험치 계산
+  const expRemaining = profileData.maxExp - profileData.currentExp;
 
   return (
-    // 🚀 최상위 div 태그 시작
     <div className="w-full">
-      {/* 1. 배경 이미지/배너 영역 (회색 부분) */}
-      {/* 💡 이 부분에 배경 이미지를 넣을 때 height와 bg-cover 등을 조정해야 합니다. */}
-      <div className="w-full h-40 bg-gray-300 rounded-t-lg">
-        {/* 나중에 <img src="..." /> 또는 배경 스타일 추가 */}
-      </div>
+      <div className="w-full h-24 bg-gray-300 rounded-t-lg"></div>
 
-      {/* 2. 프로필 정보 섹션 (어두운 배경 부분) */}
       <div className="bg-[#161C27] rounded-b-lg p-6 shadow-lg relative">
-        {/* 프로필 상단부: 아바타, 닉네임, 버튼 */}
-        <div className="flex justify-between items-start">
-          <div className="flex items-center gap-4 -mt-16">
-            {" "}
-            {/* 💡 -mt-16으로 아바타를 위로 당겨 올립니다. */}
+        {/* ... (프로필 상단부: 아바타, 닉네임, 버튼) - 생략 ... */}
+        <div className="flex justify-between items-center">
+          {/* 아바타와 닉네임 정보 그룹 */}
+          <div className="flex items-start gap-4 -mt-12">
             {/* 아바타 이미지 */}
             <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-[#161C27]">
               <img
@@ -45,8 +39,6 @@ export default function ProfileHeaderSection() {
             </div>
             {/* 닉네임 및 정보 */}
             <div className="flex flex-col pt-12">
-              {" "}
-              {/* 💡 pt-12로 텍스트 위치를 조정 */}
               <div className="flex items-center gap-2">
                 <span className="text-white text-xl font-bold">
                   {profileData.displayName}
@@ -62,12 +54,9 @@ export default function ProfileHeaderSection() {
               </div>
             </div>
           </div>
-
-          {/* 우측 버튼 그룹 (내 프로필인 경우) */}
+          {/* 우측 버튼 그룹 */}
           {isMyProfile && (
-            <div className="flex gap-2 pt-4">
-              {" "}
-              {/* 💡 버튼 그룹을 하단으로 내립니다. */}
+            <div className="flex gap-2 self-start pt-2">
               <button className="bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-1">
                 <LogOut size={14} /> 로그아웃
               </button>
@@ -81,27 +70,60 @@ export default function ProfileHeaderSection() {
         {/* 소개글 */}
         <p className="text-sm text-gray-300 mt-4 mb-6">{profileData.bio}</p>
 
-        {/* 경험치 바 */}
-        <div className="flex items-center text-xs justify-between">
-          <div className="text-yellow-500 font-bold w-12 flex-shrink-0">
+        {/* 🚀 경험치 바 섹션 재수정: 수직 플로우 정렬 */}
+        <div className="flex items-center text-xs">
+          {/* 1. 레벨 텍스트 (Lv.5) */}
+          <div className="text-yellow-500 font-bold text-lg mr-4">
             Lv.{profileData.level}
           </div>
 
-          <div className="flex-1 mx-4 bg-gray-700 rounded-full h-3 relative">
-            {/* 경험치 채우기 바 */}
-            <div
-              className="bg-yellow-500 h-full rounded-full transition-all duration-500"
-              style={{ width: `${expPercentage}%` }}
-            ></div>
-            {/* EXP 텍스트 */}
-            <div className="absolute inset-0 flex items-center justify-between text-[10px] text-black font-medium px-2">
-              <span>획득 경험치 {profileData.currentExp}exp</span>
-              <span>총 필요 경험치 {profileData.maxExp}exp</span>
+          {/* 2. 바와 텍스트를 담는 컨테이너: 가로 길이와 모서리 수정 */}
+          {/* 💡 가로 길이를 줄이기 위해 'flex-1'을 제거하고 'w-2/5' (40%)를 적용 */}
+          <div className="w-3/10 flex flex-col gap-2 mr-4">
+            {/* 2-1. 경험치 바 영역 (상단) */}
+            {/* 💡 h-3(세로 12px) 대신 h-4(세로 16px)를 적용하여 더 길게 만듦 */}
+            <div className="bg-gray-800 rounded-sm h-4 relative overflow-hidden">
+              {/* 💡 rounded-full 대신 rounded-md(중간 둥글기) 또는 rounded-sm(작은 둥글기)을 사용해 사각형 모양에 가깝게 수정 */}
+
+              {/* 경험치 채우기 바 */}
+              <div
+                className="bg-[#FFC300] h-full rounded-sm transition-all duration-500" // 💡 채우기 바에도 동일하게 rounded-md 적용
+                style={{ width: `${expPercentage}%` }}
+              ></div>
+            </div>
+
+            {/* 2-2. 텍스트 영역 (하단) */}
+            <div className="w-full flex justify-between text-sm">
+              <span className="text-gray-300 font-medium whitespace-nowrap">
+                레벨 {profileData.level + 1}까지 {expRemaining}exp 남음
+              </span>
+              <span className="text-yellow-500 font-medium whitespace-nowrap">
+                총 획득 경험치 {profileData.currentExp}exp
+              </span>
             </div>
           </div>
         </div>
+        {/* 🚀 경험치 바 섹션 종료 */}
+      </div>
+      <div className="w-full mt-1">
+        {/* 💡 mt-8로 경험치 바 아래 간격 확보 */}
+        <div className="flex justify-end border-b border-gray-700">
+          {/* 💡 우측 정렬 및 하단 구분선 */}
+          {/* '작성글' 탭 (활성화 상태) */}
+          <button className="text-sm font-medium px-4 py-2 text-white border-b-2 border-white transition-colors">
+            작성글
+          </button>
+          {/* '댓글' 탭 (비활성화 상태) */}
+          <button className="text-sm font-medium px-4 py-2 text-gray-500 hover:text-white transition-colors">
+            댓글
+          </button>
+        </div>
+      </div>
+
+      {/* 작성글 또는 댓글 리스트 영역 */}
+      <div className="w-full rounded-lg p-6 mt-4 min-h-[500px]">
+        {/* <Outlet /> */}
       </div>
     </div>
-    // 🚀 최상위 div 태그 종료
   );
 }
