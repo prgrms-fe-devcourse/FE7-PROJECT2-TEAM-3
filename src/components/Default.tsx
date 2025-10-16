@@ -13,7 +13,7 @@ export default function Home() {
   return (
     <>
       <div className="flex w-screen h-screen overflow-hidden ">
-        <Header className="" />
+        <Header />
         <main className="flex-1 relative h-full border-x border-[#303A4B]">
           {/* 배경 */}
           <GalaxyBackground />
@@ -26,13 +26,13 @@ export default function Home() {
               이전 페이지로 이동
             </button>
           </div>
-          <div className="h-full p-8 overflow-y-scroll">
+          <div className="h-full max-h-[calc(100dvh-72px)] p-8 overflow-y-scroll scrollbar-hide">
             {/* 이걸로 감싸서 진행 */}
             {/* <div className="p-6 border border-[#303A4B] rounded-lg bg-[#161C27]"></div> */}
             <Outlet />
           </div>
         </main>
-        <Sidebar className="w-80 border-l-[#303A4B]" />
+        <Sidebar />
       </div>
     </>
   );
