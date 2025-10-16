@@ -1,4 +1,4 @@
-import { Upload, X } from "lucide-react";
+import { ImageUp, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import supabase from "../../utils/supabase";
 import { useParams } from "react-router";
@@ -10,10 +10,18 @@ import { twMerge } from "tailwind-merge";
 const allowedChannels = ["weird", "todayPick", "new", "bestCombo"] as const;
 export default function PostCreatePage() {
   const navigate = useNavigate();
+  const goBackHandler = () => {
+    navigate(-1);
+  };
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<(string | null)[]>([
+    null,
+    null,
+    null,
+    null,
+  ]);
   const [userId, setUserId] = useState<string | null>(null);
   const [channelId, setChannelId] = useState<string | null>(null);
   const [hashtags, setHashtags] = useState<string[]>([]);
@@ -72,35 +80,36 @@ export default function PostCreatePage() {
     fetchProfileId();
   }, [userId, navigate]);
 
-  // 이미지 업로드 시 함수
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      const fileArray: string[] = [];
+  // 업로드 핸들러
+  const handleImageUpload = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-      if (images.length + files.length > 4) {
-        alert("이미지는 최대 4개까지만 업로드 가능합니다.");
-        return;
-      }
-
-      Array.from(files).forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      if (ev.target?.result) {
+        setImages((prev) => {
+          const copy = [...prev];
           if (ev.target?.result) {
-            fileArray.push(ev.target.result as string);
-
-            if (fileArray.length === files.length) {
-              setImages((prev) => [...prev, ...fileArray]);
-            }
+            copy[index] = ev.target.result as string;
           }
-        };
-        reader.readAsDataURL(file);
-      });
-    }
+          return copy;
+        });
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
+  // 이미지 삭제
   const removeImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => index !== i));
+    setImages((prev) => {
+      const copy = [...prev];
+      copy[index] = null;
+      return copy;
+    });
   };
 
   // 해시 태그 관련 함수들
@@ -159,12 +168,48 @@ export default function PostCreatePage() {
         .single();
       if (postError) throw postError;
 
+      // ✅ 경험치 업데이트 로직
+      try {
+        // 현재 프로필 정보 가져오기
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("exp, level")
+          .eq("_id", userId)
+          .single();
+
+        if (profileError) throw profileError;
+
+        let newExp = (profile?.exp || 0) + 30; // 게시글 등록 시 경험치 +30
+        let newLevel = profile?.level || 0;
+
+        // 레벨업 조건 체크
+        if (newExp >= 100) {
+          if (newLevel < 10) {
+            newLevel += 1; // 레벨 +1
+            newExp = newExp % 100; // 경험치 초기화
+          } else {
+            // ✅ 이미 최대 레벨(10)이라면 경험치는 고정
+            newExp = 100;
+          }
+        }
+
+        // 업데이트 쿼리 실행
+        const { error: updateError } = await supabase
+          .from("profiles")
+          .update({ exp: newExp, level: newLevel })
+          .eq("_id", userId);
+
+        if (updateError) throw updateError;
+      } catch (e) {
+        console.error("경험치 업데이트 중 오류:", e);
+      }
+
       // image 등록
-      if (images.length > 0) {
+      if (images.filter(Boolean).length > 0) {
         const { data: imageData, error: imageError } = await supabase
           .from("images")
           .insert(
-            images.map((src) => ({
+            images.filter(Boolean).map((src) => ({
               post_id: postData._id,
               src,
             }))
@@ -205,9 +250,9 @@ export default function PostCreatePage() {
     <div className="bg-[#161C27] text-[14px] p-[30px] rounded-[16px]">
       <form onSubmit={handleSubmit}>
         {!channel && (
-          <div className="mb-9">
+          <div className="mb-5">
             <label htmlFor="channel" className="text-white block  mb-2">
-              카테고리
+              채널
             </label>
             <select
               name="channel"
@@ -215,7 +260,7 @@ export default function PostCreatePage() {
               required
               value={channelId ?? ""}
               onChange={(e) => setChannelId(e.target.value)}
-              className="bg-white w-full h-[54px] rounded-[8px]  pl-4"
+              className="bg-white w-full h-[54px] rounded-[8px] pl-4"
             >
               <option value="">채널을 선택해주세요</option>
               <option value="weird">괴식</option>
@@ -226,7 +271,7 @@ export default function PostCreatePage() {
           </div>
         )}
 
-        <div className="mb-9">
+        <div className="mb-5">
           <label htmlFor="title" className="block text-white mb-2">
             제목
           </label>
@@ -241,7 +286,7 @@ export default function PostCreatePage() {
           />
         </div>
 
-        <div className="mb-9">
+        <div className="mb-5">
           <label htmlFor="content" className="block text-white  mb-2">
             내용
           </label>
@@ -256,37 +301,49 @@ export default function PostCreatePage() {
           ></textarea>
         </div>
 
-        <div className="mb-9 text-white">
-          <p className="mb-2">이미지 첨부 (최대 4개)</p>
-          <>
-            {images.map((imgSrc, index) => (
-              <div key={imgSrc}>
-                <img
-                  src={imgSrc}
-                  alt={`Thumbnail preview ${index + 1}`}
-                  className="w-40 h-40"
-                />
-                <button type="button" onClick={() => removeImage(index)}>
-                  <X />
-                </button>
+        <div className="mb-5">
+          <p className="text-white mb-2">이미지 첨부 (최대 4개)</p>
+          <div className="grid grid-cols-2 gap-4 mb-5">
+            {images.map((img, idx) => (
+              <div
+                key={idx}
+                className="relative flex flex-col items-center justify-center w-full h-40 border border-dashed border-[#D1D5DB] rounded-md cursor-pointer hover:border-blue-400 transition"
+              >
+                {img ? (
+                  <>
+                    <img
+                      src={img}
+                      alt={`uploaded ${idx + 1}`}
+                      className="w-full h-full object-cover rounded-md"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(idx)}
+                      className="absolute top-2 right-2 bg-black bg-opacity-60 text-white rounded-full px-2 py-1 text-xs"
+                    >
+                      ✕
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <ImageUp size={32} className="text-gray-400" />
+                    <p className="text-gray-400 text-sm mt-2">
+                      Click to upload image {idx + 1}
+                    </p>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                      onChange={(e) => handleImageUpload(e, idx)}
+                    />
+                  </>
+                )}
               </div>
             ))}
-            <input
-              type="file"
-              id="thumbnail"
-              accept="image/*"
-              multiple
-              // required
-              onChange={handleImageUpload}
-            />
-            <label htmlFor="thumbnail" style={{ cursor: "pointer" }}>
-              <Upload />
-            </label>
-            {/* <label htmlFor="thumbnail">Choose File</label> */}
-          </>
+          </div>
         </div>
 
-        <div className="mb-9 w-full h-[110px]">
+        <div className="mb-5 w-full h-[110px]">
           <p className="text-white mb-[10px]">해시태그 (최대 5개)</p>
           <div
             className={twMerge(
@@ -294,14 +351,41 @@ export default function PostCreatePage() {
               hashtags.length > 0 ? "h-[28px]" : "h-0" // 조건부 높이
             )}
           >
-            {hashtags.map((tag, idx) => (
+            {/* {hashtags.map((tag, idx) => (
               <span key={idx}>
                 #{tag}{" "}
                 <button type="button" onClick={() => removeHashtag(tag)}>
                   <X size={14} />
                 </button>
               </span>
-            ))}
+            ))} */}
+            {hashtags.map((tag, idx) => {
+              const pastelColors = [
+                "bg-[#E0F7FA] text-[#027A9B]", // 밝은 하늘 + 진한 청록
+                "bg-[#D8F5E0] text-[#2E7D32]", // 밝은 민트 + 진한 초록
+                "bg-[#FFE5D0] text-[#D84315]", // 밝은 피치 + 진한 오렌지
+                "bg-[#FFF1F7] text-[#C2185B]", // 밝은 핑크 + 진한 체리핑크
+                "bg-[#FFF9C4] text-[#B78900]", // 밝은 노랑 + 진한 골드
+              ];
+              return (
+                <span
+                  key={idx}
+                  className={twMerge(
+                    "inline-flex gap-1 px-2 py-[2px] rounded-full mr-2",
+                    pastelColors[idx % pastelColors.length]
+                  )}
+                >
+                  #{tag}
+                  <button
+                    type="button"
+                    onClick={() => removeHashtag(tag)}
+                    className="cursor-pointer"
+                  >
+                    <X size={14} />
+                  </button>
+                </span>
+              );
+            })}
           </div>
 
           <input
@@ -316,7 +400,10 @@ export default function PostCreatePage() {
         </div>
 
         <div className="flex justify-between w-full border-t-1 border-t-[#E5E7EB] pt-6">
-          <button className="text-white w-[150px] h-10 rounded-[8px] border-1 border-[#303A4B] shadow-[0_4px_4px_rgba(0,0,0,0.25)]">
+          <button
+            className="text-white w-[150px] h-10 rounded-[8px] border-1 border-[#303A4B] shadow-[0_4px_4px_rgba(0,0,0,0.25)]"
+            onClick={goBackHandler}
+          >
             취소
           </button>
           <button

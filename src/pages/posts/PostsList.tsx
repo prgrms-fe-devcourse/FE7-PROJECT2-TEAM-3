@@ -23,6 +23,14 @@ type PostListItem = {
   hashtags: string[];
 };
 
+const pastelColors = [
+  "bg-[#A5D8FF]", // 하늘
+  "bg-[#FFD6A5]", // 살구
+  "bg-[#FDFFB6]", // 노랑
+  "bg-[#CAFFBF]", // 연두
+  "bg-[#FFADAD]", // 핑크
+];
+
 export default function PostsList() {
   const navigate = useNavigate();
   const { channel } = useParams();
