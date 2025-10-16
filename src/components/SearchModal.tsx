@@ -1,12 +1,14 @@
 // components/SearchModal.tsx
 import { useEffect, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
+import { useNavigate } from "react-router";
 
 type SearchModalProps = {
   onClose: () => void;
 };
 
 export default function SearchModal({ onClose }: SearchModalProps) {
+  const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [query, setQuery] = useState("");
@@ -16,11 +18,20 @@ export default function SearchModal({ onClose }: SearchModalProps) {
     inputRef.current?.focus();
     setRecentQueries(["검색", "검색검색검색"]);
   }, []);
+
   const deleteRecentQuery = () => {};
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!query.trim()) return;
+
+    navigate(`/postSearch?title=${encodeURIComponent(query)}`);
+    onClose();
+  };
 
   return (
     <div className="">
-      <form className="">
+      <form className="" onSubmit={handleSubmit}>
         <label className="flex items-center gap-3 px-5 py-4 border-b border-b-[#303A4B] focus:within:bg-[#161C27]">
           <Search className="w-5 h-5 stroke-gray-400" />
           <input
