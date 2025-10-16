@@ -7,7 +7,6 @@ import PostCreatePage from "./pages/posts/PostCreatePage";
 import Login from "./pages/login/Login";
 import NotFound from "./pages/NotFound";
 import UserSetting from "./pages/login/UserSetting";
-import MyPage from "./pages/MyPage";
 import PostSearch from "./pages/search/PostSearch";
 import UserSearch from "./pages/search/UserSearch";
 import AuthLayout from "./pages/login/AuthLayout";
