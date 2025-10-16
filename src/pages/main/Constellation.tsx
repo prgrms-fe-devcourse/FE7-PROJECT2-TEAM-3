@@ -55,7 +55,7 @@ export default function Constellation() {
   ];
 
   return (
-    <div className="viewer-container w-[calc(100vw-642px)] h-full">
+    <div className="viewer-container w-[calc(100vw-402px)] xl:w-[calc(100vw-642px)] h-full">
       <TransformWrapper
         initialScale={1}
         minScale={0.5}

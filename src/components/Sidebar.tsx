@@ -23,7 +23,7 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside className="w-80 border-l-[#303A4B] overflow-y-scroll scrollbar-hide">
+      <aside className="fixed right-0 bg-[#1a2537] border-l border-l-[#303A4B] lg:border-0 lg:relative w-full max-w-80 overflow-y-scroll scrollbar-hide">
         <div className="sticky top-0 flex-center gap-2 h-18 px-3 border-b border-b-[#303A4B] bg-[#1A2537]">
           <button
             className="flex-1 flex items-center gap-2 h-10 px-3 bg-[#161C27] rounded-lg text-sm font-medium text-gray-300 cursor-pointer hover:opacity-70"
