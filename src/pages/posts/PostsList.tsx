@@ -31,7 +31,10 @@ export default function PostsList() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        let query = supabase.from("posts").select(`
+        let query = supabase
+          .from("posts")
+          .select(
+            `
             _id,
             title,
             content,
@@ -40,7 +43,9 @@ export default function PostsList() {
             user:profiles (display_name,profile_image,level, badge),
             likes (_id),
             comments (_id),
-            hashtags (hashtag)`);
+            hashtags (hashtag)`
+          )
+          .order("created_at", { ascending: false });
 
         if (channel) {
           query = query.eq("channel_id", channel);
@@ -82,7 +87,7 @@ export default function PostsList() {
             <div
               key={post._id}
               className="flex w-full h-[210px] gap-3 p-6 mb-6 border border-[#303A4B] rounded-lg bg-[#161C27] cursor-pointer hover:bg-[#171f2b] hover:border-[#4E46A5]"
-              onClick={() => navigate(`/post/${post._id}`)}
+              onClick={() => navigate(`/posts/${post._id}`)}
             >
               <div id="user-image">
                 <img
