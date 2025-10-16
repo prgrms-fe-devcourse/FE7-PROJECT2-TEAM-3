@@ -13,7 +13,7 @@ export default function PostCreatePage() {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [image, setImage] = useState<string[]>([]);
+  const [images, setImages] = useState<string[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const [channelId, setChannelId] = useState<string | null>(null);
   const [hashtags, setHashtags] = useState<string[]>([]);
@@ -78,7 +78,7 @@ export default function PostCreatePage() {
     if (files && files.length > 0) {
       const fileArray: string[] = [];
 
-      if (image.length + files.length > 4) {
+      if (images.length + files.length > 4) {
         alert("이미지는 최대 4개까지만 업로드 가능합니다.");
         return;
       }
@@ -90,7 +90,7 @@ export default function PostCreatePage() {
             fileArray.push(ev.target.result as string);
 
             if (fileArray.length === files.length) {
-              setImage((prev) => [...prev, ...fileArray]);
+              setImages((prev) => [...prev, ...fileArray]);
             }
           }
         };
@@ -100,7 +100,7 @@ export default function PostCreatePage() {
   };
 
   const removeImage = (index: number) => {
-    setImage((prev) => prev.filter((_, i) => index !== i));
+    setImages((prev) => prev.filter((_, i) => index !== i));
   };
 
   // 해시 태그 관련 함수들
@@ -160,11 +160,11 @@ export default function PostCreatePage() {
       if (postError) throw postError;
 
       // image 등록
-      if (image.length > 0) {
+      if (images.length > 0) {
         const { data: imageData, error: imageError } = await supabase
           .from("images")
           .insert(
-            image.map((src) => ({
+            images.map((src) => ({
               post_id: postData._id,
               src,
             }))
@@ -259,7 +259,7 @@ export default function PostCreatePage() {
         <div className="mb-9 text-white">
           <p className="mb-2">이미지 첨부 (최대 4개)</p>
           <>
-            {image.map((imgSrc, index) => (
+            {images.map((imgSrc, index) => (
               <div key={imgSrc}>
                 <img
                   src={imgSrc}
