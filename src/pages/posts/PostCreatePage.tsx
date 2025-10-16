@@ -168,7 +168,6 @@ export default function PostCreatePage() {
         .single();
       if (postError) throw postError;
 
-      // ✅ 경험치 업데이트 로직
       try {
         // 현재 프로필 정보 가져오기
         const { data: profile, error: profileError } = await supabase
@@ -188,7 +187,6 @@ export default function PostCreatePage() {
             newLevel += 1; // 레벨 +1
             newExp = newExp % 100; // 경험치 초기화
           } else {
-            // ✅ 이미 최대 레벨(10)이라면 경험치는 고정
             newExp = 100;
           }
         }
@@ -206,7 +204,7 @@ export default function PostCreatePage() {
 
       // image 등록
       if (images.filter(Boolean).length > 0) {
-        const { data: imageData, error: imageError } = await supabase
+        const { error: imageError } = await supabase
           .from("images")
           .insert(
             images.filter(Boolean).map((src) => ({
@@ -221,7 +219,7 @@ export default function PostCreatePage() {
 
       // hashtag 등록
       if (hashtags.length > 0) {
-        const { data: hashtagData, error: hashtagError } = await supabase
+        const { error: hashtagError } = await supabase
           .from("hashtags")
           .insert(
             hashtags.map((hashtag) => ({
@@ -349,14 +347,6 @@ export default function PostCreatePage() {
               hashtags.length > 0 ? "h-[28px]" : "h-0" // 조건부 높이
             )}
           >
-            {/* {hashtags.map((tag, idx) => (
-              <span key={idx}>
-                #{tag}{" "}
-                <button type="button" onClick={() => removeHashtag(tag)}>
-                  <X size={14} />
-                </button>
-              </span>
-            ))} */}
             {hashtags.map((tag, idx) => {
               const pastelColors = [
                 "bg-[#E0F7FA] text-[#027A9B]", // 밝은 하늘 + 진한 청록
