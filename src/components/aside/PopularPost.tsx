@@ -1,8 +1,8 @@
-import NoProfileImage from "../../assets/image/no_profile_image.png";
 import { Heart, MessageSquare } from "lucide-react";
 import { twMerge } from "tailwind-merge";
 import { useRelativeTime } from "../../hooks/useRelativeTime";
 import type { PopularPosts } from "../../types/posts";
+import ProfileImage from "../ui/ProfileImage";
 
 export default function PopularPost({
   post,
@@ -15,14 +15,10 @@ export default function PopularPost({
   return (
     <article className="flex gap-3 p-3 bg-[#161C27] rounded-lg cursor-pointer hover:opacity-70">
       <div className="overflow-hidden w-8 h-8 rounded-full">
-        <img
-          src={
-            post.profiles.profile_image !== null
-              ? post.profiles.profile_image
-              : NoProfileImage
-          }
+        <ProfileImage
+          className="w-8 h-8"
+          src={post.profiles.profile_image}
           alt={post.profiles.display_name}
-          className="w-full h-full object-cover"
         />
       </div>
       <div className="flex flex-col flex-1 gap-2">
@@ -35,8 +31,8 @@ export default function PopularPost({
           <p className="flex-center gap-1 text-gray-400 text-xs">
             <Heart
               className={twMerge(
-                "w-3 h-3 stroke-red-600",
-                liked && "fill-red-600"
+                "w-3 h-3 stroke-gray-400 fill-gray-400",
+                liked && "stroke-red-600 fill-red-600"
               )}
             />
             {post.likes_count}
