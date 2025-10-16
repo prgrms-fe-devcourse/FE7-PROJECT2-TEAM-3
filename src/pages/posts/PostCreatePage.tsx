@@ -217,7 +217,6 @@ export default function PostCreatePage() {
           .select();
 
         if (imageError) throw imageError;
-        console.log(imageData);
       }
 
       // hashtag 등록
@@ -233,7 +232,6 @@ export default function PostCreatePage() {
           .select();
 
         if (hashtagError) throw hashtagError;
-        console.log(hashtagData);
       }
 
       alert("게시글이 등록되었습니다.");

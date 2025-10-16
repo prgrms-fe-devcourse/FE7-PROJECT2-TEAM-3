@@ -57,8 +57,6 @@ export default function PostsList() {
 
         if (error) throw error;
 
-        console.log(data);
-
         const formatted: PostListItem[] = (data || []).map((post: any) => ({
           _id: post._id,
           title: post.title,
@@ -73,7 +71,6 @@ export default function PostsList() {
           ),
         }));
 
-        console.log(formatted);
         setPosts(formatted);
       } catch (e) {
         console.error("게시글 불러오기 실패:", e);
