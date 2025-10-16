@@ -49,8 +49,6 @@ export default function PostsList() {
 
         if (error) throw error;
 
-        console.log(data);
-
         const formatted: PostListItem[] = (data || []).map((post: any) => ({
           _id: post._id,
           title: post.title,
@@ -65,7 +63,6 @@ export default function PostsList() {
           ),
         }));
 
-        console.log(formatted);
         setPosts(formatted);
       } catch (e) {
         console.error("게시글 불러오기 실패:", e);
@@ -77,7 +74,6 @@ export default function PostsList() {
 
   return (
     <>
-      {/* <button>글쓰기</button> */}
       <div id="post-list-container">
         {posts.map((post) => {
           const profileSrc = post.user.profile_image || defaultProfile;
@@ -85,7 +81,7 @@ export default function PostsList() {
           return (
             <div
               key={post._id}
-              className="flex w-full h-[210px] gap-3 p-6 mb-6 bg-[#161C27] rounded-[8px] cursor-pointer"
+              className="flex w-full h-[210px] gap-3 p-6 mb-6 border border-[#303A4B] rounded-lg bg-[#161C27] cursor-pointer hover:bg-[#171f2b] hover:border-[#4E46A5]"
               onClick={() => navigate(`/post/${post._id}`)}
             >
               <div id="user-image">
@@ -151,7 +147,6 @@ export default function PostsList() {
                         key={idx}
                         onClick={(e) => {
                           e.stopPropagation();
-                          console.log(`#${tag} 클릭됨`);
                         }}
                         className="text-[#2563EB] cursor-pointer bg-[#EFF6FF] text-xs font-medium px-2 py-1 rounded-full hover:bg-[#DBEAFE] transition"
                       >
