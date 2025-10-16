@@ -80,6 +80,7 @@ export default function Login() {
               badge: "치킨 미개봉자",
               level: 0,
               is_online: true,
+              bio: "",
             })
             .eq("_id", profile?._id)
             .select();
