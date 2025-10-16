@@ -156,7 +156,6 @@ export default function PostsList() {
                         key={idx}
                         onClick={(e) => {
                           e.stopPropagation();
-                          console.log(`#${tag} 클릭됨`);
                         }}
                         className="text-[#2563EB] cursor-pointer bg-[#EFF6FF] text-xs font-medium px-2 py-1 rounded-full hover:bg-[#DBEAFE] transition"
                       >
