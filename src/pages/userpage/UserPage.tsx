@@ -121,23 +121,18 @@ export default function ProfileHeaderSection() {
           <p className="text-sm text-gray-300 mt-4 mb-6">{profile.bio}</p>
 
           <div className="flex items-center text-xs">
-            {/* 1. 레벨 텍스트 (Lv.5) */}
             <div className="text-yellow-500 font-bold text-lg mr-4">
               Lv.{profile.level}
             </div>
 
-            {/* 2. 바와 텍스트를 담는 컨테이너: 가로 길이와 모서리 수정 */}
             <div className="w-1/2 flex flex-col gap-2 mr-4">
-              {/* 2-1. 경험치 바 영역 (상단) */}
               <div className="bg-gray-800 rounded-sm h-4 relative overflow-hidden">
-                {/* 경험치 채우기 바 */}
                 <div
-                  className="bg-[#FFC300] h-full rounded-sm transition-all duration-500" // 💡 채우기 바에도 동일하게 rounded-md 적용
+                  className="bg-[#FFC300] h-full rounded-sm transition-all duration-500" 
                   style={{ width: `${expPercentage / 5}%` }}
                 ></div>
               </div>
 
-              {/* 2-2. 텍스트 영역 (하단) */}
               <div className="w-full flex justify-between text-sm">
                 <span className="text-gray-300 font-medium whitespace-nowrap">
                   레벨 {profile.level + 1}까지 {expRemaining}exp 남음
@@ -148,17 +143,12 @@ export default function ProfileHeaderSection() {
               </div>
             </div>
           </div>
-          {/* 🚀 경험치 바 섹션 종료 */}
         </div>
         <div className="w-full mt-1">
-          {/* 💡 mt-8로 경험치 바 아래 간격 확보 */}
           <div className="flex justify-end border-b border-gray-700">
-            {/* 💡 우측 정렬 및 하단 구분선 */}
-            {/* '작성글' 탭 (활성화 상태) */}
             <button className="text-sm font-medium px-4 py-2 text-white border-b-2 border-white transition-colors">
               작성글
             </button>
-            {/* '댓글' 탭 (비활성화 상태) */}
             <button className="text-sm font-medium px-4 py-2 text-gray-500 hover:text-white transition-colors">
               댓글
             </button>
