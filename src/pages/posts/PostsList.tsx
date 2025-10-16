@@ -31,7 +31,10 @@ export default function PostsList() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        let query = supabase.from("posts").select(`
+        let query = supabase
+          .from("posts")
+          .select(
+            `
             _id,
             title,
             content,
@@ -40,7 +43,9 @@ export default function PostsList() {
             user:profiles (display_name,profile_image,level, badge),
             likes (_id),
             comments (_id),
-            hashtags (hashtag)`);
+            hashtags (hashtag)`
+          )
+          .order("created_at", { ascending: false });
 
         if (channel) {
           query = query.eq("channel_id", channel);
