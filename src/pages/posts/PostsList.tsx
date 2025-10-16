@@ -87,7 +87,7 @@ export default function PostsList() {
             <div
               key={post._id}
               className="flex w-full h-[210px] gap-3 p-6 mb-6 border border-[#303A4B] rounded-lg bg-[#161C27] cursor-pointer hover:bg-[#171f2b] hover:border-[#4E46A5]"
-              onClick={() => navigate(`/post/${post._id}`)}
+              onClick={() => navigate(`/posts/${post._id}`)}
             >
               <div id="user-image">
                 <img
