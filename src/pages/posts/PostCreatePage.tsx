@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import supabase from "../../utils/supabase";
 import { useParams } from "react-router";
 import { useNavigate } from "react-router-dom";
+import { twMerge } from "tailwind-merge";
 
 // TODO: 제목 글자 제한, 내용 최소 글자 수 제한
 
@@ -205,7 +206,7 @@ export default function PostCreatePage() {
       <form onSubmit={handleSubmit}>
         {!channel && (
           <div className="mb-9">
-            <label htmlFor="channel" className="text-white">
+            <label htmlFor="channel" className="text-white block  mb-2">
               카테고리
             </label>
             <select
@@ -214,7 +215,7 @@ export default function PostCreatePage() {
               required
               value={channelId ?? ""}
               onChange={(e) => setChannelId(e.target.value)}
-              className="text-white"
+              className="bg-white w-full h-[54px] rounded-[8px]  pl-4"
             >
               <option value="">채널을 선택해주세요</option>
               <option value="weird">괴식</option>
@@ -224,8 +225,9 @@ export default function PostCreatePage() {
             </select>
           </div>
         )}
+
         <div className="mb-9">
-          <label htmlFor="title" className="block text-white">
+          <label htmlFor="title" className="block text-white mb-2">
             제목
           </label>
           <input
@@ -234,32 +236,29 @@ export default function PostCreatePage() {
             required
             value={title}
             placeholder="제목을 입력하세요"
-            className="bg-white placeholder-[#ADAEBC] w-full"
+            className="bg-white placeholder-[#ADAEBC] w-full h-[54px] rounded-[8px] pl-4"
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
 
         <div className="mb-9">
-          <label htmlFor="content" className="block text-white">
+          <label htmlFor="content" className="block text-white  mb-2">
             내용
           </label>
           <textarea
             name="content"
             id="content"
+            placeholder="컨텐츠 내용을 작성하세요"
             required
             value={content}
-            className="bg-white w-full h-[300px]"
+            className="bg-white placeholder-[#ADAEBC] w-full h-[200px] rounded-[8px] p-4"
             onChange={(e) => setContent(e.target.value)}
           ></textarea>
         </div>
+
         <div className="mb-9 text-white">
-          <p>이미지 첨부 (최대 4개)</p>
-          {/* {image.length > 0 && <></>}
-          {image.length === 0 && (
-            
-          )} */}
+          <p className="mb-2">이미지 첨부 (최대 4개)</p>
           <>
-            {/* <p>Upload thumbnail image</p> */}
             {image.map((imgSrc, index) => (
               <div key={imgSrc}>
                 <img
@@ -286,9 +285,15 @@ export default function PostCreatePage() {
             {/* <label htmlFor="thumbnail">Choose File</label> */}
           </>
         </div>
-        <div className="mb-9">
-          <p className="text-white">해시태그 (최대 5개)</p>
-          <div>
+
+        <div className="mb-9 w-full h-[110px]">
+          <p className="text-white mb-[10px]">해시태그 (최대 5개)</p>
+          <div
+            className={twMerge(
+              "mb-[10px] w-full transition-all duration-100", // 기본 스타일
+              hashtags.length > 0 ? "h-[28px]" : "h-0" // 조건부 높이
+            )}
+          >
             {hashtags.map((tag, idx) => (
               <span key={idx}>
                 #{tag}{" "}
@@ -303,15 +308,22 @@ export default function PostCreatePage() {
             type="text"
             id="hashtags"
             placeholder="태그를 입력하세요."
-            className="placeholder-[#ADAEBC] w-full bg-white"
+            className="placeholder-[#ADAEBC] w-full bg-white h-[42px] rounded-[8px] pl-4"
             value={hashtagInput}
             onChange={(e) => setHashtagInput(e.target.value)}
             onKeyDown={handleHashtagKeyDown}
           />
         </div>
-        <div>
-          <button className="text-white" disabled={isSubmitting}>
-            {isSubmitting ? "등록 중..." : "글 올리기"}
+
+        <div className="flex justify-between w-full border-t-1 border-t-[#E5E7EB] pt-6">
+          <button className="text-white w-[150px] h-10 rounded-[8px] border-1 border-[#303A4B] shadow-[0_4px_4px_rgba(0,0,0,0.25)]">
+            취소
+          </button>
+          <button
+            className="text-white w-[150px] h-10 rounded-[8px] bo bg-gradient-to-r from-[#6366F1] via-[#7761F3] to-[#8B5CF6] shadow-[0_0_4px_#8B5CF6]"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "등록 중..." : "작성"}
           </button>
         </div>
       </form>
