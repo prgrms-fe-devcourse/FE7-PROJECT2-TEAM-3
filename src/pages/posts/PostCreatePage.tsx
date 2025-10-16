@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 const allowedChannels = ["weird", "todayPick", "new", "bestCombo"] as const;
 export default function PostCreatePage() {
   const navigate = useNavigate();
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [image, setImage] = useState<string[]>([]);
@@ -16,6 +17,7 @@ export default function PostCreatePage() {
   const [channelId, setChannelId] = useState<string | null>(null);
   const [hashtags, setHashtags] = useState<string[]>([]);
   const [hashtagInput, setHashtagInput] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { channel } = useParams();
 
@@ -126,6 +128,7 @@ export default function PostCreatePage() {
   // 폼 제출 시 함수
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isSubmitting) return;
 
     // 예외처리 부분
     if (!userId || userId.trim() === "") {
@@ -137,10 +140,9 @@ export default function PostCreatePage() {
       return;
     }
 
-    console.log(channelId);
-
     // 실제 포스트 등록 로직
     try {
+      setIsSubmitting(true);
       // post 등록
       const { data: postData, error: postError } = await supabase
         .from("posts")
@@ -193,32 +195,26 @@ export default function PostCreatePage() {
     } catch (e) {
       console.log(e);
       alert("게시글 등록 중 오류가 발생했습니다.");
-      return;
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <>
+    <div className="bg-[#161C27] text-[14px] p-[30px] rounded-[16px]">
       <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="title">제목</label>
-          <input
-            type="text"
-            id="title"
-            required
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-        </div>
         {!channel && (
-          <div>
-            <label htmlFor="channel">카테고리</label>
+          <div className="mb-9">
+            <label htmlFor="channel" className="text-white">
+              카테고리
+            </label>
             <select
               name="channel"
               id="channel"
               required
               value={channelId ?? ""}
               onChange={(e) => setChannelId(e.target.value)}
+              className="text-white"
             >
               <option value="">채널을 선택해주세요</option>
               <option value="weird">괴식</option>
@@ -228,24 +224,42 @@ export default function PostCreatePage() {
             </select>
           </div>
         )}
-        <div>
-          <label htmlFor="content">내용</label>
+        <div className="mb-9">
+          <label htmlFor="title" className="block text-white">
+            제목
+          </label>
+          <input
+            type="text"
+            id="title"
+            required
+            value={title}
+            placeholder="제목을 입력하세요"
+            className="bg-white placeholder-[#ADAEBC] w-full"
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </div>
+
+        <div className="mb-9">
+          <label htmlFor="content" className="block text-white">
+            내용
+          </label>
           <textarea
             name="content"
             id="content"
             required
             value={content}
+            className="bg-white w-full h-[300px]"
             onChange={(e) => setContent(e.target.value)}
           ></textarea>
         </div>
-        <div>
+        <div className="mb-9 text-white">
           <p>이미지 첨부 (최대 4개)</p>
           {/* {image.length > 0 && <></>}
           {image.length === 0 && (
             
           )} */}
           <>
-            <p>Upload thumbnail image</p>
+            {/* <p>Upload thumbnail image</p> */}
             {image.map((imgSrc, index) => (
               <div key={imgSrc}>
                 <img
@@ -272,8 +286,8 @@ export default function PostCreatePage() {
             {/* <label htmlFor="thumbnail">Choose File</label> */}
           </>
         </div>
-        <div>
-          <p>해시태그 (최대 5개)</p>
+        <div className="mb-9">
+          <p className="text-white">해시태그 (최대 5개)</p>
           <div>
             {hashtags.map((tag, idx) => (
               <span key={idx}>
@@ -288,16 +302,19 @@ export default function PostCreatePage() {
           <input
             type="text"
             id="hashtags"
-            placeholder="태그를 입력하고 Enter를 누르세요."
+            placeholder="태그를 입력하세요."
+            className="placeholder-[#ADAEBC] w-full bg-white"
             value={hashtagInput}
             onChange={(e) => setHashtagInput(e.target.value)}
             onKeyDown={handleHashtagKeyDown}
           />
         </div>
         <div>
-          <button>글 올리기</button>
+          <button className="text-white" disabled={isSubmitting}>
+            {isSubmitting ? "등록 중..." : "글 올리기"}
+          </button>
         </div>
       </form>
-    </>
+    </div>
   );
 }

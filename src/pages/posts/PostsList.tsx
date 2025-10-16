@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import supabase from "../../utils/supabase";
 import { useNavigate, useParams } from "react-router";
 import defaultProfile from "../../assets/image/no_profile_image.png";
+import { Heart, MessageSquare, Pencil } from "lucide-react";
+import { twMerge } from "tailwind-merge";
 
-// TODO: 글쓰기 버튼을 추가해서 누르면 '/channel/${channel}/write로 이동하는 것 구현하기
-// TODO: 목록을 Link로 연결해서 포스트 디테일로 연결되도록 하기 post._id를 활용
-
+// TODO: 나중에 타입 가져와서 사용하고, 컴포넌트로 빼서 리팩터링하기
 type PostListItem = {
   _id: string;
   title: string;
@@ -15,7 +15,7 @@ type PostListItem = {
   user: {
     display_name: string;
     profile_image: string | null;
-    exp: number;
+    level: number;
     badge?: string;
   };
   likeCount: number;
@@ -37,7 +37,7 @@ export default function PostsList() {
             content,
             channel_id,
             created_at,
-            user:profiles (display_name,profile_image,exp, badge),
+            user:profiles (display_name,profile_image,level, badge),
             likes (_id),
             comments (_id),
             hashtags (hashtag)`);
@@ -73,7 +73,7 @@ export default function PostsList() {
     };
 
     fetchPosts();
-  }, []);
+  }, [channel]);
 
   return (
     <>
@@ -85,7 +85,7 @@ export default function PostsList() {
           return (
             <div
               key={post._id}
-              className="flex w-[1024px] h-[210px] gap-3 p-6 mb-6 bg-[#161C27] rounded-[8px] cursor-pointer"
+              className="flex w-full h-[210px] gap-3 p-6 mb-6 bg-[#161C27] rounded-[8px] cursor-pointer"
               onClick={() => navigate(`/post/${post._id}`)}
             >
               <div id="user-image">
@@ -102,7 +102,7 @@ export default function PostsList() {
                     {post.user.display_name}
                   </span>
                   <span className="text-[#F59E0B] text-[12px] pr-2">
-                    {post.user.exp || "0"}
+                    {`Lv ${post.user.level || "0"}`}
                   </span>
                   <div className="inline-flex w-[44px] h-[17px] items-center justify-center bg-[#9F9F9F] text-white text-[10px] rounded-[30px] whitespace-nowrap overflow-hidden">
                     {post.user.badge || "정보 없음"}
@@ -123,14 +123,28 @@ export default function PostsList() {
                 </div>
 
                 <div id="footer" className="h-[18px] flex justify-between">
-                  <div>
-                    <span className="text-[#9CA3AF] mr-3">
-                      ❤️ {post.likeCount}
-                    </span>
-                    <span className="text-[#9CA3AF] mr-3">
-                      💬 {post.commentCount}
-                    </span>
+                  <div className="flex gap-3">
+                    <p className="flex-center gap-1 text-gray-400 text-xs">
+                      <Heart
+                        width={18}
+                        height={18}
+                        className={twMerge(
+                          "stroke-red-600",
+                          post.likeCount > 0 && "fill-red-600"
+                        )}
+                      />
+                      {post.likeCount}
+                    </p>
+                    <p className="flex-center gap-1 text-gray-400 text-xs">
+                      <MessageSquare
+                        width={16}
+                        height={16}
+                        className="stroke-gray-400 fill-gray-400"
+                      />
+                      {post.commentCount}
+                    </p>
                   </div>
+
                   <div className="flex flex-wrap gap-2">
                     {post.hashtags?.map((tag, idx) => (
                       <button
@@ -150,6 +164,14 @@ export default function PostsList() {
             </div>
           );
         })}
+        <button
+          onClick={() =>
+            navigate(channel ? `/channel/${channel}/write` : "/channel/write")
+          }
+          className="fixed bottom-8 right-90 bg-gray-500 hover:bg-gray-400 text-white rounded-full w-15 h-15 flex items-center justify-center shadow-lg cursor-pointer transition"
+        >
+          <Pencil />
+        </button>
       </div>
     </>
   );
