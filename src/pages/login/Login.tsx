@@ -1,21 +1,15 @@
 import supabase from "../../utils/supabase";
-import { useAuthStore } from "../../stores/authStore";
-import { useEffect } from "react";
-import { useNavigate } from "react-router";
 import { Github } from "lucide-react";
 import Logo from "../../assets/image/logo.png";
-
 export default function Login() {
-  const navigate = useNavigate();
-  const claims = useAuthStore((state) => state.claims);
-  const profile = useAuthStore((state) => state.profile);
+  type AuthProvider = "google" | "github" | "discord";
 
-  const handleGoogleLogin = async () => {
+  const handleOAuthLogin = async (provider: AuthProvider) => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
+        provider, // 인자로 받은 provider를 사용
         options: {
-          redirectTo: `${import.meta.env.VITE_URL}/userSetting`, // 로그인 후 리다이렉트할 URL
+          redirectTo: `${import.meta.env.VITE_URL}/authcallback`, // 로그인 후 리디렉션할 URL
         },
       });
       if (error) throw error;
@@ -23,75 +17,6 @@ export default function Login() {
       console.log(error);
     }
   };
-
-  const handleGithubLogin = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "github",
-        options: {
-          redirectTo: `${import.meta.env.VITE_URL}/userSetting`,
-        },
-      });
-      if (error) throw error;
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const handleDiscordLogin = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "discord",
-        options: {
-          redirectTo: `${import.meta.env.VITE_URL}/userSetting`,
-        },
-      });
-      if (error) throw error;
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      if (claims?.sub) {
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("_id", claims.sub)
-          .single();
-
-        if (profiles?.exp) {
-          const { data } = await supabase
-            .from("profiles")
-            .update({
-              is_online: true,
-            })
-            .eq("_id", profile?._id)
-            .select();
-          if (data) {
-            navigate("/home");
-          }
-        } else {
-          const { data } = await supabase
-            .from("profiles")
-            .update({
-              exp: 0,
-              badge: "치킨 미개봉자",
-              level: 0,
-              is_online: true,
-              bio: "",
-            })
-            .eq("_id", profile?._id)
-            .select();
-          if (data) {
-            navigate("/userSetting");
-          }
-        }
-      }
-    };
-    fetchUser();
-  }, [claims?.sub, profile, navigate]);
 
   return (
     <div className="max-w-md mx-auto">
@@ -101,19 +26,15 @@ export default function Login() {
         style={{ border: "1px solid rgba(255,255,255,0.1)" }}
       >
         <div className="text-center mb-8">
-          {/* 로고와 텍스트를 위아래로 분리 */}
           <img src={Logo} alt="CHICKEN GALAXY" className="mx-auto mb-2" />
         </div>
 
-        {/* 🚀 버튼 간 간격을 늘리기 위해 space-y-4를 space-y-3으로 변경 (선택 사항) */}
         <div className="space-y-4">
-          {/* 1. Google Login: 흰색 배경에 검은색 폰트 (사진과 유사) */}
           <button
-            onClick={handleGoogleLogin}
+            onClick={() => handleOAuthLogin("google")}
             className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 hover:bg-gray-100 transition-colors font-medium"
           >
             <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
-              {/* ... Google SVG 경로는 그대로 둡니다 ... */}
               <path
                 fill="#4285F4"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -134,18 +55,16 @@ export default function Login() {
             Google 계정으로 로그인
           </button>
 
-          {/* 2. GitHub Login: 어두운 배경, 흰색 폰트 (사진과 유사) */}
           <button
-            onClick={handleGithubLogin}
+            onClick={() => handleOAuthLogin("github")}
             className="w-full flex items-center justify-center px-4 py-3 border border-gray-700 rounded-md shadow-sm bg-[#24292e] text-white hover:bg-[#3b4146] transition-colors font-medium"
           >
             <Github size={20} className="mr-3" />
             GitHub 계정으로 로그인
           </button>
 
-          {/* 3. Discord Login: 보라색 배경 (Discord 공식 색상), 흰색 폰트 (사진과 유사) */}
           <button
-            onClick={handleDiscordLogin}
+            onClick={() => handleOAuthLogin("discord")}
             className="w-full flex items-center justify-center px-4 py-3 border border-gray-700 rounded-md shadow-sm bg-[#5865F2] text-white hover:bg-[#4E5AE2] transition-colors font-medium"
           >
             <svg
@@ -160,7 +79,6 @@ export default function Login() {
         </div>
 
         <div className="mt-8 text-center">
-          {/* 🚀 HTML <p> 중첩 오류 방지를 위해 <span>으로 변경 */}
           <span className="text-sm text-gray-400">
             <div>로그인 시 Chicken Galaxy의 개인정보처리방침과</div>
             <div>이용 약관에 동의한 것으로 간주합니다.</div>

@@ -1,34 +1,20 @@
-import React, { Activity, useEffect, useState } from "react";
-import { LogOut, Pencil } from "lucide-react";
+import { Activity, useEffect, useState } from "react";
 import { useAuthStore } from "../../stores/authStore";
 import { useNavigate, useParams } from "react-router";
 import supabase from "../../utils/supabase";
 import ProfileImage from "../../components/ui/ProfileImage";
 import CoverImage from "../../components/ui/CoverImage";
-
-type ProfileData = {
-  _id: string;
-  badge: string | null;
-  bio: string | null;
-  cover_image: string | null;
-  display_name: string;
-  email: string | null;
-  exp: string | null;
-  is_online: boolean | null;
-  profile_image: string | null;
-  level: number;
-};
+import { LogOut, Pencil } from "lucide-react";
+import Modal from "../../components/Modal";
+import SearchModal from "../../components/SearchModal";
+import type { Profile } from "../../types/profile";
 
 export default function ProfileHeaderSection() {
   const navigate = useNavigate();
   const idUrl = useParams();
   const myProfile = useAuthStore((state) => state.profile);
-  const maxExp = 500;
-  // 채운 경험치 계산 (총 exp/maxExp * 100)
-  const [expPercentage, setExpPercentage] = useState(maxExp);
-  // 남은 경험치 계산
-  const [expRemaining, setExpRemaining] = useState(maxExp);
-  const [profile, setProfile] = useState<ProfileData>({
+
+  const [profile, setProfile] = useState<Profile>({
     _id: "",
     badge: null,
     bio: null,
@@ -42,10 +28,6 @@ export default function ProfileHeaderSection() {
   });
 
   useEffect(() => {
-    if (!myProfile) {
-      navigate("/login");
-      return;
-    }
     if (idUrl.id) {
       const fetchProfile = async () => {
         try {
@@ -58,15 +40,38 @@ export default function ProfileHeaderSection() {
             throw error;
           }
           setProfile(data);
-          setExpPercentage(data.exp % maxExp);
-          setExpRemaining(maxExp - data.exp);
         } catch (error) {
           console.log(error);
         }
       };
       fetchProfile();
     }
-  }, [idUrl, myProfile, navigate, setExpPercentage, setExpRemaining]);
+  }, [idUrl, myProfile, navigate]);
+
+  const maxExp = 100;
+  const currentExp = Number(profile.exp ?? 0); // exp가 null일 경우를 대비
+  const expPercentage = currentExp % maxExp; // 채운 경험치 계산
+  const expRemaining = maxExp - expPercentage; // 남은 경험치 계산
+
+  // 로그아웃 처리 함수
+  async function signOut() {
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ is_online: false })
+        .eq("_id", myProfile?._id)
+        .select();
+      if (error) throw error;
+    } catch (e) {
+      console.error(e);
+    }
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   return (
     <div className="w-full">
@@ -108,7 +113,10 @@ export default function ProfileHeaderSection() {
             {/* 우측 버튼 그룹 */}
             <Activity mode={idUrl.id === myProfile?._id ? "visible" : "hidden"}>
               <div className="flex gap-2 self-start pt-2">
-                <button className="bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-1">
+                <button
+                  className="bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-1"
+                  onClick={signOut}
+                >
                   <LogOut size={14} /> 로그아웃
                 </button>
                 <button className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-1">
@@ -128,14 +136,14 @@ export default function ProfileHeaderSection() {
             <div className="w-1/2 flex flex-col gap-2 mr-4">
               <div className="bg-gray-800 rounded-sm h-4 relative overflow-hidden">
                 <div
-                  className="bg-[#FFC300] h-full rounded-sm transition-all duration-500" 
-                  style={{ width: `${expPercentage / 5}%` }}
+                  className="bg-[#FFC300] h-full rounded-sm transition-all duration-500"
+                  style={{ width: `${expPercentage}%` }}
                 ></div>
               </div>
 
               <div className="w-full flex justify-between text-sm">
                 <span className="text-gray-300 font-medium whitespace-nowrap">
-                  레벨 {profile.level + 1}까지 {expRemaining}exp 남음
+                  레벨 {profile.level! + 1}까지 {expRemaining}exp 남음
                 </span>
                 <span className="text-yellow-500 font-medium whitespace-nowrap">
                   Max {maxExp}exp
@@ -159,6 +167,9 @@ export default function ProfileHeaderSection() {
       <div className="w-full rounded-lg p-6 mt-4 min-h-[500px]">
         {/* <Outlet /> */}
       </div>
+      <Modal isOpen={false} onClose={() => {}}>
+        <SearchModal onClose={() => {}} />
+      </Modal>
     </div>
   );
 }
