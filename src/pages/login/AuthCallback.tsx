@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../stores/authStore";
 import supabase from "../../utils/supabase";
+import loading_img from "../../assets/image/loding_image.png";
 
 export default function AuthCallback() {
   const navigate = useNavigate();
@@ -49,5 +50,17 @@ export default function AuthCallback() {
     }
   }, [claims?.sub, navigate]);
 
-  return <div>로그인 처리 중...</div>;
+  return (
+    <div className="flex flex-col items-center justify-center h-full w-full">
+      <img
+        className="rounded-full w-full h-full object-cover shadow-2xl animate-bounce-slow"
+        src={loading_img}
+        alt={"로딩중 이미지"}
+      />
+
+      <p className="text-xl font-bold text-blue-400 tracking-widest animate-pulse">
+        로딩중...
+      </p>
+    </div>
+  );
 }
