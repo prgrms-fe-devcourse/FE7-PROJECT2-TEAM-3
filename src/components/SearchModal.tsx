@@ -16,17 +16,31 @@ export default function SearchModal({ onClose }: SearchModalProps) {
 
   useEffect(() => {
     inputRef.current?.focus();
-    setRecentQueries(["검색", "검색검색검색"]);
+
+    const stored = window.localStorage.getItem("search");
+    if (stored) {
+      setRecentQueries(JSON.parse(stored));
+    } else {
+      setRecentQueries([]); // 저장된 게 없으면 빈 배열
+    }
   }, []);
 
-  const deleteRecentQuery = () => {};
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!query.trim()) return;
 
-    navigate(`/postSearch?title=${encodeURIComponent(query)}`);
+    const JSONQueries = JSON.stringify([query, ...recentQueries]);
+
+    setRecentQueries((prev) => [query, ...prev]);
+
+    window.localStorage.setItem("search", JSONQueries);
+
+    navigate(`/postSearch?content=${encodeURIComponent(query)}`);
     onClose();
+  };
+
+  const deleteRecentQuery = (idx: number) => {
+    setRecentQueries((prev) => prev.filter((_, index) => index !== idx));
   };
 
   return (
@@ -53,8 +67,8 @@ export default function SearchModal({ onClose }: SearchModalProps) {
                   {recent}
                 </p>
                 <button
-                  onClick={deleteRecentQuery}
-                  className="absolute top-1/2 right-5 -translate-y-1/2"
+                  onClick={() => deleteRecentQuery(idx)}
+                  className="absolute top-1/2 right-5 -translate-y-1/2 cursor-pointer"
                 >
                   <X className="w-4 h-4 stroke-gray-400" />
                 </button>
