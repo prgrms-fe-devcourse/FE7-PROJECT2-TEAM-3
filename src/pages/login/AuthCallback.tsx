@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../stores/authStore";
 import supabase from "../../utils/supabase";
-import loading_img from "../../assets/image/loding_image.png";
+import loading_img from "../../assets/image/loading_img.png";
 
 export default function AuthCallback() {
   const navigate = useNavigate();
@@ -52,15 +52,51 @@ export default function AuthCallback() {
 
   return (
     <div className="flex flex-col items-center justify-center h-full w-full">
-      <img
-        className="rounded-full w-full h-full object-cover shadow-2xl animate-bounce-slow"
-        src={loading_img}
-        alt={"로딩중 이미지"}
-      />
-
-      <p className="text-xl font-bold text-blue-400 tracking-widest animate-pulse">
-        로딩중...
-      </p>
+      <div className="flex-center flex-col">
+        <img
+          className="w-40 h-40 animate-flyingRocket"
+          src={loading_img}
+          alt={"로딩중 이미지"}
+        />
+        <div className="flex items-center gap-1 text-2xl font-black text-white text-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
+          <span
+            className="animate-loading-text"
+            style={{ animationDelay: "0s" }}
+          >
+            로
+          </span>
+          <span
+            className="animate-loading-text"
+            style={{ animationDelay: "0.2s" }}
+          >
+            딩
+          </span>
+          <span
+            className="animate-loading-text"
+            style={{ animationDelay: "0.4s" }}
+          >
+            중
+          </span>
+          <span
+            className="animate-loading-text"
+            style={{ animationDelay: "0.6s" }}
+          >
+            .
+          </span>
+          <span
+            className="animate-loading-text"
+            style={{ animationDelay: "0.8s" }}
+          >
+            .
+          </span>
+          <span
+            className="animate-loading-text"
+            style={{ animationDelay: "1s" }}
+          >
+            .
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
