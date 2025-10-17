@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import supabase from "../../utils/supabase";
 import { useParams } from "react-router";
 import Posts from "../../components/Posts";
-import type { PostListItem } from "../../types/postListItem";
+import type { PostListItem } from "../../types/postList";
 
 // TODO: 나중에 타입 가져와서 사용하고, 컴포넌트로 빼서 리팩터링하기
 
