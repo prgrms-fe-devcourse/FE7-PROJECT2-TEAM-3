@@ -39,8 +39,18 @@ export default function SearchModal({ onClose }: SearchModalProps) {
     onClose();
   };
 
-  const deleteRecentQuery = (idx: number) => {
-    setRecentQueries((prev) => prev.filter((_, index) => index !== idx));
+  const searchRecentQuery = (query: string) => {
+    navigate(`/postSearch?content=${encodeURIComponent(query)}`);
+    onClose();
+  };
+
+  const deleteRecentQuery = (e: React.MouseEvent, idx: number) => {
+    e.stopPropagation();
+    setRecentQueries((prev) => {
+      const updated = prev.filter((_, index) => index !== idx);
+      window.localStorage.setItem("search", JSON.stringify(updated));
+      return updated;
+    });
   };
 
   return (
@@ -63,7 +73,10 @@ export default function SearchModal({ onClose }: SearchModalProps) {
           <ul>
             {recentQueries.map((recent, idx) => (
               <li key={idx} className="relative">
-                <p className="px-5 py-4 border-t border-t-[#303A4B] text-xs text-gray-400">
+                <p
+                  className="pl-5 pr-10 py-4 border-t border-t-[#303A4B] text-xs text-gray-400 whitespace-nowrap overflow-hidden overflow-ellipsis cursor-pointer"
+                  onClick={() => searchRecentQuery(recent)}
+                >
                   {recent}
                 </p>
                 <button
