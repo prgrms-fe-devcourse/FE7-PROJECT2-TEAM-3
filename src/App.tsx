@@ -44,7 +44,7 @@ export default function App() {
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
           <Route path="/userSetting" element={<UserSetting />} />
-          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/authcallback" element={<AuthCallback />} />
         </Route>
         <Route path="*" element={<NotFound />}></Route>
       </Routes>
