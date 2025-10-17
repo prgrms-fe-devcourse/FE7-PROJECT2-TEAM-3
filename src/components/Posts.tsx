@@ -2,7 +2,8 @@ import { Heart, MessageSquare, Pencil } from "lucide-react";
 import { useNavigate } from "react-router";
 import defaultProfile from "../assets/image/no_profile_image.png";
 import { twMerge } from "tailwind-merge";
-import type { PostListItem } from "../types/postListItem";
+import type { PostListItem } from "../types/postList";
+import { formaRelativeTime } from "../utils/formatRelativeTime";
 
 export default function Posts({
   posts,
@@ -40,9 +41,13 @@ export default function Posts({
                   <span className="text-[#F59E0B] text-[12px] pr-2">
                     {`Lv ${post.user.level || "0"}`}
                   </span>
-                  <div className="inline-flex w-[44px] h-[17px] items-center justify-center bg-[#9F9F9F] text-white text-[10px] rounded-[30px] whitespace-nowrap overflow-hidden">
+                  <div className="inline-flex mr-2 w-[44px] h-[17px] items-center justify-center bg-[#9F9F9F] text-white text-[10px] rounded-[30px] whitespace-nowrap overflow-hidden">
                     {post.user.badge || "정보 없음"}
                   </div>
+                  {/* 시간 표시 부분 */}
+                  <p className="text-xs text-gray-400">
+                    {formaRelativeTime(post.created_at)}
+                  </p>
                 </div>
 
                 <div id="content" className="flex flex-col h-[92px] mb-4">

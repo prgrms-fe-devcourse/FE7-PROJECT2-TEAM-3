@@ -2,7 +2,7 @@ import { useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Posts from "../../components/Posts";
 import supabase from "../../utils/supabase";
-import type { PostListItem } from "../../types/postListItem";
+import type { PostListItem } from "../../types/postList";
 
 export default function PostSearch() {
   const [searchParams] = useSearchParams();
