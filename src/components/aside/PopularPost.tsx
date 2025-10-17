@@ -1,8 +1,8 @@
 import { Heart, MessageSquare } from "lucide-react";
 import { twMerge } from "tailwind-merge";
-import { useRelativeTime } from "../../hooks/useRelativeTime";
 import type { PopularPosts } from "../../types/posts";
 import ProfileImage from "../ui/ProfileImage";
+import { formaRelativeTime } from "../../utils/formatRelativeTime";
 
 export default function PopularPost({
   post,
@@ -11,7 +11,7 @@ export default function PopularPost({
   post: PopularPosts;
   liked: boolean;
 }) {
-  const createdText = useRelativeTime(post.created_at);
+  const createdText = formaRelativeTime(post.created_at);
   return (
     <article className="flex gap-3 p-3 bg-[#161C27] rounded-lg cursor-pointer hover:opacity-70">
       <div className="overflow-hidden w-8 h-8 rounded-full">

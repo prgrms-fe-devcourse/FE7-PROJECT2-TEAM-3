@@ -64,11 +64,13 @@ export default function SidebarContents() {
           .slice(0, 3);
         sethashs(hashArr);
 
+        if (!profile) return;
+
         // 내가 누른 좋아요들
         const { data: myLikes, error: likeErr } = await supabase
-          .from("likes")
-          .select("post_id")
-          .eq("user_id", profile?._id);
+            .from("likes")
+            .select("post_id")
+            .eq("user_id", profile?._id);
         if (likeErr) throw likeErr;
 
         setLikedSet(new Set((myLikes ?? []).map((r) => r.post_id)));
@@ -90,7 +92,7 @@ export default function SidebarContents() {
       }
     };
     fetchPosts();
-  }, [profile?._id]);
+  }, [profile]);
 
   return (
     <>

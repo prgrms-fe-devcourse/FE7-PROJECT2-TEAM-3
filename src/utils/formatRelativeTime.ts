@@ -1,4 +1,4 @@
-export function useRelativeTime(iso?: string | null) {
+export function formaRelativeTime(iso?: string | null) {
   if (!iso) return "";
   const d = new Date(iso);
   const now = new Date();

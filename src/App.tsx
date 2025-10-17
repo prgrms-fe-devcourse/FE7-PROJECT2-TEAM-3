@@ -40,14 +40,13 @@ export default function App() {
             <Route path="/postSearch" element={<PostSearch />} />
             <Route path="/userSearch" element={<UserSearch />} />
           </Route>
-
-          <Route path="*" element={<NotFound />}></Route>
         </Route>
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
           <Route path="/userSetting" element={<UserSetting />} />
-          <Route path="/authcallback" element={<AuthCallback />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
         </Route>
+        <Route path="*" element={<NotFound />}></Route>
       </Routes>
     </>
   );
