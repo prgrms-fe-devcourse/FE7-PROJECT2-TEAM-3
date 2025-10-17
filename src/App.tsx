@@ -12,6 +12,7 @@ import UserSearch from "./pages/search/UserSearch";
 import AuthLayout from "./pages/login/AuthLayout";
 import SubLayout from "./components/SubLayout";
 import UserPage from "./pages/userpage/UserPage";
+import AuthCallback from "./pages/login/AuthCallback";
 
 export default function App() {
   return (
@@ -39,11 +40,13 @@ export default function App() {
             <Route path="/postSearch" element={<PostSearch />} />
             <Route path="/userSearch" element={<UserSearch />} />
           </Route>
-          <Route element={<AuthLayout />}>
-            <Route path="/login" element={<Login />} />
-            <Route path="/userSetting" element={<UserSetting />} />
-          </Route>
+
           <Route path="*" element={<NotFound />}></Route>
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/userSetting" element={<UserSetting />} />
+          <Route path="/authcallback" element={<AuthCallback />} />
         </Route>
       </Routes>
     </>
