@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../stores/authStore";
 import supabase from "../../utils/supabase";
-import loading_img from "../../assets/image/loding_image.png";
+import loading_img from "../../assets/image/loading_img.png";
 
 export default function AuthCallback() {
   const navigate = useNavigate();
@@ -52,11 +52,13 @@ export default function AuthCallback() {
 
   return (
     <div className="flex flex-col items-center justify-center h-full w-full">
-      <img
-        className="rounded-full w-full h-full object-cover shadow-2xl animate-bounce-slow"
-        src={loading_img}
-        alt={"로딩중 이미지"}
-      />
+      <div className="relative w-50 h-50 mb-8">
+        <img
+          className="rounded-full w-full h-full object-cover shadow-2xl animate-bounce-slow"
+          src={loading_img}
+          alt={"로딩중 이미지"}
+        />
+      </div>
 
       <p className="text-xl font-bold text-blue-400 tracking-widest animate-pulse">
         로딩중...

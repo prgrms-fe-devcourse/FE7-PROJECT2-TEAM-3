@@ -11,10 +11,21 @@ export default function ProfileImage({
   alt: string;
 }) {
   return (
-    <img
-      className={twMerge("rounded-full object-cover", className)}
-      src={src !== null ? src : NoProfileImage}
-      alt={alt}
-    />
+    <>
+      {src && (
+        <img
+          className={twMerge("rounded-full object-cover", className)}
+          src={src}
+          alt={alt}
+        />
+      )}
+      {!src && (
+        <img
+          className={twMerge("rounded-full object-cover", className)}
+          src={NoProfileImage}
+          alt={alt}
+        />
+      )}
+    </>
   );
 }

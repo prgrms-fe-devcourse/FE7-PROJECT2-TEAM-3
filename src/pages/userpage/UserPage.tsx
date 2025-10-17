@@ -6,13 +6,19 @@ import ProfileImage from "../../components/ui/ProfileImage";
 import CoverImage from "../../components/ui/CoverImage";
 import { LogOut, Pencil } from "lucide-react";
 import Modal from "../../components/Modal";
-import SearchModal from "../../components/SearchModal";
 import type { Profile } from "../../types/profile";
+import SetUpModal from "../../components/SetUpModal";
 
 export default function ProfileHeaderSection() {
   const navigate = useNavigate();
   const idUrl = useParams();
   const myProfile = useAuthStore((state) => state.profile);
+  const [isSetUpOpened, setIsSetUpOpened] = useState(false);
+  const [followers, setFollowers] = useState<number>(0);
+  const [followings, setFollowings] = useState<number>(0);
+
+  const openSetUp = () => setIsSetUpOpened(true);
+  const closeSetUp = () => setIsSetUpOpened(false);
 
   const [profile, setProfile] = useState<Profile>({
     _id: "",
@@ -36,6 +42,7 @@ export default function ProfileHeaderSection() {
             .select("*")
             .eq("_id", idUrl.id)
             .single();
+
           if (error) {
             throw error;
           }
@@ -43,6 +50,20 @@ export default function ProfileHeaderSection() {
         } catch (error) {
           console.log(error);
         }
+      };
+      const fetchfollows = async () => {
+        const { count: followingCount } = await supabase
+          .from("follows")
+          .select("id", { count: "exact", head: true })
+          .eq("follower_id", idUrl.id);
+
+        const { count: followerCount } = await supabase
+          .from("follows")
+          .select("id", { count: "exact", head: true })
+          .eq("following_id", idUrl.id);
+
+        setFollowings(followingCount || 0);
+        setFollowers(followerCount || 0);
       };
       fetchProfile();
     }
@@ -76,7 +97,7 @@ export default function ProfileHeaderSection() {
   return (
     <div className="w-full">
       <div className="fixed top-[104px] right-[352px] left-[352px]">
-        <div className="w-full h-30 bg-gray-200 rounded-t-lg">
+        <div className="w-full h-[200px] bg-gray-200 rounded-t-lg">
           <CoverImage
             className="w-full h-full object-cover"
             src={profile.cover_image}
@@ -105,8 +126,9 @@ export default function ProfileHeaderSection() {
                 </div>
                 <div className="text-sm text-gray-400">
                   {/* 팔로잉/팔로우 수 - 임시 데이터 */}
-                  <span>{22} 팔로잉</span> <span className="mx-1">·</span>{" "}
-                  <span>{22} 팔로우</span>
+                  <span>{followings} 팔로잉</span>{" "}
+                  <span className="mx-1">·</span>{" "}
+                  <span>{followers} 팔로워</span>
                 </div>
               </div>
             </div>
@@ -119,7 +141,10 @@ export default function ProfileHeaderSection() {
                 >
                   <LogOut size={14} /> 로그아웃
                 </button>
-                <button className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-1">
+                <button
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-1"
+                  onClick={openSetUp}
+                >
                   <Pencil size={14} /> 수정
                 </button>
               </div>
@@ -167,8 +192,8 @@ export default function ProfileHeaderSection() {
       <div className="w-full rounded-lg p-6 mt-4 min-h-[500px]">
         {/* <Outlet /> */}
       </div>
-      <Modal isOpen={false} onClose={() => {}}>
-        <SearchModal onClose={() => {}} />
+      <Modal isOpen={isSetUpOpened} onClose={closeSetUp}>
+        <SetUpModal onClose={closeSetUp} />
       </Modal>
     </div>
   );

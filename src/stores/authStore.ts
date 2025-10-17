@@ -25,6 +25,7 @@ type AuthStore = {
   claims: Claims; // JWTPayload(사용자 정보)
   profile: Profile | null; // Profiles 테이블의 데이터
   setClaims: (c: Claims) => void;
+  setProfile: (p: Profile) => void;
   hydrateFromAuth: () => void;
   clearAuth: () => void;
   setNextBadge: () => Promise<void>;
@@ -84,6 +85,11 @@ export const useAuthStore = create<AuthStore>()(
         setClaims: (c: Claims) =>
           set((state) => {
             state.claims = c;
+          }),
+
+        setProfile: (p: Profile) =>
+          set((state) => {
+            state.profile = p;
           }),
 
         hydrateFromAuth: async () => {
