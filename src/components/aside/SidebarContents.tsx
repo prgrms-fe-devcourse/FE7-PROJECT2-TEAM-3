@@ -64,17 +64,6 @@ export default function SidebarContents() {
           .slice(0, 3);
         sethashs(hashArr);
 
-        if (!profile) return;
-
-        // 내가 누른 좋아요들
-        const { data: myLikes, error: likeErr } = await supabase
-            .from("likes")
-            .select("post_id")
-            .eq("user_id", profile?._id);
-        if (likeErr) throw likeErr;
-
-        setLikedSet(new Set((myLikes ?? []).map((r) => r.post_id)));
-
         // 유저 랭킹
         const { data: profiles, error: profilesErr } = await supabase
           .from("profiles")
@@ -85,6 +74,17 @@ export default function SidebarContents() {
         const userRanks = profiles.sort((a, b) => b.exp - a.exp).slice(0, 3);
 
         setUserRank(userRanks);
+
+        if (!profile) return;
+
+        // 내가 누른 좋아요들
+        const { data: myLikes, error: likeErr } = await supabase
+          .from("likes")
+          .select("post_id")
+          .eq("user_id", profile?._id);
+        if (likeErr) throw likeErr;
+
+        setLikedSet(new Set((myLikes ?? []).map((r) => r.post_id)));
       } catch (e) {
         console.error(e);
       } finally {

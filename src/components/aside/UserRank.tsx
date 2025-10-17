@@ -13,7 +13,7 @@ export default function UserRank({
   return (
     <article>
       <Link
-        to="/mypage"
+        to={`/userPage/${user._id}`}
         className="flex-center gap-2 p-3 border border-transparent rounded-lg hover:border-[#85523E] hover:bg-[linear-gradient(180deg,_rgba(255,255,255,0.1)_0%,_rgba(242,145,61,0.1)_100%)]"
       >
         <div className="relative">
