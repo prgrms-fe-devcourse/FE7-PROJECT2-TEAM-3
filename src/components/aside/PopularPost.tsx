@@ -1,6 +1,6 @@
 import { Heart, MessageSquare } from "lucide-react";
 import { twMerge } from "tailwind-merge";
-import type { PopularPosts } from "../../types/posts";
+import type { PopularPosts } from "../../types/post";
 import ProfileImage from "../ui/ProfileImage";
 import { formaRelativeTime } from "../../utils/formatRelativeTime";
 
