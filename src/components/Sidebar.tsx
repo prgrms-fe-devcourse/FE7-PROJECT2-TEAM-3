@@ -46,7 +46,7 @@ export default function Sidebar() {
               </button>
               <div className="">
                 <Link
-                  to="myPage"
+                  to={`userPage/${isLogined._id}`}
                   className="block hover:opacity-70"
                 >
                   {/* 프로필 이미지 src */}

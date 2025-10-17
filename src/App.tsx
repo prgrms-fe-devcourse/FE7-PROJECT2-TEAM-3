@@ -35,7 +35,7 @@ export default function App() {
             />
             <Route path="/channel/write" element={<PostCreatePage />} />
 
-            <Route path="/userPage" element={<UserPage />} />
+            <Route path="/userPage/:id" element={<UserPage />} />
             <Route path="/postSearch" element={<PostSearch />} />
             <Route path="/userSearch" element={<UserSearch />} />
           </Route>
