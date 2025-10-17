@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import supabase from "../../utils/supabase";
 import { ChartNoAxesCombined, Trophy, Zap } from "lucide-react";
-import type { HashTags, PopularPosts } from "../../types/posts";
+import type { HashTags, PopularPosts } from "../../types/post";
 import TrendingHashTag from "./TrendingHashTag";
 import PopularPost from "./PopularPost";
 import { useAuthStore } from "../../stores/authStore";
