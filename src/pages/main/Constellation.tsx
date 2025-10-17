@@ -60,50 +60,52 @@ export default function Constellation() {
         initialScale={1}
         minScale={0.5}
         maxScale={10}
-        limitToBounds={false} // 캔버스 밖으로 드래그 가능하게 설정
+        limitToBounds={true} // 캔버스 밖으로 드래그 가능?
         doubleClick={{ disabled: true }} // 더블클릭 줌 비활성화
       >
         <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
-          <div className="relative w-full min-w-dvw h-auto">
-            <ConstellationSVG className="inset-0 w-full h-full" />
-            <div className="absolute inset-0">
-              {stars.map((s, idx) => (
-                <div
-                  key={idx}
-                  className="absolute max-w-20 max-h-20 -translate-x-1/2 -translate-y-1/2"
-                  style={{
-                    left: `${s.position[0]}%`,
-                    top: `${s.position[1]}%`,
-                  }}
-                >
-                  <button
-                    style={
-                      s.src
-                        ? {
-                            backgroundImage: `url(${s.src})`,
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                            backgroundRepeat: "no-repeat",
-                          }
-                        : undefined
-                    }
-                    className={twMerge(
-                      "rounded-full text-[0px]",
-                      s.path
-                        ? "w-20 h-20 border-2 border-amber-300 shadow-[0px_0px_20px_0px_#FFD86F] transition-all hover:shadow-[0px_0px_50px_0px_#FFD86F] bg-cover"
-                        : "w-1 h-1 bg-white"
-                    )}
-                    onClick={() => s.path && navigate(s.path)}
+          <div className="p-100">
+            <div className="relative w-full min-w-dvw h-auto">
+              <ConstellationSVG className="inset-0 w-full h-full" />
+              <div className="absolute inset-0">
+                {stars.map((s, idx) => (
+                  <div
+                    key={idx}
+                    className="absolute max-w-20 max-h-20 -translate-x-1/2 -translate-y-1/2"
+                    style={{
+                      left: `${s.position[0]}%`,
+                      top: `${s.position[1]}%`,
+                    }}
                   >
-                    {s.name} 으로 이동
-                  </button>
-                  {s.path && (
-                    <span className="absolute top-1/2 left-full -translate-y-1/2 flex-center whitespace-nowrap rounded-lg bg-[rgba(0,0,0,0.8)] min-w-25  ml-2.5 p-2 text-xs text-white border border-[rgba(255,216,111,0.3)]">
-                      {s.name}
-                    </span>
-                  )}
-                </div>
-              ))}
+                    <button
+                      style={
+                        s.src
+                          ? {
+                              backgroundImage: `url(${s.src})`,
+                              backgroundSize: "cover",
+                              backgroundPosition: "center",
+                              backgroundRepeat: "no-repeat",
+                            }
+                          : undefined
+                      }
+                      className={twMerge(
+                        "rounded-full text-[0px]",
+                        s.path
+                          ? "w-20 h-20 border-2 border-amber-300 shadow-[0px_0px_20px_0px_#FFD86F] transition-all hover:shadow-[0px_0px_50px_0px_#FFD86F] bg-cover"
+                          : "w-1 h-1 bg-white"
+                      )}
+                      onClick={() => s.path && navigate(s.path)}
+                    >
+                      {s.name} 으로 이동
+                    </button>
+                    {s.path && (
+                      <span className="absolute top-1/2 left-full -translate-y-1/2 flex-center whitespace-nowrap rounded-lg bg-[rgba(0,0,0,0.8)] min-w-25  ml-2.5 p-2 text-xs text-white border border-[rgba(255,216,111,0.3)]">
+                        {s.name}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </TransformComponent>
