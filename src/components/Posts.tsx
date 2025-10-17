@@ -2,8 +2,8 @@ import { Heart, MessageSquare, Pencil } from "lucide-react";
 import { useNavigate } from "react-router";
 import defaultProfile from "../assets/image/no_profile_image.png";
 import { twMerge } from "tailwind-merge";
-import type { PostListItem } from "../types/postList";
 import { formaRelativeTime } from "../utils/formatRelativeTime";
+import type { PostListItem } from "../types/post";
 
 export default function Posts({
   posts,
