@@ -25,7 +25,7 @@ export default function SearchModal({ onClose }: SearchModalProps) {
 
     if (!query.trim()) return;
 
-    navigate(`/postSearch?title=${encodeURIComponent(query)}`);
+    navigate(`/postSearch?content=${encodeURIComponent(query)}`);
     onClose();
   };
 

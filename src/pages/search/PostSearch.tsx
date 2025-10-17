@@ -6,7 +6,7 @@ import type { PostListItem } from "../../types/postList";
 
 export default function PostSearch() {
   const [searchParams] = useSearchParams();
-  const title = searchParams.get("title") || "";
+  const query = searchParams.get("content") || "";
   const [posts, setPosts] = useState<PostListItem[]>([]);
 
   useEffect(() => {
@@ -27,8 +27,8 @@ export default function PostSearch() {
         )
         .order("created_at", { ascending: false });
 
-      if (title) {
-        queryBuilder = queryBuilder.ilike("title", `%${title}%`);
+      if (query) {
+        queryBuilder = queryBuilder.ilike("content", `%${query}%`);
       }
 
       const { data, error } = await queryBuilder;
@@ -55,7 +55,7 @@ export default function PostSearch() {
     }
 
     fetchPosts();
-  }, [title]);
+  }, [query]);
 
   return <Posts posts={posts} channel={undefined} />;
 }
