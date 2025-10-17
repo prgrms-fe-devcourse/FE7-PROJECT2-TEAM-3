@@ -39,7 +39,9 @@ export default function SearchModal({ onClose }: SearchModalProps) {
     onClose();
   };
 
-  const deleteRecentQuery = () => {};
+  const deleteRecentQuery = (idx: number) => {
+    setRecentQueries((prev) => prev.filter((_, index) => index !== idx));
+  };
 
   return (
     <div className="">
@@ -65,8 +67,8 @@ export default function SearchModal({ onClose }: SearchModalProps) {
                   {recent}
                 </p>
                 <button
-                  onClick={deleteRecentQuery}
-                  className="absolute top-1/2 right-5 -translate-y-1/2"
+                  onClick={() => deleteRecentQuery(idx)}
+                  className="absolute top-1/2 right-5 -translate-y-1/2 cursor-pointer"
                 >
                   <X className="w-4 h-4 stroke-gray-400" />
                 </button>
