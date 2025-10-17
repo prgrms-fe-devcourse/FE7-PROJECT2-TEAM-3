@@ -13,7 +13,7 @@ export default function ProfileImage({
   return (
     <img
       className={twMerge("rounded-full object-cover", className)}
-      src={src !== null ? src : NoProfileImage}
+      src={src ? src : NoProfileImage}
       alt={alt}
     />
   );
