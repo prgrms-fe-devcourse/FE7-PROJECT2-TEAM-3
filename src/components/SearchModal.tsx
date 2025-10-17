@@ -25,18 +25,21 @@ export default function SearchModal({ onClose }: SearchModalProps) {
     }
   }, []);
 
-  const deleteRecentQuery = () => {};
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
 
-    setRecentQueries((prev) => [...prev, query]);
-    window.localStorage.setItem("search", JSON.stringify(recentQueries));
+    const JSONQueries = JSON.stringify([query, ...recentQueries]);
+
+    setRecentQueries((prev) => [query, ...prev]);
+
+    window.localStorage.setItem("search", JSONQueries);
 
     navigate(`/postSearch?content=${encodeURIComponent(query)}`);
     onClose();
   };
+
+  const deleteRecentQuery = () => {};
 
   return (
     <div className="">
