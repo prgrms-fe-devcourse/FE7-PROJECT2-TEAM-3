@@ -16,14 +16,23 @@ export default function SearchModal({ onClose }: SearchModalProps) {
 
   useEffect(() => {
     inputRef.current?.focus();
-    setRecentQueries(["검색", "검색검색검색"]);
+
+    const stored = window.localStorage.getItem("search");
+    if (stored) {
+      setRecentQueries(JSON.parse(stored));
+    } else {
+      setRecentQueries([]); // 저장된 게 없으면 빈 배열
+    }
   }, []);
 
   const deleteRecentQuery = () => {};
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!query.trim()) return;
+
+    setRecentQueries((prev) => [...prev, query]);
+    window.localStorage.setItem("search", JSON.stringify(recentQueries));
 
     navigate(`/postSearch?content=${encodeURIComponent(query)}`);
     onClose();
