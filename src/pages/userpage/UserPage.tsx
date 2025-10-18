@@ -8,17 +8,32 @@ import { LogOut, Pencil } from "lucide-react";
 import Modal from "../../components/Modal";
 import type { Profile } from "../../types/profile";
 import SetUpModal from "../../components/SetUpModal";
+import FollowerModal from "../../components/FollowerModal";
 
 export default function ProfileHeaderSection() {
   const navigate = useNavigate();
-  const idUrl = useParams();
+  const { userId } = useParams();
   const myProfile = useAuthStore((state) => state.profile);
-  const [isSetUpOpened, setIsSetUpOpened] = useState(false);
+  // 팔로워, 팔로잉 수 상태
   const [followers, setFollowers] = useState<number>(0);
   const [followings, setFollowings] = useState<number>(0);
+  const [isFollowing, setIsFollowing] = useState<boolean>(false);
+  // 모달 상태 관리
+  const [isSetUpOpened, setIsSetUpOpened] = useState(false); // 프로필 수정 모달
+  const [isFollowerOpend, setIsFollowerOpend] = useState<boolean>(false); // 팔로워 모달
+  const [isFollowingOpend, setIsFollowingOpend] = useState<boolean>(false); // 팔로잉 모달
+  // 로그인 페이지 이동 함수
+  const directLogin = () => {
+    navigate("/login");
+  };
 
-  const openSetUp = () => setIsSetUpOpened(true);
+  // 모달 열기/닫기 함수
+  const openSetUp = () => setIsSetUpOpened(true); // 프로필 수정 모달
   const closeSetUp = () => setIsSetUpOpened(false);
+  const openFollowers = () => setIsFollowerOpend(true); // 팔로워 모달
+  const closeFollowers = () => setIsFollowerOpend(false);
+  const openFollowings = () => setIsFollowingOpend(true); // 팔로잉 모달
+  const closeFollowings = () => setIsFollowingOpend(false);
 
   const [profile, setProfile] = useState<Profile>({
     _id: "",
@@ -33,14 +48,15 @@ export default function ProfileHeaderSection() {
     level: 0,
   });
 
+  // 해당 페이지 유저 프로필 정보 불러오기
   useEffect(() => {
-    if (idUrl.id) {
+    if (userId) {
       const fetchProfile = async () => {
         try {
           const { data, error } = await supabase
             .from("profiles")
             .select("*")
-            .eq("_id", idUrl.id)
+            .eq("_id", userId)
             .single();
 
           if (error) {
@@ -51,28 +67,74 @@ export default function ProfileHeaderSection() {
           console.log(error);
         }
       };
+
+      fetchProfile();
+    }
+  }, [userId, myProfile]);
+
+  // 팔로잉 & 팔로우 수, 팔로잉 & 팔로우 목록 불러오기
+  useEffect(() => {
+    if (userId) {
       const fetchfollows = async () => {
         const { count: followingCount } = await supabase
           .from("follows")
-          .select("id", { count: "exact", head: true })
-          .eq("follower_id", idUrl.id);
+          .select("following_id", { count: "exact", head: true })
+          .eq("follower_id", userId);
 
         const { count: followerCount } = await supabase
           .from("follows")
-          .select("id", { count: "exact", head: true })
-          .eq("following_id", idUrl.id);
+          .select("follower_id", { count: "exact", head: true })
+          .eq("following_id", userId);
+
+        const { count: isFollowingData } = await supabase
+          .from("follows")
+          .select("", { count: "exact", head: true })
+          .eq("follower_id", myProfile?._id)
+          .eq("following_id", userId);
 
         setFollowings(followingCount || 0);
         setFollowers(followerCount || 0);
+        setIsFollowing(isFollowingData === 1 || false);
       };
-      fetchProfile();
+      fetchfollows();
     }
-  }, [idUrl, myProfile, navigate]);
+  }, [userId, myProfile?._id]);
 
-  const maxExp = 100;
-  const currentExp = Number(profile.exp ?? 0); // exp가 null일 경우를 대비
-  const expPercentage = currentExp % maxExp; // 채운 경험치 계산
-  const expRemaining = maxExp - expPercentage; // 남은 경험치 계산
+  //팔로우 하는 함수
+  const followSubmit = async () => {
+    if (!myProfile?._id || myProfile._id === userId) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("follows")
+        .insert([{ follower_id: myProfile._id, following_id: userId }])
+        .select();
+      if (error) throw error;
+      if (data) {
+        setIsFollowing(true);
+        setFollowers((prevCount) => prevCount + 1);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  //언팔로우 하는 함수
+  const unfollowSubmit = async () => {
+    try {
+      const { error } = await supabase
+        .from("follows")
+        .delete()
+        .eq("follower_id", myProfile?._id)
+        .eq("following_id", userId);
+      if (error) {
+        throw error;
+      }
+      setIsFollowing(false);
+      setFollowers((prevCount) => prevCount - 1);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   // 로그아웃 처리 함수
   async function signOut() {
@@ -94,6 +156,11 @@ export default function ProfileHeaderSection() {
     }
   }
 
+  const maxExp = 100;
+  const currentExp = Number(profile.exp ?? 0); // exp가 null일 경우를 대비
+  const expPercentage = currentExp % maxExp; // 채운 경험치 계산
+  const expRemaining = maxExp - expPercentage; // 남은 경험치 계산
+
   return (
     <div className="w-full">
       <div className="fixed top-[104px] right-[352px] left-[352px]">
@@ -107,7 +174,7 @@ export default function ProfileHeaderSection() {
 
         <div className="bg-[#161C27] rounded-b-lg p-6 shadow-lg relative">
           <div className="flex justify-between items-center">
-            <div className="flex items-start gap-4 -mt-12">
+            <div className="flex items-start gap-2 -mt-12">
               <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-[#161C27]">
                 <ProfileImage
                   className="w-full h-full object-cover"
@@ -116,7 +183,7 @@ export default function ProfileHeaderSection() {
                 />
               </div>
               <div className="flex flex-col pt-12">
-                <div className="flex items-center gap-2">
+                <div className="px-2 flex items-center gap-2">
                   <span className="text-white text-xl font-bold">
                     {profile.display_name}
                   </span>
@@ -126,14 +193,23 @@ export default function ProfileHeaderSection() {
                 </div>
                 <div className="text-sm text-gray-400">
                   {/* 팔로잉/팔로우 수 - 임시 데이터 */}
-                  <span>{followings} 팔로잉</span>{" "}
-                  <span className="mx-1">·</span>{" "}
-                  <span>{followers} 팔로워</span>
+                  <button
+                    className="hover:bg-[#303A4B] rounded-md px-2 py-[2] transition-colors"
+                    onClick={openFollowings}
+                  >
+                    {followings} 팔로잉
+                  </button>
+                  <button
+                    className="hover:bg-[#303A4B] rounded-md px-2 py-[2] transition-colors"
+                    onClick={openFollowers}
+                  >
+                    {followers} 팔로워
+                  </button>
                 </div>
               </div>
             </div>
             {/* 우측 버튼 그룹 */}
-            <Activity mode={idUrl.id === myProfile?._id ? "visible" : "hidden"}>
+            <Activity mode={userId === myProfile?._id ? "visible" : "hidden"}>
               <div className="flex gap-2 self-start pt-2">
                 <button
                   className="bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-1"
@@ -148,6 +224,43 @@ export default function ProfileHeaderSection() {
                   <Pencil size={14} /> 수정
                 </button>
               </div>
+            </Activity>
+
+            <Activity
+              mode={
+                myProfile && userId !== myProfile?._id && !isFollowing
+                  ? "visible"
+                  : "hidden"
+              }
+            >
+              <button
+                onClick={followSubmit}
+                className="bg-[#5C4DCA] hover:bg-[#7b6cdb] text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors"
+              >
+                팔로우
+              </button>
+            </Activity>
+            <Activity
+              mode={
+                myProfile && userId !== myProfile?._id && isFollowing
+                  ? "visible"
+                  : "hidden"
+              }
+            >
+              <button
+                onClick={unfollowSubmit}
+                className="bg-[#9297AC] hover:bg-[#696F86] text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors"
+              >
+                팔로잉
+              </button>
+            </Activity>
+            <Activity mode={!myProfile ? "visible" : "hidden"}>
+              <button
+                onClick={directLogin}
+                className="bg-[#9297AC] hover:bg-[#696F86] text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors"
+              >
+                로그인
+              </button>
             </Activity>
           </div>
 
@@ -192,8 +305,17 @@ export default function ProfileHeaderSection() {
       <div className="w-full rounded-lg p-6 mt-4 min-h-[500px]">
         {/* <Outlet /> */}
       </div>
+      {/* 수정 모달 */}
       <Modal isOpen={isSetUpOpened} onClose={closeSetUp}>
         <SetUpModal onClose={closeSetUp} />
+      </Modal>
+      {/* 팔로워 목록 모달 */}
+      <Modal isOpen={isFollowerOpend} onClose={closeFollowers}>
+        <FollowerModal onClose={closeFollowers} />
+      </Modal>
+      {/* 팔로잉 목록 모달 */}
+      <Modal isOpen={isFollowingOpend} onClose={closeFollowings}>
+        <FollowerModal onClose={closeFollowings} />
       </Modal>
     </div>
   );
