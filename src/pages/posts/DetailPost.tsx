@@ -99,7 +99,7 @@ export default function PostDetail() {
         }
       };
       fetchProfileId();
-    }, [userId, navigate]);
+    }, []);
 
     // 포스트 가져오기
     useEffect(() => {
@@ -168,7 +168,7 @@ export default function PostDetail() {
         }
       }
       fetchImage();
-    }, [images]);
+    }, [params?.postId]);
 
     // 해시태그 가져오기
     useEffect(() => {
@@ -190,19 +190,19 @@ export default function PostDetail() {
   // 하트 가져오기
   useEffect(() => {
     const fetchLikes = async () => {
-      const { data: like, error } = await supabase
+      const { data: likes, error } = await supabase
       .from("likes")
-      .select("post_id")
-      .eq("post_id", params?.postId)
-
+      .select("user_id")
+      .eq("post_id", params?.postId);
       if (error) {
         console.error("좋아요 불러오기 실패:", error);
       } else {
-        setLikeCount(like.length);
-      }     
+        setLikeCount(likes.length);
+        setLiked(!!likes.find((entry) => entry.user_id === userId));
+      }
     }
     fetchLikes();
-  }, [params?.postId]);
+  }, [params?.postId, userId]);
 
 
   // 댓글 가져오기
@@ -238,24 +238,40 @@ export default function PostDetail() {
   
     try {
       // 현재 좋아요 여부 확인
-      const { data: existing, error: checkError } = await supabase
-        .from('likes')
-        .select('user_id, post_id')
-        .eq('user_id', userId)
-        .eq('post_id', params?.postId)
-        .maybeSingle();
+      // const { data: existing, error: checkError } = await supabase
+      //   .from('likes')
+      //   .select('user_id, post_id')
+      //   .eq('user_id', userId)
+      //   .eq('post_id', params?.postId)
+      //   .maybeSingle();
   
-      if (checkError) throw checkError;
-      console.log("exist", existing);
-      if (existing) {
+      // if (checkError) throw checkError;
+      // console.log("exist", existing);
+
+      
+    // const fetchLikes = async () => {
+    //   const { data: likes, error } = await supabase
+    //   .from("likes")
+    //   .select("user_id")
+    //   .eq("post_id", params?.postId);
+    //   if (error) {
+    //     console.error("좋아요 불러오기 실패:", error);
+    //   } else {
+    //     setLikeCount(likes.length);
+    //     setLiked(!!likes.find((entry) => entry.user_id === userId));
+    //   }
+    // }
+    // fetchLikes();
+
+      if (liked) {
         // 이미 좋아요한 경우 → 삭제
         const { data: del, error: deleteError } = await supabase
           .from('likes')
           .delete()
+          .eq('user_id', userId)
           .eq('post_id', params?.postId)
-          .eq('user_id', userId);
-        console.log("_id", existing._id);
-        if (deleteError) throw deleteError;
+          .select();
+        if (deleteError) throw  deleteError;
         setLiked(false);
         setLikeCount((prev) => (prev-1));
       } else {
@@ -266,7 +282,6 @@ export default function PostDetail() {
         if (insertError) throw insertError;  
         setLiked(true);
         setLikeCount((prev) => (prev+1));
-
       }
     } catch (e) {
       console.error('좋아요 처리 중 오류:', e);
