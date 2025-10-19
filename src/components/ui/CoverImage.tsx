@@ -14,14 +14,14 @@ export default function CoverImage({
     <>
       {src && (
         <img
-          className={twMerge("rounded-full object-cover", className)}
+          className={twMerge("object-cover", className)}
           src={src}
           alt={alt}
         />
       )}
       {!src && (
         <img
-          className={twMerge("rounded-full object-cover", className)}
+          className={twMerge("object-cover", className)}
           src={NoCoverImage}
           alt={alt}
         />

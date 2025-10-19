@@ -80,7 +80,7 @@ export default function SearchModal({ onClose }: SearchModalProps) {
                   {recent}
                 </p>
                 <button
-                  onClick={() => deleteRecentQuery(idx)}
+                  onClick={(e) => deleteRecentQuery(e, idx)}
                   className="absolute top-1/2 right-5 -translate-y-1/2 cursor-pointer"
                 >
                   <X className="w-4 h-4 stroke-gray-400" />
