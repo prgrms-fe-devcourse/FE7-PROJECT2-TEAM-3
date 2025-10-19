@@ -185,7 +185,7 @@ export default function PostDetail() {
         }     
       }
       fetchHashtags();
-    });
+    }, [params?.postId]);
 
   // 하트 가져오기
   useEffect(() => {
@@ -240,7 +240,7 @@ export default function PostDetail() {
       // 현재 좋아요 여부 확인
       const { data: existing, error: checkError } = await supabase
         .from('likes')
-        .select('*')
+        .select('user_id, post_id')
         .eq('user_id', userId)
         .eq('post_id', params?.postId)
         .maybeSingle();
@@ -408,7 +408,7 @@ export default function PostDetail() {
             </button>
 
             <button className="flex items-center gap-1 text-gray-400 focus:outline-none">
-                <MessageSquare className="w-4 h-4" /> 0
+                <MessageSquare className="w-4 h-4" />{commentsCount}
             </button>
             </div>
 
