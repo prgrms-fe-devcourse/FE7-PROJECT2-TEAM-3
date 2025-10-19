@@ -13,6 +13,7 @@ import AuthLayout from "./pages/login/AuthLayout";
 import SubLayout from "./components/SubLayout";
 import UserPage from "./pages/userpage/UserPage";
 import AuthCallback from "./pages/login/AuthCallback";
+import UpdatePost from "./pages/posts/UpdatePost";
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
             />
             <Route path="/channel/:channel" element={<PostsList />} />
             <Route path="/posts/:postId" element={<DetailPost />} />
+            <Route path="/posts/:postId/modify" element={<UpdatePost />} />
             <Route path="/channel/all" element={<PostsList />} />
             {/* 테스트 하고 아래 코드 지우기 */}
             <Route
