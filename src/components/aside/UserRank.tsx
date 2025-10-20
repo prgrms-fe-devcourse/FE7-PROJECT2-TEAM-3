@@ -1,13 +1,13 @@
 import { twMerge } from "tailwind-merge";
-import type { Profile } from "../../types/profile";
 import ProfileImage from "../ui/ProfileImage";
 import { Link } from "react-router";
+import type { UserRankProfile } from "../../types/post";
 
 export default function UserRank({
   user,
   index,
 }: {
-  user: Profile;
+  user: UserRankProfile;
   index: number;
 }) {
   return (
@@ -37,11 +37,12 @@ export default function UserRank({
           </h4>
           <p
             className={twMerge(
-              "text-xs",
+              "flex gap-2 text-xs",
               index === 0 ? "text-[#E9AF74]" : "text-gray-500"
             )}
           >
-            {user.exp} exp
+            <span>Lv.{user.level}</span>
+            <span>{user.exp} exp</span>
           </p>
         </div>
       </Link>
