@@ -55,7 +55,7 @@ export default function UserSetting() {
           return;
         }
 
-        if (profiles?.display_name) {
+        if (profiles?.exp) {
           navigate("/home");
         }
       }
