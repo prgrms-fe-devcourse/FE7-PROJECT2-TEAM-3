@@ -1,4 +1,5 @@
 import type { Database } from "./database";
+import type { Profile } from "./profile";
 
 type Post = Database["public"]["Tables"]["posts"]["Row"];
 
@@ -19,18 +20,19 @@ interface HashTags {
   count: number;
 }
 
-interface Profile {
+interface UserProfile extends Profile {
   display_name: string;
   profile_image: string | null;
-  level: number;
-  badge?: string;
+  level: number | null;
+  badge: string | null;
+  exp: number | null;
 }
 
 interface PostSearchItem {
   _id: string;
   title: string;
   content: string;
-  channel_id: string;
+  channel_id: string | null;
   created_at: string;
   user: Profile | Profile[];
   likes: { count: number }[];
@@ -42,7 +44,7 @@ interface PostListItem {
   _id: string;
   title: string;
   content: string;
-  channel_id: string;
+  channel_id: string | null;
   created_at: string;
   user: Profile;
   likeCount: number;
