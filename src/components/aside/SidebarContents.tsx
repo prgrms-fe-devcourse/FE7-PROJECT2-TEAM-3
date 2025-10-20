@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
 import supabase from "../../utils/supabase";
 import { ChartNoAxesCombined, Trophy, Zap } from "lucide-react";
-import type { HashTags, PopularPosts } from "../../types/posts";
+import type { HashTags, PopularPosts } from "../../types/post";
 import TrendingHashTag from "./TrendingHashTag";
 import PopularPost from "./PopularPost";
+import { useAuthStore } from "../../stores/authStore";
+import type { Profile } from "../../types/profile";
+import UserRank from "./UserRank";
 
 export default function SidebarContents() {
   const [populars, setPopulars] = useState<PopularPosts[]>([]);
   const [likedSet, setLikedSet] = useState<Set<string>>(new Set());
   const [hashs, sethashs] = useState<HashTags[]>([]);
-  const [userRank, setUserRank] = useState([]);
+  const [userRank, setUserRank] = useState<Profile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const profile = useAuthStore((state) => state.profile);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -60,21 +64,24 @@ export default function SidebarContents() {
           .slice(0, 3);
         sethashs(hashArr);
 
-        // 내 ID확인
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (!user) {
-          // 로그인 안했으면 초기값
-          setLikedSet(new Set());
-          return;
-        }
+        // 유저 랭킹
+        const { data: profiles, error: profilesErr } = await supabase
+          .from("profiles")
+          .select("*");
+
+        if (profilesErr) throw profilesErr;
+
+        const userRanks = profiles.sort((a, b) => b.exp - a.exp).slice(0, 3);
+
+        setUserRank(userRanks);
+
+        if (!profile) return;
 
         // 내가 누른 좋아요들
         const { data: myLikes, error: likeErr } = await supabase
           .from("likes")
           .select("post_id")
-          .eq("user_id", user.id);
+          .eq("user_id", profile?._id);
         if (likeErr) throw likeErr;
 
         setLikedSet(new Set((myLikes ?? []).map((r) => r.post_id)));
@@ -85,60 +92,49 @@ export default function SidebarContents() {
       }
     };
     fetchPosts();
-  }, []);
+  }, [profile]);
 
   return (
     <>
       <div className="flex flex-col gap-5 p-4 border-b border-b-[#303A4B]">
         <h3 className="flex items-center gap-3 font-bold text-xl text-white">
           <Trophy className="w-7.25 h-6.5 stroke-[#F2913D]" />
-          User Ranking
+          유저 랭킹
         </h3>
         <div className="flex flex-col gap-2">
-          <article className="flex-center gap-2 p-3 border border-transparent rounded-lg cursor-pointer hover:border-[#85523E] hover:bg-[linear-gradient(180deg,_rgba(255,255,255,0.1)_0%,_rgba(242,145,61,0.1)_100%)]">
-            <div className="overflow-hidden w-10 h-10 rounded-full bg-gray-200"></div>
-            <div className="flex-1 flex flex-col">
-              <h4 className="overflow-hidden text-sm text-ellipsis whitespace-nowrap font-semibold text-white">
-                닉네임
-              </h4>
-              <p className="text-xs text-[#E9AF74]">12,420 exp</p>
-            </div>
-          </article>
-          <article className="flex-center gap-2 p-3 border border-transparent rounded-lg cursor-pointer hover:border-[#85523E] hover:bg-[linear-gradient(180deg,_rgba(255,255,255,0.1)_0%,_rgba(242,145,61,0.1)_100%)]">
-            <div className="overflow-hidden w-10 h-10 rounded-full bg-gray-200"></div>
-            <div className="flex-1 flex flex-col">
-              <h4 className="overflow-hidden text-sm text-ellipsis whitespace-nowrap font-semibold text-white">
-                닉네임
-              </h4>
-              <p className="text-xs text-gray-500">12,420 exp</p>
-            </div>
-          </article>
+          {userRank.map((user, idx) => (
+            <UserRank key={user._id} user={user} index={idx} />
+          ))}
         </div>
       </div>
       <div className="flex flex-col gap-5 p-4 border-b border-b-[#303A4B]">
         <h3 className="flex items-center gap-3 font-bold text-xl text-white">
           <ChartNoAxesCombined className="w-7.25 h-6.5 stroke-[#7B61FF]" />
-          Trending
+          트랜딩
         </h3>
         <div className="flex flex-col gap-2">
-          {hashs.map((hash) => (
-            <TrendingHashTag key={hash.hashtag} hash={hash} />
-          ))}
+          {hashs.length === 0 && <p>해시태그가 없습니다.</p>}
+          {hashs.length > 0 &&
+            hashs.map((hash) => (
+              <TrendingHashTag key={hash.hashtag} hash={hash} />
+            ))}
         </div>
       </div>
       <div className="flex flex-col gap-5 p-4">
         <h3 className="flex items-center gap-3 font-bold text-xl text-white">
           <Zap className="w-7.25 h-6.5 stroke-[#A62F03]" />
-          Popular Posts
+          인기 게시물
         </h3>
         <div className="flex flex-col gap-2">
-          {populars.map((post) => (
-            <PopularPost
-              key={post._id}
-              post={post}
-              liked={likedSet.has(post._id)}
-            />
-          ))}
+          {populars.length === 0 && <p>인기 게시물이 없습니다.</p>}
+          {populars.length > 0 &&
+            populars.map((post) => (
+              <PopularPost
+                key={post._id}
+                post={post}
+                liked={likedSet.has(post._id)}
+              />
+            ))}
         </div>
       </div>
     </>

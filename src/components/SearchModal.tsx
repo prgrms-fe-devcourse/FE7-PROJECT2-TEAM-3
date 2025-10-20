@@ -1,12 +1,14 @@
 // components/SearchModal.tsx
 import { useEffect, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
+import { useNavigate } from "react-router";
 
 type SearchModalProps = {
   onClose: () => void;
 };
 
 export default function SearchModal({ onClose }: SearchModalProps) {
+  const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [query, setQuery] = useState("");
@@ -14,11 +16,41 @@ export default function SearchModal({ onClose }: SearchModalProps) {
 
   useEffect(() => {
     inputRef.current?.focus();
-    setRecentQueries(["검색", "검색검색검색"]);
+
+    const stored = window.localStorage.getItem("search");
+    if (stored) {
+      setRecentQueries(JSON.parse(stored));
+    } else {
+      setRecentQueries([]); // 저장된 게 없으면 빈 배열
+    }
   }, []);
-  const deleteRecentQuery = () => {};
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!query.trim()) return;
+
+    const JSONQueries = JSON.stringify([query, ...recentQueries]);
+
+    setRecentQueries((prev) => [query, ...prev]);
+
+    window.localStorage.setItem("search", JSONQueries);
+
+    navigate(`/postSearch?content=${encodeURIComponent(query)}`);
+    onClose();
+  };
+
+  const searchRecentQuery = (query: string) => {
+    navigate(`/postSearch?content=${encodeURIComponent(query)}`);
+    onClose();
+  };
+
+  const deleteRecentQuery = (e: React.MouseEvent, idx: number) => {
+    e.stopPropagation();
+    setRecentQueries((prev) => {
+      const updated = prev.filter((_, index) => index !== idx);
+      window.localStorage.setItem("search", JSON.stringify(updated));
+      return updated;
+    });
   };
 
   return (
@@ -44,12 +76,15 @@ export default function SearchModal({ onClose }: SearchModalProps) {
           <ul>
             {recentQueries.map((recent, idx) => (
               <li key={idx} className="relative">
-                <p className="px-5 py-4 border-t border-t-[#303A4B] text-xs text-gray-400">
+                <p
+                  className="pl-5 pr-10 py-4 border-t border-t-[#303A4B] text-xs text-gray-400 whitespace-nowrap overflow-hidden overflow-ellipsis cursor-pointer"
+                  onClick={() => searchRecentQuery(recent)}
+                >
                   {recent}
                 </p>
                 <button
-                  onClick={deleteRecentQuery}
-                  className="absolute top-1/2 right-5 -translate-y-1/2"
+                  onClick={(e) => deleteRecentQuery(e, idx)}
+                  className="absolute top-1/2 right-5 -translate-y-1/2 cursor-pointer"
                 >
                   <X className="w-4 h-4 stroke-gray-400" />
                 </button>

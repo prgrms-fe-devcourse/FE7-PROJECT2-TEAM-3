@@ -1,7 +1,7 @@
 // AuthLayout.tsx
-import { Outlet } from 'react-router-dom';
-import GalaxyBackground from '../../components/ui/background/GalaxyBackground';
-import ShootingStars from '../../components/ui/background/ShootingStars';
+import { Outlet } from "react-router-dom";
+import GalaxyBackground from "../../components/ui/background/GalaxyBackground";
+import ShootingStars from "../../components/ui/background/ShootingStars";
 // *경로를 실제 파일 위치에 맞게 수정하세요.
 
 export default function AuthLayout() {
