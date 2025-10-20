@@ -14,18 +14,16 @@ export default function ProfileHeaderSection() {
   const navigate = useNavigate();
   const { userId } = useParams();
   const myProfile = useAuthStore((state) => state.profile);
+
   // 팔로워, 팔로잉 수 상태
   const [followers, setFollowers] = useState<number>(0);
   const [followings, setFollowings] = useState<number>(0);
   const [isFollowing, setIsFollowing] = useState<boolean>(false);
+
   // 모달 상태 관리
   const [isSetUpOpened, setIsSetUpOpened] = useState(false); // 프로필 수정 모달
   const [isFollowerOpend, setIsFollowerOpend] = useState<boolean>(false); // 팔로워 모달
   const [isFollowingOpend, setIsFollowingOpend] = useState<boolean>(false); // 팔로잉 모달
-  // 로그인 페이지 이동 함수
-  const directLogin = () => {
-    navigate("/login");
-  };
 
   // 모달 열기/닫기 함수
   const openSetUp = () => setIsSetUpOpened(true); // 프로필 수정 모달
@@ -34,7 +32,6 @@ export default function ProfileHeaderSection() {
   const closeFollowers = () => setIsFollowerOpend(false);
   const openFollowings = () => setIsFollowingOpend(true); // 팔로잉 모달
   const closeFollowings = () => setIsFollowingOpend(false);
-
   const [profile, setProfile] = useState<Profile>({
     _id: "",
     badge: null,
@@ -47,78 +44,54 @@ export default function ProfileHeaderSection() {
     profile_image: null,
     level: 0,
   });
-
   // 해당 페이지 유저 프로필 정보 불러오기
+  useEffect(() => {
+    if (userId) {
+      const fetchProfile = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("_id", userId)
+            .single();
+          if (error) {
+            throw error;
+          }
+          setProfile(data);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      fetchProfile();
+    }
+  }, [userId, myProfile]);
   // 팔로잉 & 팔로우 수, 팔로잉 & 팔로우 목록 불러오기
   useEffect(() => {
-    if (!userId) {
-      return;
-    }
-
-    const fetchAllData = async () => {
-      try {
-        // 4개의 요청을 'await' 없이 준비
-        const profilePromise = supabase
-          .from("profiles")
-          .select("*")
-          .eq("_id", userId)
-          .single();
-
-        const followingCountPromise = supabase
+    if (userId) {
+      const fetchfollows = async () => {
+        const { count: followingCount } = await supabase
           .from("follows")
           .select("following_id", { count: "exact", head: true })
           .eq("follower_id", userId);
-
-        const followerCountPromise = supabase
+        const { count: followerCount } = await supabase
           .from("follows")
           .select("follower_id", { count: "exact", head: true })
           .eq("following_id", userId);
-
-        // myProfile.id가 있을 때만 'isFollowing'을 체크
-        const isFollowingPromise = myProfile?._id
-          ? supabase
-              .from("follows")
-              .select("", { count: "exact", head: true })
-              .eq("follower_id", myProfile._id)
-              .eq("following_id", userId)
-          : Promise.resolve({ count: 0, error: null }); // 로그인 안했으면 'false'로 간주
-
-        //  Promise.all로 모든 요청을 동시에 실행
-        const [
-          profileResponse,
-          followingResponse,
-          followerResponse,
-          isFollowingResponse,
-        ] = await Promise.all([
-          profilePromise,
-          followingCountPromise,
-          followerCountPromise,
-          isFollowingPromise,
-        ]);
-
-        // 각 응답의 에러를 개별적으로 확인
-        if (profileResponse.error) throw profileResponse.error;
-        if (followingResponse.error) throw followingResponse.error;
-        if (followerResponse.error) throw followerResponse.error;
-        if (isFollowingResponse.error) throw isFollowingResponse.error;
-
-        //  모든 데이터가 성공적으로 오면 상태에 한 번에 반영
-        setProfile(profileResponse.data);
-        setFollowings(followingResponse.count || 0);
-        setFollowers(followerResponse.count || 0);
-        setIsFollowing((isFollowingResponse.count || 0) > 0);
-      } catch (error) {
-        console.error("프로필 데이터, 팔로우 데이터 로드 실패:", error);
-      }
-    };
-
-    fetchAllData();
+        const { count: isFollowingData } = await supabase
+          .from("follows")
+          .select("", { count: "exact", head: true })
+          .eq("follower_id", myProfile?._id)
+          .eq("following_id", userId);
+        setFollowings(followingCount || 0);
+        setFollowers(followerCount || 0);
+        setIsFollowing(isFollowingData === 1 || false);
+      };
+      fetchfollows();
+    }
   }, [userId, myProfile?._id]);
-
   //팔로우 하는 함수
   const followSubmit = async () => {
     if (!myProfile?._id || myProfile._id === userId) return;
-
     try {
       const { data, error } = await supabase
         .from("follows")
@@ -150,7 +123,6 @@ export default function ProfileHeaderSection() {
       console.error(error);
     }
   };
-
   // 로그아웃 처리 함수
   async function signOut() {
     try {
@@ -169,6 +141,7 @@ export default function ProfileHeaderSection() {
     } catch (e) {
       console.error(e);
     }
+    navigate("/home");
   }
 
   const maxExp = 100;
@@ -186,7 +159,6 @@ export default function ProfileHeaderSection() {
             alt={profile.display_name + "님의 배경 이미지"}
           />
         </div>
-
         <div className="bg-[#161C27] rounded-b-lg p-6 shadow-lg relative">
           <div className="flex justify-between items-center">
             <div className="flex items-start gap-2 -mt-12">
@@ -232,6 +204,7 @@ export default function ProfileHeaderSection() {
                 >
                   <LogOut size={14} /> 로그아웃
                 </button>
+
                 <button
                   className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-1"
                   onClick={openSetUp}
@@ -240,7 +213,6 @@ export default function ProfileHeaderSection() {
                 </button>
               </div>
             </Activity>
-
             <Activity
               mode={
                 myProfile && userId !== myProfile?._id && !isFollowing
@@ -269,23 +241,14 @@ export default function ProfileHeaderSection() {
                 팔로잉
               </button>
             </Activity>
-            <Activity mode={!myProfile ? "visible" : "hidden"}>
-              <button
-                onClick={directLogin}
-                className="bg-[#9297AC] hover:bg-[#696F86] text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors"
-              >
-                로그인
-              </button>
-            </Activity>
           </div>
-
-          <p className="text-sm text-gray-300 mt-4 mb-6">{profile.bio}</p>
-
+          <p className="text-sm text-gray-300 mt-4 mb-6 line-clamp-6">
+            {profile.bio}
+          </p>
           <div className="flex items-center text-xs">
             <div className="text-yellow-500 font-bold text-lg mr-4">
               Lv.{profile.level}
             </div>
-
             <div className="w-1/2 flex flex-col gap-2 mr-4">
               <div className="bg-gray-800 rounded-sm h-4 relative overflow-hidden">
                 <div
@@ -298,6 +261,7 @@ export default function ProfileHeaderSection() {
                 <span className="text-gray-300 font-medium whitespace-nowrap">
                   레벨 {profile.level! + 1}까지 {expRemaining}exp 남음
                 </span>
+
                 <span className="text-yellow-500 font-medium whitespace-nowrap">
                   Max {maxExp}exp
                 </span>
@@ -305,11 +269,13 @@ export default function ProfileHeaderSection() {
             </div>
           </div>
         </div>
+
         <div className="w-full mt-1">
           <div className="flex justify-end border-b border-gray-700">
             <button className="text-sm font-medium px-4 py-2 text-white border-b-2 border-white transition-colors">
               작성글
             </button>
+
             <button className="text-sm font-medium px-4 py-2 text-gray-500 hover:text-white transition-colors">
               댓글
             </button>

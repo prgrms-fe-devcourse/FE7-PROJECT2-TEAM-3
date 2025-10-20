@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import supabase from "../utils/supabase";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { X } from "lucide-react"; // 아이콘 임포트
 
 type SetUpModalProps = {
@@ -18,6 +18,12 @@ type FollowerProfile = {
 export default function FollowerModal({ onClose }: SetUpModalProps) {
   const { userId } = useParams();
   const [profiles, setProfiles] = useState<FollowerProfile[]>([]);
+  const navigate = useNavigate();
+
+  const directUserPage = (profileData: FollowerProfile) => {
+    navigate(`/userPage/${profileData._id}`);
+    onClose();
+  };
 
   useEffect(() => {
     const fetchFollowers = async () => {
@@ -79,10 +85,11 @@ export default function FollowerModal({ onClose }: SetUpModalProps) {
           return (
             <div key={profile._id}>
               <div className="p-0 max-h-[400px] overflow-y-auto">
-                {/* 단일 팔로워 목록 항목 */}
                 <div className="flex items-start gap-4 p-4 border-b border-[#303A4B] hover:bg-[#1f2d44] transition-colors">
-                  {/* 1. 프로필 이미지 */}
-                  <div className="w-16 h-16 shrink-0">
+                  <div
+                    onClick={() => directUserPage(profile)}
+                    className="w-16 h-16 shrink-0"
+                  >
                     <img
                       src={profile.profile_image || ""}
                       alt="프로필 이미지"
@@ -90,41 +97,31 @@ export default function FollowerModal({ onClose }: SetUpModalProps) {
                     />
                   </div>
 
-                  {/* 2. 닉네임, 레벨, 소개 텍스트 컨테이너 (세로 정렬) */}
                   <div className="flex-grow min-w-0">
-                    {/* 2-1. 닉네임 (텍스트만) */}
-                    <div className="mb-0.5">
+                    <div className="mb-1">
                       <span className="text-base font-semibold text-white truncate">
-                        닉네임
+                        닉네임{profile.display_name}
                       </span>
                     </div>
 
-                    {/* 2-2. 레벨 및 초급자 배지 (가로 정렬, items-center로 수직 중앙 맞춤) */}
                     <div className="flex items-center gap-2 mb-1">
-                      {/* 레벨 정보 (Level: Lv.5) */}
                       <span className="text-sm font-bold text-[#FFC107]  py-0.5 ">
-                        Lv.5
+                        Lv.{profile.level}
                       </span>
 
-                      {/* 초급자 (Badge) */}
                       <span className="text-xs text-white bg-[#334155] px-2 py-0.5 rounded-full">
-                        초급자
+                        {profile.badge}
                       </span>
                     </div>
 
-                    {/* 2-3. 소개 텍스트 */}
-                    <p className="text-sm text-gray-400 line-clamp-2">
-                      Lorem Ipsum is simply dummy text of the printing and
-                      typesetting industry. Lorem Ipsum has been the industry's
-                      standard dummy text ever since the 1500s, when an unknown
-                      printer took a galley of type and scrambled it to ma...
+                    <p className="text-sm text-gray-400 line-clamp-2 ">
+                      {profile.bio}
                     </p>
-                    {/* 3. 팔로우 버튼 */}
-                    <div className="shrink-0 pt-1">
-                      <button className="bg-[#5C4DCA] hover:bg-[#7b6cdb] text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors">
-                        팔로우
-                      </button>
-                    </div>
+                  </div>
+                  <div className="shrink-0 pt-1">
+                    <button className="bg-[#5C4DCA] hover:bg-[#7b6cdb] text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors">
+                      팔로우
+                    </button>
                   </div>
                 </div>
               </div>
