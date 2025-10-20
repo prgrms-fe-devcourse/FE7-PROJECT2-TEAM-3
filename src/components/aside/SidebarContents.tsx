@@ -1,12 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import supabase from "../../utils/supabase";
-import {
-  ChartNoAxesCombined,
-  Heart,
-  MessageSquare,
-  Trophy,
-  Zap,
-} from "lucide-react";
+import { ChartNoAxesCombined, Trophy, Zap } from "lucide-react";
 import type { HashTags, PopularPosts } from "../../types/post";
 import TrendingHashTag from "./TrendingHashTag";
 import PopularPost from "./PopularPost";
@@ -14,7 +8,8 @@ import { useAuthStore } from "../../stores/authStore";
 import type { UserRankItem } from "../../types/profile";
 import UserRank from "./UserRank";
 import UserRankingSkeleton from "../ui/loading/UserRankingSkeleton";
-import TrendingSkleton from "../ui/loading/TrendingSkleton";
+import PopularPostSkeleton from "../ui/loading/PopularPostSkeleton";
+import TrendingSkeleton from "../ui/loading/TrendingSkeleton";
 
 export default function SidebarContents() {
   const [populars, setPopulars] = useState<PopularPosts[]>([]);
@@ -123,7 +118,7 @@ export default function SidebarContents() {
             트랜딩
           </h3>
           <div className="flex flex-col gap-2 animate-pulse">
-            <TrendingSkleton />
+            <TrendingSkeleton />
           </div>
         </div>
         <div className="flex flex-col gap-5 p-4">
@@ -132,26 +127,7 @@ export default function SidebarContents() {
             인기 게시물
           </h3>
           <div className="flex flex-col gap-2 animate-pulse">
-            <article className="flex gap-3 p-3 bg-[#161C27] rounded-lg cursor-pointer hover:opacity-70">
-              <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-              <div className="flex flex-col flex-1 gap-2">
-                <div className="flex items-center flex-wrap gap-x-2.5">
-                  <p className="w-15 h-5 rounded-sm bg-gray-200"></p>
-                  <p className="w-10 h-5 rounded-sm bg-gray-200"></p>
-                </div>
-                <div className="w-full h-5 rounded-sm bg-gray-200"></div>
-                <div className="flex gap-3">
-                  <p className="flex-center gap-1">
-                    <span className="w-3 h-3 rounded-xs bg-gray-200"></span>
-                    <span className="w-10 h-3 rounded-xs bg-gray-200"></span>
-                  </p>
-                  <p className="flex-center gap-1">
-                    <span className="w-3 h-3 rounded-xs bg-gray-200"></span>
-                    <span className="w-10 h-3 rounded-xs bg-gray-200"></span>
-                  </p>
-                </div>
-              </div>
-            </article>
+            <PopularPostSkeleton />
           </div>
         </div>
       </>

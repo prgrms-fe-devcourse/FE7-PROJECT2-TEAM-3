@@ -1,4 +1,4 @@
-export default function TrendingSkleton() {
+export default function TrendingSkeleton() {
   return (
     <>
       <article className="flex flex-col gap-1 p-3 border border-transparent rounded-lg cursor-pointer">
