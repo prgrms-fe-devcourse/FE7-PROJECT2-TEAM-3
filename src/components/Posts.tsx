@@ -41,7 +41,7 @@ export default function Posts({
                   <span className="text-[#F59E0B] text-[12px] pr-2">
                     {`Lv ${post.user.level || "0"}`}
                   </span>
-                  <div className="inline-flex mr-2 w-[44px] h-[17px] items-center justify-center bg-[#9F9F9F] text-white text-[10px] rounded-[30px] whitespace-nowrap overflow-hidden">
+                  <div className="inline-flex mr-2 px-3 h-[17px] items-center justify-center bg-[#9F9F9F] text-white text-[10px] rounded-[30px] whitespace-nowrap overflow-hidden">
                     {post.user.badge || "정보 없음"}
                   </div>
                   {/* 시간 표시 부분 */}
