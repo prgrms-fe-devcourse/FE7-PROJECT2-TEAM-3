@@ -4,6 +4,7 @@ import defaultProfile from "../assets/image/no_profile_image.png";
 import { twMerge } from "tailwind-merge";
 import { formaRelativeTime } from "../utils/formatRelativeTime";
 import type { PostListItem } from "../types/post";
+import ProfileImage from "./ui/ProfileImage";
 
 export default function Posts({
   posts,
@@ -26,7 +27,7 @@ export default function Posts({
               onClick={() => navigate(`/posts/${post._id}`)}
             >
               <div id="user-image">
-                <img
+                <ProfileImage
                   src={profileSrc}
                   alt={`${post.user.display_name}의 프로필 이미지`}
                   className="h-10 w-10"
