@@ -1,5 +1,7 @@
 import { twMerge } from "tailwind-merge";
 import { SquarePen, Trash2 } from "lucide-react";
+import React, { useState } from "react";
+
 type BadgeProps = { className?: string; children: React.ReactNode };
 export const Badge = ({ className, children }: BadgeProps) => (
   <span
@@ -14,55 +16,99 @@ export const Badge = ({ className, children }: BadgeProps) => (
 );
 
 type CommentProps = {
-    author: string;
-    level: string;
-    role: string;
-    content: string;
-    time: string;
-    isEdited?: boolean;
-  };
+  id: string;
+  author: string;
+  level: string;
+  badge: string;
+  profileImage?: string | null;
+  time: string;
+  content: string;
+  isEdited?: boolean;
+  isMine: boolean;
+  onEditSave: (id: string, newText: string) => void;
+  onDelete: (id: string) => void;
+};
 
 const Comment = ({
-    author,
-    level,
-    role,
-    content,
-    time,
-    isEdited,
-  }: CommentProps) => (
+  id,
+  author,
+  level,
+  badge,
+  profileImage,
+  time,
+  content,
+  isEdited,
+  isMine,
+  onEditSave,
+  onDelete,
+}: CommentProps) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [text, setText] = useState(content);
+
+  const handleEdit = () => {
+    if (isEditing) {
+      // 수정 중일 때 다시 수정 버튼 누르면 저장
+      onEditSave(id, text);
+    }
+    setIsEditing((prev) => !prev);
+  };
+
+  return (
     <div className="flex gap-3 py-4 border-b border-white/10 last:border-0">
-          <div className="w-10 h-10 rounded-full bg-gray-600 shrink-0 mt-1.5" />
+      {/* 프로필 이미지 */}
+      <img
+        src={profileImage || "/defaultProfile.png"}
+        alt="프로필 이미지"
+        className="w-10 h-10 rounded-full object-cover shrink-0 mt-1.5"
+      />
+
       <div className="flex-1">
-        <div className="flex items-center gap-2 mb-1 flex-wrap justify-between">
-          <div className="flex gap-2 flex-center">
-              <span className="font-semibold text-sm">{author}</span>
-              <span className="text-xs font-bold text-amber-400">{level}</span>
-              <Badge>{role}</Badge>
-              <span className="text-xs text-gray-500">{time}{isEdited && " (수정됨)"}</span>
+        <div className="flex items-center justify-between flex-wrap mb-1">
+          <div className="flex gap-2 flex-wrap items-center">
+            <span className="font-semibold text-sm">{author}</span>
+            <span className="text-xs font-bold text-amber-400">{`Lv.${level}`}</span>
+            <Badge>{badge}</Badge>
+            <span className="text-xs text-gray-500">
+              {time}
+              {isEdited && " (수정됨)"}
+            </span>
           </div>
-          {/* 우측 수정 / 삭제 버튼 */}
-          <div className="flex gap-3">
-              {/* 수정 버튼 */}
+
+          {/* 수정 / 삭제 버튼 */}
+          {isMine && (
+            <div className="flex gap-2">
               <button
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#4A77E4] text-white font-medium text-sm hover:bg-[#3d68d0] transition"
+                onClick={handleEdit}
+                className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-[#4A77E4] text-white text-xs hover:bg-[#3d68d0] transition"
               >
-                  <SquarePen className="w-4 h-4" />
-                  수정
+                <SquarePen className="w-4 h-4" />
+                {isEditing ? "저장" : "수정"}
               </button>
-  
-              {/* 삭제 버튼 */}
               <button
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#D94A3D] text-white font-medium text-sm hover:bg-[#c23c30] transition"
+                onClick={() => onDelete(id)}
+                className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-[#D94A3D] text-white text-xs hover:bg-[#c23c30] transition"
               >
-                  <Trash2 className="w-4 h-4" />
-                  삭제
+                <Trash2 className="w-4 h-4" />
+                삭제
               </button>
-          </div>
+            </div>
+          )}
         </div>
-        <p className="text-sm text-gray-300 leading-relaxed">{content}</p>
+
+        {/* 댓글 내용 영역 */}
+        {isEditing ? (
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            className="w-full bg-white text-gray-900 rounded-xl p-4 text-sm shadow-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 transition resize-none mt-2"
+            rows={4}
+          />
+        ) : (
+          <p className="text-sm text-gray-300 leading-relaxed">{content}</p>
+        )}
       </div>
     </div>
   );
-  
+};
 
 export default Comment;
