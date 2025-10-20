@@ -78,7 +78,7 @@ export default function PostCreatePage() {
     };
 
     fetchProfileId();
-  }, [userId, navigate]);
+  }, [navigate]);
 
   // 업로드 핸들러
   const handleImageUpload = (

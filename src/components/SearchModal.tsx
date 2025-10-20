@@ -61,7 +61,10 @@ export default function SearchModal({ onClose }: SearchModalProps) {
           <input
             ref={inputRef}
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              console.log(query);
+            }}
             placeholder="채널의 게시물을 검색하세요."
             className="flex-1 bg-transparent outline-none text-gray-100 placeholder:text-gray-400"
           />
