@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import supabase from "../../utils/supabase";
 import { useParams } from "react-router";
 import Posts from "../../components/Posts";
-import type { PostListItem } from "../../types/post";
+import type { PostListItem, PostSearchItem } from "../../types/post";
 import PostSkeleton from "../../components/ui/loading/PostSkeleton";
 
 // TODO: 나중에 타입 가져와서 사용하고, 컴포넌트로 빼서 리팩터링하기
@@ -26,8 +26,8 @@ export default function PostsList() {
             channel_id,
             created_at,
             user:profiles (display_name,profile_image,level, badge),
-            likes (_id),
-            comments (_id),
+            likes:likes(count),
+            comments:comments(count),
             hashtags (hashtag)`
           )
           .order("created_at", { ascending: false });
@@ -39,19 +39,30 @@ export default function PostsList() {
 
         if (error) throw error;
 
-        const formatted: PostListItem[] = (data || []).map((post: any) => ({
-          _id: post._id,
-          title: post.title,
-          content: post.content,
-          channel_id: post.channel_id,
-          created_at: post.created_at,
-          user: post.user,
-          likeCount: Array.isArray(post.likes) ? post.likes.length : 0,
-          commentCount: Array.isArray(post.comments) ? post.comments.length : 0,
-          hashtags: (post.hashtags || []).map(
-            (h: { hashtag: string }) => h.hashtag
-          ),
-        }));
+        const formatted: PostListItem[] = (data || []).map(
+          (post: PostSearchItem) => {
+            const user = Array.isArray(post.user) ? post.user[0] : post.user;
+            return {
+              _id: post._id,
+              title: post.title,
+              content: post.content,
+              channel_id: post.channel_id,
+              created_at: post.created_at,
+              user,
+              likeCount:
+                Array.isArray(post.likes) && post.likes[0]?.count != null
+                  ? post.likes[0].count
+                  : 0,
+              commentCount:
+                Array.isArray(post.comments) && post.comments[0]?.count != null
+                  ? post.comments[0].count
+                  : 0,
+              hashtags: (post.hashtags ?? []).map(
+                (h: { hashtag: string }) => h.hashtag
+              ),
+            };
+          }
+        );
 
         setPosts(formatted);
       } catch (e) {
