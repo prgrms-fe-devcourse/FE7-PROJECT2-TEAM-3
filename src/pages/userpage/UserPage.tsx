@@ -49,55 +49,70 @@ export default function ProfileHeaderSection() {
   });
 
   // 해당 페이지 유저 프로필 정보 불러오기
-  useEffect(() => {
-    if (userId) {
-      const fetchProfile = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("_id", userId)
-            .single();
-
-          if (error) {
-            throw error;
-          }
-          setProfile(data);
-        } catch (error) {
-          console.log(error);
-        }
-      };
-
-      fetchProfile();
-    }
-  }, [userId, myProfile]);
-
   // 팔로잉 & 팔로우 수, 팔로잉 & 팔로우 목록 불러오기
   useEffect(() => {
-    if (userId) {
-      const fetchfollows = async () => {
-        const { count: followingCount } = await supabase
+    if (!userId) {
+      return;
+    }
+
+    const fetchAllData = async () => {
+      try {
+        // 4개의 요청을 'await' 없이 준비
+        const profilePromise = supabase
+          .from("profiles")
+          .select("*")
+          .eq("_id", userId)
+          .single();
+
+        const followingCountPromise = supabase
           .from("follows")
           .select("following_id", { count: "exact", head: true })
           .eq("follower_id", userId);
 
-        const { count: followerCount } = await supabase
+        const followerCountPromise = supabase
           .from("follows")
           .select("follower_id", { count: "exact", head: true })
           .eq("following_id", userId);
 
-        const { count: isFollowingData } = await supabase
-          .from("follows")
-          .select("", { count: "exact", head: true })
-          .eq("follower_id", myProfile?._id)
-          .eq("following_id", userId);
+        // myProfile.id가 있을 때만 'isFollowing'을 체크
+        const isFollowingPromise = myProfile?._id
+          ? supabase
+              .from("follows")
+              .select("", { count: "exact", head: true })
+              .eq("follower_id", myProfile._id)
+              .eq("following_id", userId)
+          : Promise.resolve({ count: 0, error: null }); // 로그인 안했으면 'false'로 간주
 
-        setFollowings(followingCount || 0);
-        setFollowers(followerCount || 0);
-        setIsFollowing(isFollowingData === 1 || false);
-      };
-      fetchfollows();
-    }
+        //  Promise.all로 모든 요청을 동시에 실행
+        const [
+          profileResponse,
+          followingResponse,
+          followerResponse,
+          isFollowingResponse,
+        ] = await Promise.all([
+          profilePromise,
+          followingCountPromise,
+          followerCountPromise,
+          isFollowingPromise,
+        ]);
+
+        // 각 응답의 에러를 개별적으로 확인
+        if (profileResponse.error) throw profileResponse.error;
+        if (followingResponse.error) throw followingResponse.error;
+        if (followerResponse.error) throw followerResponse.error;
+        if (isFollowingResponse.error) throw isFollowingResponse.error;
+
+        //  모든 데이터가 성공적으로 오면 상태에 한 번에 반영
+        setProfile(profileResponse.data);
+        setFollowings(followingResponse.count || 0);
+        setFollowers(followerResponse.count || 0);
+        setIsFollowing((isFollowingResponse.count || 0) > 0);
+      } catch (error) {
+        console.error("프로필 데이터, 팔로우 데이터 로드 실패:", error);
+      }
+    };
+
+    fetchAllData();
   }, [userId, myProfile?._id]);
 
   //팔로우 하는 함수
