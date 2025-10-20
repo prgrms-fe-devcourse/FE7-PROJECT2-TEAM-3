@@ -3,16 +3,19 @@ import supabase from "../../utils/supabase";
 import { useParams } from "react-router";
 import Posts from "../../components/Posts";
 import type { PostListItem } from "../../types/post";
+import PostSkeleton from "../../components/ui/loading/PostSkeleton";
 
 // TODO: 나중에 타입 가져와서 사용하고, 컴포넌트로 빼서 리팩터링하기
 
 export default function PostsList() {
   const { channel } = useParams();
   const [posts, setPosts] = useState<PostListItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
+        setIsLoading(true);
         let query = supabase
           .from("posts")
           .select(
@@ -53,11 +56,18 @@ export default function PostsList() {
         setPosts(formatted);
       } catch (e) {
         console.error("게시글 불러오기 실패:", e);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchPosts();
   }, [channel]);
 
-  return <Posts posts={posts} channel={channel} />;
+  if (isLoading) return <PostSkeleton line={3} />;
+  return (
+    <>
+      <Posts posts={posts} channel={channel} />
+    </>
+  );
 }
