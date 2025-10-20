@@ -8,7 +8,7 @@ import { LogOut, Pencil } from "lucide-react";
 import Modal from "../../components/Modal";
 import type { Profile } from "../../types/profile";
 import SetUpModal from "../../components/SetUpModal";
-import FollowerModal from "../../components/FollowerModal";
+import FollowsModal from "../../components/FollowsModal";
 
 export default function ProfileHeaderSection() {
   const navigate = useNavigate();
@@ -242,7 +242,7 @@ export default function ProfileHeaderSection() {
               </button>
             </Activity>
           </div>
-          <p className="text-sm text-gray-300 mt-4 mb-6 line-clamp-6">
+          <p className="text-sm text-gray-300 mt-4 mb-6 overflow-hidden text-ellipsis display-box line-clamp-6">
             {profile.bio}
           </p>
           <div className="flex items-center text-xs">
@@ -292,11 +292,11 @@ export default function ProfileHeaderSection() {
       </Modal>
       {/* 팔로워 목록 모달 */}
       <Modal isOpen={isFollowerOpend} onClose={closeFollowers}>
-        <FollowerModal onClose={closeFollowers} />
+        <FollowsModal onClose={closeFollowers} ModalType={"followerModal"} />
       </Modal>
       {/* 팔로잉 목록 모달 */}
       <Modal isOpen={isFollowingOpend} onClose={closeFollowings}>
-        <FollowerModal onClose={closeFollowings} />
+        <FollowsModal onClose={closeFollowings} ModalType={"followingModal"} />
       </Modal>
     </div>
   );
