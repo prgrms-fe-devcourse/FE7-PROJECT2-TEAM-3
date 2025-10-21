@@ -2,9 +2,9 @@ import { ImageUp, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import supabase from "../../utils/supabase";
 import { useNavigate } from "react-router-dom";
-import { useParams } from 'react-router-dom';
+import { useParams } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
-
+import toast from "react-hot-toast";
 
 export default function DetailPost() {
   const navigate = useNavigate();
@@ -13,7 +13,12 @@ export default function DetailPost() {
   };
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
-  const [images, setImages] = useState<(string | null)[]>([null, null, null, null]);
+  const [images, setImages] = useState<(string | null)[]>([
+    null,
+    null,
+    null,
+    null,
+  ]);
   const [userId, setUserId] = useState<string | null>(null);
   const [postId, setPostId] = useState<string>("");
   const [channelId, setChannelId] = useState<string | null>(null);
@@ -38,7 +43,7 @@ export default function DetailPost() {
       if (error) {
         console.error("게시글 불러오기 실패:", error);
       } else {
-        setChannelId(post.channel_id)
+        setChannelId(post.channel_id);
         setPostId(post._id);
         setUserId(post.user_id);
         setTitle(post.title);
@@ -47,36 +52,36 @@ export default function DetailPost() {
     };
     const fetchImage = async () => {
       const { data: imageRows, error } = await supabase
-      .from("images")
-      .select("src")
-      .eq("post_id", params?.postId);
-    
+        .from("images")
+        .select("src")
+        .eq("post_id", params?.postId);
+
       if (error) {
         console.error("이미지 불러오기 실패:", error);
       } else if (imageRows) {
         // src 필드만 추출해서 상태에 넣기
         const imageSrcList = imageRows.map((img) => img.src);
-      
+
         // 이미지 배열을 최대 4칸 구조에 맞게 채우기
         const updatedImages = Array(4)
           .fill(null)
           .map((_, idx) => imageSrcList[idx] || null);
-      
+
         setImages(updatedImages);
       }
-    }
+    };
     const fetchHashtags = async () => {
       const { data: hashtag, error } = await supabase
-      .from("hashtags")
-      .select("hashtag")
-      .eq("post_id", params?.postId)
+        .from("hashtags")
+        .select("hashtag")
+        .eq("post_id", params?.postId);
 
       if (error) {
         console.error("해시태그 불러오기 실패:", error);
       } else {
         setHashtags(hashtag.map((h) => h.hashtag));
-      }     
-    }
+      }
+    };
     fetchPost();
     fetchImage();
     fetchHashtags();
@@ -105,7 +110,6 @@ export default function DetailPost() {
     reader.readAsDataURL(file);
   };
 
-
   // 이미지 삭제
   const removeImage = (index: number) => {
     setImages((prev) => {
@@ -126,9 +130,10 @@ export default function DetailPost() {
       e.preventDefault();
       const trimmed = hashtagInput.trim();
       if (!trimmed) return;
-      if (hashtags.includes(trimmed)) return alert("이미 추가한 태그입니다.");
+      if (hashtags.includes(trimmed))
+        return toast.success("이미 추가한 태그입니다.");
       if (hashtags.length >= 5)
-        return alert("최대 5개까지만 추가할 수 있습니다.");
+        return toast.success("최대 5개까지만 추가할 수 있습니다.");
 
       setHashtags((prev) => [...prev, trimmed]);
       setHashtagInput("");
@@ -144,19 +149,19 @@ export default function DetailPost() {
 
     // 예외처리 부분
     if (!userId || userId.trim() === "") {
-      alert("유효한 사용자 ID가 필요합니다.");
+      toast.success("유효한 사용자 ID가 필요합니다.");
       return;
     }
     if (!postId || postId.trim() === "") {
-      alert("유효한 게시물 ID가 필요합니다.");
+      toast.success("유효한 게시물 ID가 필요합니다.");
       return;
     }
     console.log("이벤트:", e);
     console.log("커런트 타겟:", e.currentTarget);
     console.log("타겟:", e.target);
 
-    if (!title.trim() || !images.some((image) => image.trim()) || !content.trim()) {
-      alert("제목, 내용, 이미지 모두 입력해주세요.");
+    if (!title.trim() || !content.trim()) {
+      toast.success("제목과 내용을 모두 입력해주세요.");
       return;
     }
     // 포스트 수정 로직
@@ -164,57 +169,69 @@ export default function DetailPost() {
       setIsSubmitting(true);
       // post 수정
       const { data: postData, error: postError } = await supabase
-      .from("posts")
-      .update(
-        {
+        .from("posts")
+        .update({
           title,
           content,
           user_id: userId,
           channel_id: channelId,
-        }
-      )
-      .eq("_id", params?.postId)
-      .select()
-      .single();
+        })
+        .eq("_id", params?.postId)
+        .select()
+        .single();
       if (postError) throw postError;
       if (!postData) throw new Error("게시글 수정 실패: 데이터 없음");
 
       // image 등록
-      // 저장 직전, 이전 목록을 가져옴
+      // 기존 이미지 목록 불러오기
       const { data: prevRows, error: prevErr } = await supabase
         .from("images")
         .select("_id, src")
-        .eq("post_id", postData._id);
+        .eq("post_id", postData._id)
+        .order("_id", { ascending: true }); // 순서 보장
       if (prevErr) throw prevErr;
 
-      const prevSrcs = new Set((prevRows ?? []).map(r => r.src));
-      const nextSrcs = new Set(images.filter(Boolean) as string[]);
+      const prev = prevRows ?? [];
+      const next = images.filter(Boolean) as string[];
 
-      // 삭제할 것들
-      const toDeleteIds = (prevRows ?? [])
-        .filter(r => !nextSrcs.has(r.src))
-        .map(r => r._id);
-
-      // 추가할 것들
-      const toInsert = (images.filter(Boolean) as string[])
-        .filter(src => !prevSrcs.has(src))
-        .map(src => ({ post_id: postData._id, src }));
-
-      if (toDeleteIds.length) {
-        const { error: delErr } = await supabase
-          .from("images")
-          .delete()
-          .in("_id", toDeleteIds);
-        if (delErr) throw delErr;
+      // 기존보다 이미지가 줄었으면, 초과분 삭제
+      if (next.length < prev.length) {
+        const toDeleteIds = prev.slice(next.length).map((r) => r._id);
+        if (toDeleteIds.length) {
+          const { error: delErr } = await supabase
+            .from("images")
+            .delete()
+            .in("_id", toDeleteIds);
+          if (delErr) throw delErr;
+        }
       }
-      if (toInsert.length) {
+
+      // 기존보다 이미지가 늘었으면, 새로 추가
+      if (next.length > prev.length) {
+        const toInsert = next.slice(prev.length).map((src) => ({
+          post_id: postData._id,
+          src,
+        }));
         const { error: insErr } = await supabase
           .from("images")
           .insert(toInsert);
         if (insErr) throw insErr;
       }
 
-      // hashtag 저장 (전체 삭제 -> 재삽입)
+      // 기존 개수와 같으면, 순서가 바뀌었을 수 있으므로 업데이트
+      if (next.length === prev.length) {
+        for (let i = 0; i < next.length; i++) {
+          if (next[i] !== prev[i]?.src) {
+            const { error: updErr } = await supabase
+              .from("images")
+              .update({ src: next[i] })
+              .eq("_id", prev[i]._id);
+            if (updErr) throw updErr;
+          }
+        }
+      }
+
+      // hashtag(해시태그) 저장 (전체 삭제 -> 재삽입)
       {
         const { error: delTagsErr } = await supabase
           .from("hashtags")
@@ -223,13 +240,18 @@ export default function DetailPost() {
         if (delTagsErr) throw delTagsErr;
 
         if (hashtags.length > 0) {
-          const rows = hashtags.map((hashtag) => ({ post_id: postData._id, hashtag }));
-          const { error: insTagsErr } = await supabase.from("hashtags").insert(rows);
+          const rows = hashtags.map((hashtag) => ({
+            post_id: postData._id,
+            hashtag,
+          }));
+          const { error: insTagsErr } = await supabase
+            .from("hashtags")
+            .insert(rows);
           if (insTagsErr) throw insTagsErr;
         }
       }
 
-      alert("게시글이 수정되었습니다.");
+      toast.success("게시글이 수정되었습니다.");
       navigate(`/channel/${channelId}`);
     } catch (e) {
       console.log(e);
@@ -239,13 +261,6 @@ export default function DetailPost() {
     }
   };
 
-  const handleDelete = async () => {
-    const { post, error } = await supabase
-    .from('posts')
-    .delete() // 삭제
-    .eq("_id", params?.postId);
-  }
-  
   return (
     <div className="bg-[#161C27] text-[14px] p-[30px] rounded-[16px]">
       <form onSubmit={handleSubmit}>
@@ -383,7 +398,7 @@ export default function DetailPost() {
           <input
             type="text"
             id="hashtags"
-            placeholder="태그를 입력하세요."
+            placeholder="해시태그를 입력하세요."
             className="placeholder-[#ADAEBC] w-full bg-white h-[42px] rounded-[8px] pl-4"
             value={hashtagInput}
             onChange={(e) => setHashtagInput(e.target.value)}
@@ -392,11 +407,12 @@ export default function DetailPost() {
         </div>
 
         <div className="flex justify-between w-full border-t border-t-[#E5E7EB] pt-6">
-          <button type="button"
+          <button
+            type="button"
             className="text-white w-[150px] h-10 rounded-[8px] border border-[#303A4B] shadow-[0_4px_4px_rgba(0,0,0,0.25)]"
-            onClick={handleDelete}
+            onClick={goBackHandler}
           >
-            삭제
+            취소
           </button>
           <button
             className="text-white w-[150px] h-10 rounded-[8px] bo bg-gradient-to-r from-[#6366F1] via-[#7761F3] to-[#8B5CF6] shadow-[0_0_4px_#8B5CF6]"
