@@ -4,6 +4,7 @@ import supabase from "../../utils/supabase";
 import { useParams } from "react-router";
 import { useNavigate } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
+import toast from "react-hot-toast";
 
 // TODO: 제목 글자 제한, 내용 최소 글자 수 제한
 
@@ -53,7 +54,8 @@ export default function PostCreatePage() {
 
         // 로그인되지 않은 사용자 예외처리 부분
         if (!user) {
-          alert("로그인 후 이용 가능한 페이지입니다.");
+          toast.success("로그인 후 이용 가능한 페이지입니다.");
+
           navigate("/login");
           return;
         }
@@ -123,9 +125,10 @@ export default function PostCreatePage() {
       e.preventDefault();
       const trimmed = hashtagInput.trim();
       if (!trimmed) return;
-      if (hashtags.includes(trimmed)) return alert("이미 추가한 태그입니다.");
+      if (hashtags.includes(trimmed))
+        return toast.success("이미 추가한 태그입니다.");
       if (hashtags.length >= 5)
-        return alert("최대 5개까지만 추가할 수 있습니다.");
+        return toast.success("최대 5개까지만 추가할 수 있습니다.");
 
       setHashtags((prev) => [...prev, trimmed]);
       setHashtagInput("");
@@ -142,11 +145,12 @@ export default function PostCreatePage() {
 
     // 예외처리 부분
     if (!userId || userId.trim() === "") {
-      alert("유효한 사용자 ID가 필요합니다.");
+      toast.success("유효한 사용자 ID가 필요합니다.");
+
       return;
     }
     if (!title.trim() || !content.trim() || !channelId?.trim()) {
-      alert("제목, 내용, 채널 아이디를 모두 입력해주세요.");
+      toast.success("제목, 내용, 채널 아이디를 모두 입력해주세요.");
       return;
     }
 
@@ -232,7 +236,8 @@ export default function PostCreatePage() {
         if (hashtagError) throw hashtagError;
       }
 
-      alert("게시글이 등록되었습니다.");
+      toast.success("게시글이 등록되었습니다.");
+
       navigate(`/channel/${channelId}`);
     } catch (e) {
       console.log(e);
