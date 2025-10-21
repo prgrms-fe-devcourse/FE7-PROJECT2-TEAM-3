@@ -5,6 +5,7 @@ import type { UserProfile } from "../../types/profile";
 import ProfileImage from "../../components/ui/ProfileImage";
 import { twMerge } from "tailwind-merge";
 import { Link } from "react-router";
+import Badge from "../../components/ui/Badge";
 
 export default function UserSearch() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -96,9 +97,10 @@ export default function UserSearch() {
                       <span className="text-[#F59E0B] text-sm">
                         Lv.{user.level}
                       </span>
-                      <span className="flex px-3 h-[17px] items-center justify-center bg-[#9F9F9F] text-white text-[10px] rounded-[30px] whitespace-nowrap overflow-hidden">
-                        {user.badge}
-                      </span>
+                      <Badge
+                        className="flex px-3 h-[17px] items-center justify-center whitespace-nowrap overflow-hidden"
+                        level={user.level}
+                      />
                     </div>
                     <button className="bg-[#5C4DCA] hover:bg-[#7b6cdb] text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors">
                       팔로우
