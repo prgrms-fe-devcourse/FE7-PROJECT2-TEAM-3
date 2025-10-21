@@ -106,7 +106,7 @@ export default function SetUpModal({ onClose }: SetUpModalProps) {
         <h2 className="text-xl font-bold">회원정보 수정</h2>
         <button
           onClick={onClose}
-          className="text-gray-400 hover:text-white transition-colors"
+          className="text-gray-400 hover:text-white transition-colors cursor-pointer"
         >
           <X size={24} />
         </button>
@@ -145,7 +145,7 @@ export default function SetUpModal({ onClose }: SetUpModalProps) {
                   cover_image: "",
                 }))
               }
-              className="flex items-center justify-center w-8 h-8 rounded-full bg-red-600 hover:bg-red-700 transition-colors"
+              className="flex items-center justify-center w-8 h-8 rounded-full bg-red-600 hover:bg-red-700 transition-colors cursor-pointer"
             >
               <XCircle size={16} className="text-white" />
             </button>
@@ -182,7 +182,7 @@ export default function SetUpModal({ onClose }: SetUpModalProps) {
                     profile_image: "",
                   }))
                 }
-                className="ml-2 flex items-center justify-center w-10 h-10 rounded-full bg-red-600 hover:bg-red-700"
+                className="ml-2 flex items-center justify-center w-10 h-10 rounded-full bg-red-600 hover:bg-red-700 cursor-pointer"
               >
                 <XCircle size={20} className="text-white" />
               </button>
@@ -234,7 +234,7 @@ export default function SetUpModal({ onClose }: SetUpModalProps) {
       <div className="p-6 pt-0">
         <button
           onClick={handleSave}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition-colors"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition-colors cursor-pointer"
         >
           저장
         </button>
