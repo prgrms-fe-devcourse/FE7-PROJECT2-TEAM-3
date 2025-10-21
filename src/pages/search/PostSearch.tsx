@@ -4,6 +4,7 @@ import Posts from "../../components/Posts";
 import supabase from "../../utils/supabase";
 import type { PostListItem, PostSearchItem } from "../../types/post";
 import PostSkeleton from "../../components/ui/loading/PostSkeleton";
+import { TriangleAlert } from "lucide-react";
 
 export default function PostSearch() {
   const [searchParams] = useSearchParams();
@@ -86,5 +87,37 @@ export default function PostSearch() {
 
   if (isLoading) return <PostSkeleton line={2} />;
 
-  return <Posts posts={posts} channel={undefined} />;
+  return (
+    <>
+      <div className="flex flex-col gap-10 min-h-full">
+        <div className="flex justify-between items-center gap-5 h-15 px-7 border border-[#303A4B] bg-[#161C27] rounded-lg text-sm font-medium text-gray-300">
+          {query && (
+            <>
+              <p>
+                검색어 <strong className="text-white">"{query}"</strong>에 대한
+                결과입니다.
+              </p>
+              <p>{posts.length}개의 포스트</p>
+            </>
+          )}
+          {hashtag && (
+            <>
+              <p>
+                <strong className="text-white">#{hashtag}</strong>를 포함한
+                포스트 검색 결과입니다.
+              </p>
+              <p>{posts.length}개의 포스트</p>
+            </>
+          )}
+        </div>
+        {posts.length === 0 && (
+          <div className="flex-1 flex-center flex-col gap-5 bg-[#1A2537] border border-[#303A4B] rounded-lg text-gray-500">
+            <TriangleAlert className="w-20 h-20 stroke-1.5" />
+            <p>검색된 포스트가 없습니다.</p>
+          </div>
+        )}
+        {posts.length > 0 && <Posts posts={posts} channel={undefined} />}
+      </div>
+    </>
+  );
 }

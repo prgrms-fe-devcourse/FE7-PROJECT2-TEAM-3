@@ -3,6 +3,7 @@ import { useAuthStore } from "../stores/authStore";
 import { useNavigate } from "react-router";
 import supabase from "../utils/supabase";
 import ProfileImage from "./ui/ProfileImage";
+import Badge from "./ui/Badge";
 
 type FollowerProfile = {
   _id: string;
@@ -83,11 +84,11 @@ export default function FollowList({
     <>
       <div>
         <div className="p-0 max-h-[400px] overflow-y-auto">
-          <div className="flex items-start gap-4 p-4 border-b border-[#303A4B] hover:bg-[#1f2d44] transition-colors">
-            <div
-              onClick={() => directUserPage(profile)}
-              className="w-16 h-16 shrink-0"
-            >
+          <div
+            onClick={() => directUserPage(profile)}
+            className="flex items-start gap-4 p-4 border-b border-[#303A4B] hover:bg-[#1f2d44] transition-colors cursor-pointer"
+          >
+            <div className="w-16 h-16 shrink-0">
               <ProfileImage
                 className="w-full h-full object-cover rounded-full border border-gray-700"
                 src={profile.profile_image}
@@ -107,9 +108,10 @@ export default function FollowList({
                   Lv.{profile.level}
                 </span>
 
-                <span className="text-xs text-white bg-[#334155] px-2 py-0.5 rounded-full">
-                  {profile.badge}
-                </span>
+                <Badge
+                  className="px-2 py-0.5 whitespace-nowrap"
+                  level={profile.level}
+                />
               </div>
 
               <p className="text-sm text-gray-400 overflow-hidden text-ellipsis display-box line-clamp-2 ">
@@ -126,8 +128,11 @@ export default function FollowList({
             >
               <div className="shrink-0 pt-1">
                 <button
-                  onClick={followSubmit}
-                  className="bg-[#5C4DCA] hover:bg-[#7b6cdb] text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    followSubmit();
+                  }}
+                  className="bg-[#5C4DCA] hover:bg-[#7b6cdb] text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors cursor-pointer"
                 >
                   팔로우
                 </button>
@@ -142,8 +147,11 @@ export default function FollowList({
             >
               <div className="shrink-0 pt-1">
                 <button
-                  onClick={unfollowSubmit}
-                  className="bg-[#9297AC] hover:bg-[#696F86] text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    unfollowSubmit();
+                  }}
+                  className="bg-[#9297AC] hover:bg-[#696F86] text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors cursor-pointer"
                 >
                   팔로잉
                 </button>

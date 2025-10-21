@@ -2,9 +2,9 @@ import { ImageUp, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import supabase from "../../utils/supabase";
 import { useNavigate } from "react-router-dom";
-import { useParams } from 'react-router-dom';
+import { useParams } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
-
+import toast from "react-hot-toast";
 
 export default function UpdatePost() {
   const navigate = useNavigate();
@@ -13,7 +13,12 @@ export default function UpdatePost() {
   };
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
-  const [images, setImages] = useState<(string | null)[]>([null, null, null, null]);
+  const [images, setImages] = useState<(string | null)[]>([
+    null,
+    null,
+    null,
+    null,
+  ]);
   const [userId, setUserId] = useState<string | null>(null);
   const [postId, setPostId] = useState<string>("");
   const [channelId, setChannelId] = useState<string | null>(null);
@@ -38,7 +43,7 @@ export default function UpdatePost() {
       if (error) {
         console.error("게시글 불러오기 실패:", error);
       } else {
-        setChannelId(post.channel_id)
+        setChannelId(post.channel_id);
         setPostId(post._id);
         setUserId(post.user_id);
         setTitle(post.title);
@@ -47,36 +52,36 @@ export default function UpdatePost() {
     };
     const fetchImage = async () => {
       const { data: imageRows, error } = await supabase
-      .from("images")
-      .select("src")
-      .eq("post_id", params?.postId);
-    
+        .from("images")
+        .select("src")
+        .eq("post_id", params?.postId);
+
       if (error) {
         console.error("이미지 불러오기 실패:", error);
       } else if (imageRows) {
         // src 필드만 추출해서 상태에 넣기
         const imageSrcList = imageRows.map((img) => img.src);
-      
+
         // 이미지 배열을 최대 4칸 구조에 맞게 채우기
         const updatedImages = Array(4)
           .fill(null)
           .map((_, idx) => imageSrcList[idx] || null);
-      
+
         setImages(updatedImages);
       }
-    }
+    };
     const fetchHashtags = async () => {
       const { data: hashtag, error } = await supabase
-      .from("hashtags")
-      .select("hashtag")
-      .eq("post_id", params?.postId)
+        .from("hashtags")
+        .select("hashtag")
+        .eq("post_id", params?.postId);
 
       if (error) {
         console.error("해시태그 불러오기 실패:", error);
       } else {
         setHashtags(hashtag.map((h) => h.hashtag));
-      }     
-    }
+      }
+    };
     fetchPost();
     fetchImage();
     fetchHashtags();
@@ -106,7 +111,6 @@ export default function UpdatePost() {
     reader.readAsDataURL(file);
   };
 
-
   // 이미지 삭제
   const removeImage = (index: number) => {
     setImages((prev) => {
@@ -127,9 +131,10 @@ export default function UpdatePost() {
       e.preventDefault();
       const trimmed = hashtagInput.trim();
       if (!trimmed) return;
-      if (hashtags.includes(trimmed)) return alert("이미 추가한 태그입니다.");
+      if (hashtags.includes(trimmed))
+        return toast.success("이미 추가한 태그입니다.");
       if (hashtags.length >= 5)
-        return alert("최대 5개까지만 추가할 수 있습니다.");
+        return toast.success("최대 5개까지만 추가할 수 있습니다.");
 
       setHashtags((prev) => [...prev, trimmed]);
       setHashtagInput("");
@@ -145,16 +150,16 @@ export default function UpdatePost() {
 
     // 예외처리 부분
     if (!userId || userId.trim() === "") {
-      alert("유효한 사용자 ID가 필요합니다.");
+      toast.success("유효한 사용자 ID가 필요합니다.");
       return;
     }
     if (!postId || postId.trim() === "") {
-      alert("유효한 게시물 ID가 필요합니다.");
+      toast.success("유효한 게시물 ID가 필요합니다.");
       return;
     }
 
     if (!title.trim() || !content.trim()) {
-      alert("제목과 내용을 모두 입력해주세요.");
+      toast.success("제목과 내용을 모두 입력해주세요.");
       return;
     }
     // 포스트 수정 로직
@@ -162,9 +167,8 @@ export default function UpdatePost() {
       setIsSubmitting(true);
       // post 수정
       const { data: postData, error: postError } = await supabase
-      .from("posts")
-      .update(
-        {
+        .from("posts")
+        .update({
           title,
           content,
           user_id: userId,
@@ -192,7 +196,7 @@ export default function UpdatePost() {
 
       // 기존보다 이미지가 줄었으면, 초과분 삭제
       if (next.length < prev.length) {
-        const toDeleteIds = prev.slice(next.length).map(r => r._id);
+        const toDeleteIds = prev.slice(next.length).map((r) => r._id);
         if (toDeleteIds.length) {
           const { error: delErr } = await supabase
             .from("images")
@@ -204,11 +208,13 @@ export default function UpdatePost() {
 
       // 기존보다 이미지가 늘었으면, 새로 추가
       if (next.length > prev.length) {
-        const toInsert = next.slice(prev.length).map(src => ({
+        const toInsert = next.slice(prev.length).map((src) => ({
           post_id: postData._id,
           src,
         }));
-        const { error: insErr } = await supabase.from("images").insert(toInsert);
+        const { error: insErr } = await supabase
+          .from("images")
+          .insert(toInsert);
         if (insErr) throw insErr;
       }
 
@@ -234,15 +240,18 @@ export default function UpdatePost() {
         if (delTagsErr) throw delTagsErr;
 
         if (hashtags.length > 0) {
-          const rows = hashtags.map((hashtag) => ({ post_id: postData._id, hashtag }));
+          const rows = hashtags.map((hashtag) => ({
+            post_id: postData._id,
+            hashtag,
+          }));
           const { error: insTagsErr } = await supabase
-          .from("hashtags")
-          .insert(rows);
-          if (insTagsErr) throw insTagsErr; 
+            .from("hashtags")
+            .insert(rows);
+          if (insTagsErr) throw insTagsErr;
         }
       }
 
-      alert("게시글이 수정되었습니다.");
+      toast.success("게시글이 수정되었습니다.");
       navigate(`/channel/${channelId}`);
     } catch (e) {
       console.log(e);
@@ -251,7 +260,7 @@ export default function UpdatePost() {
       setIsSubmitting(false);
     }
   };
-  
+
   return (
     <div className="bg-[#161C27] text-[14px] p-[30px] rounded-[16px]">
       <form onSubmit={handleSubmit}>
@@ -398,7 +407,8 @@ export default function UpdatePost() {
         </div>
 
         <div className="flex justify-between w-full border-t border-t-[#E5E7EB] pt-6">
-          <button type="button"
+          <button
+            type="button"
             className="text-white w-[150px] h-10 rounded-[8px] border border-[#303A4B] shadow-[0_4px_4px_rgba(0,0,0,0.25)]"
             onClick={goBackHandler}
           >
