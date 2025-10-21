@@ -8,7 +8,10 @@ import { LogOut, Pencil } from "lucide-react";
 import Modal from "../../components/Modal";
 import type { Profile } from "../../types/profile";
 import SetUpModal from "../../components/SetUpModal";
-import FollowsModal from "../../components/FollowsModal";
+import FollowerModal from "../../components/FollowerModal";
+import { twMerge } from "tailwind-merge";
+import type { PostListItem, PostSearchItem } from "../../types/post";
+import UserPagePosts from "../../components/userPage/UserPagePosts";
 
 export default function ProfileHeaderSection() {
   const navigate = useNavigate();
@@ -24,6 +27,11 @@ export default function ProfileHeaderSection() {
   const [isSetUpOpened, setIsSetUpOpened] = useState(false); // 프로필 수정 모달
   const [isFollowerOpend, setIsFollowerOpend] = useState<boolean>(false); // 팔로워 모달
   const [isFollowingOpend, setIsFollowingOpend] = useState<boolean>(false); // 팔로잉 모달
+
+  // 진환
+  // 작성글, 댓글 전환용 상태
+  const [activeTab, setActiveTab] = useState<"posts" | "comments">("posts");
+  const [posts, setPosts] = useState<PostListItem[]>([]);
 
   // 모달 열기/닫기 함수
   const openSetUp = () => setIsSetUpOpened(true); // 프로필 수정 모달
@@ -89,6 +97,64 @@ export default function ProfileHeaderSection() {
       fetchfollows();
     }
   }, [userId, myProfile?._id]);
+
+  useEffect(() => {
+    const postFetch = async () => {
+      try {
+        const { data: postsData, error: postsError } = await supabase
+          .from("posts")
+          .select(
+            `
+            _id,
+            title,
+            content,
+            channel_id,
+            created_at,
+            user:profiles (display_name,profile_image,level, badge),
+            likes:likes(count),
+            comments:comments(count),
+            hashtags (hashtag)`
+          )
+          .eq("user_id", profile._id);
+
+        if (postsError) {
+          console.error("Error fetching posts:", postsError);
+          setPosts([]);
+        } else if (postsData) {
+          const formatted: PostListItem[] = (postsData || []).map(
+            (post: PostSearchItem) => {
+              const user = Array.isArray(post.user) ? post.user[0] : post.user;
+              return {
+                _id: post._id,
+                title: post.title,
+                content: post.content,
+                channel_id: post.channel_id,
+                created_at: post.created_at,
+                user,
+                likeCount:
+                  Array.isArray(post.likes) && post.likes[0]?.count != null
+                    ? post.likes[0].count
+                    : 0,
+                commentCount:
+                  Array.isArray(post.comments) &&
+                  post.comments[0]?.count != null
+                    ? post.comments[0].count
+                    : 0,
+                hashtags: (post.hashtags ?? []).map(
+                  (h: { hashtag: string }) => h.hashtag
+                ),
+              };
+            }
+          );
+          setPosts(formatted);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    postFetch();
+  }, [profile._id]);
+
   //팔로우 하는 함수
   const followSubmit = async () => {
     if (!myProfile?._id || myProfile._id === userId) return;
@@ -270,16 +336,34 @@ export default function ProfileHeaderSection() {
           </div>
         </div>
 
-        <div className="w-full mt-1">
+        {/* 진환 파트 */}
+        <div className="w-full mt-5 flex flex-col gap-6">
           <div className="flex justify-end border-b border-gray-700">
-            <button className="text-sm font-medium px-4 py-2 text-white border-b-2 border-white transition-colors">
+            <button
+              onClick={() => setActiveTab("posts")}
+              className={twMerge(
+                "text-sm font-medium px-4 py-2 transition-colors",
+                activeTab === "posts"
+                  ? "text-white border-b-2 border-white"
+                  : "text-gray-500 hover:text-white"
+              )}
+            >
               작성글
             </button>
-
-            <button className="text-sm font-medium px-4 py-2 text-gray-500 hover:text-white transition-colors">
+            <button
+              onClick={() => setActiveTab("comments")}
+              className={twMerge(
+                "text-sm font-medium px-4 py-2 transition-colors",
+                activeTab === "comments"
+                  ? "text-white border-b-2 border-white"
+                  : "text-gray-500 hover:text-white"
+              )}
+            >
               댓글
             </button>
           </div>
+          {/* 작성글, 댓글 불러오기 부분 */}
+          <div>{activeTab === "posts" && <UserPagePosts posts={posts} />}</div>
         </div>
       </div>
       {/* 작성글 또는 댓글 리스트 영역 */}
