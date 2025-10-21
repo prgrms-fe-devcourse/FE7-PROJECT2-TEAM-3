@@ -1,6 +1,8 @@
 import { twMerge } from "tailwind-merge";
 import { SquarePen, Trash2 } from "lucide-react";
 import React, { useState } from "react";
+import ProfileImage from "../../components/ui/ProfileImage.tsx";
+import { Link } from "react-router-dom";
 
 type BadgeProps = { className?: string; children: React.ReactNode };
 export const Badge = ({ className, children }: BadgeProps) => (
@@ -16,7 +18,8 @@ export const Badge = ({ className, children }: BadgeProps) => (
 );
 
 type CommentProps = {
-  id: string;
+  _id: string;
+  userId: string;
   author: string;
   level: string;
   badge: string;
@@ -30,7 +33,8 @@ type CommentProps = {
 };
 
 const Comment = ({
-  id,
+  _id,
+  userId,
   author,
   level,
   badge,
@@ -48,7 +52,7 @@ const Comment = ({
   const handleEdit = () => {
     if (isEditing) {
       // 수정 중일 때 다시 수정 버튼 누르면 저장
-      onEditSave(id, text);
+      onEditSave(_id, text);
     }
     setIsEditing((prev) => !prev);
   };
@@ -56,12 +60,13 @@ const Comment = ({
   return (
     <div className="flex gap-3 py-4 border-b border-white/10 last:border-0">
       {/* 프로필 이미지 */}
-      <img
-        src={profileImage || "/defaultProfile.png"}
-        alt="프로필 이미지"
-        className="w-10 h-10 rounded-full object-cover shrink-0 mt-1.5"
-      />
-
+      <Link to={`/userPage/${userId}`}>
+        <ProfileImage
+          className="w-16 h-16 rounded-full object-cover shrink-0"
+          src={profileImage}
+          alt={author + "님의 이미지"}
+        />
+      </Link>
       <div className="flex-1">
         <div className="flex items-center justify-between flex-wrap mb-1">
           <div className="flex gap-2 flex-wrap items-center">
@@ -85,7 +90,7 @@ const Comment = ({
                 {isEditing ? "저장" : "수정"}
               </button>
               <button
-                onClick={() => onDelete(id)}
+                onClick={() => onDelete(_id)}
                 className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-[#D94A3D] text-white text-xs hover:bg-[#c23c30] transition"
               >
                 <Trash2 className="w-4 h-4" />
