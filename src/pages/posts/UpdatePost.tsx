@@ -155,8 +155,8 @@ export default function DetailPost() {
     console.log("커런트 타겟:", e.currentTarget);
     console.log("타겟:", e.target);
 
-    if (!title.trim() || !images.some((image) => image?.trim()) || !content.trim()) {
-      alert("제목, 내용, 이미지 모두 입력해주세요.");
+    if (!title.trim() || !content.trim()) {
+      alert("제목과 내용을 모두 입력해주세요.");
       return;
     }
     // 포스트 수정 로직
@@ -240,13 +240,6 @@ export default function DetailPost() {
       setIsSubmitting(false);
     }
   };
-
-  const handleDelete = async () => {
-    const { post, error } = await supabase
-    .from('posts')
-    .delete() // 삭제
-    .eq("_id", params?.postId);
-  }
   
   return (
     <div className="bg-[#161C27] text-[14px] p-[30px] rounded-[16px]">
@@ -396,9 +389,9 @@ export default function DetailPost() {
         <div className="flex justify-between w-full border-t border-t-[#E5E7EB] pt-6">
           <button type="button"
             className="text-white w-[150px] h-10 rounded-[8px] border border-[#303A4B] shadow-[0_4px_4px_rgba(0,0,0,0.25)]"
-            onClick={handleDelete}
+            onClick={goBackHandler}
           >
-            삭제
+            취소
           </button>
           <button
             className="text-white w-[150px] h-10 rounded-[8px] bo bg-gradient-to-r from-[#6366F1] via-[#7761F3] to-[#8B5CF6] shadow-[0_0_4px_#8B5CF6]"
