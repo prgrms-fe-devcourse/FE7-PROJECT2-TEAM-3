@@ -9,9 +9,10 @@ import Modal from "../../components/Modal";
 import type { Profile } from "../../types/profile";
 import SetUpModal from "../../components/SetUpModal";
 import FollowerModal from "../../components/FollowerModal";
-import { twMerge } from "tailwind-merge";
 import type { PostListItem, PostSearchItem } from "../../types/post";
 import UserPagePosts from "../../components/userPage/UserPagePosts";
+import UserTabSwitcher from "../../components/userPage/UserTabSwitcher";
+import UserPageComments from "../../components/userPage/UserPageComments";
 
 export default function ProfileHeaderSection() {
   const navigate = useNavigate();
@@ -32,6 +33,7 @@ export default function ProfileHeaderSection() {
   // 작성글, 댓글 전환용 상태
   const [activeTab, setActiveTab] = useState<"posts" | "comments">("posts");
   const [posts, setPosts] = useState<PostListItem[]>([]);
+  const [comments, setComments] = useState<FormattedComments[]>([]);
 
   // 모달 열기/닫기 함수
   const openSetUp = () => setIsSetUpOpened(true); // 프로필 수정 모달
@@ -98,7 +100,10 @@ export default function ProfileHeaderSection() {
     }
   }, [userId, myProfile?._id]);
 
+  // 작성글 불러오는 로직
   useEffect(() => {
+    if (!profile._id) return;
+
     const postFetch = async () => {
       try {
         const { data: postsData, error: postsError } = await supabase
@@ -118,7 +123,7 @@ export default function ProfileHeaderSection() {
           .eq("user_id", profile._id);
 
         if (postsError) {
-          console.error("Error fetching posts:", postsError);
+          console.error("데이터 불러오기 오류: ", postsError);
           setPosts([]);
         } else if (postsData) {
           const formatted: PostListItem[] = (postsData || []).map(
@@ -153,6 +158,39 @@ export default function ProfileHeaderSection() {
       }
     };
     postFetch();
+  }, [profile._id]);
+
+  // 작성 댓글 불러오는 로직
+  useEffect(() => {
+    if (!profile._id) return;
+
+    const fetchComments = async () => {
+      try {
+        const { data: comments, error: commentsError } = await supabase
+          .from("comments")
+          .select(`comment, created_at, post_id, postTitle: posts(title)`)
+          .eq("user_id", profile._id);
+
+        console.log(comments);
+
+        const formmatedComments = (comments || []).map(
+          (c: CommentListItem) => ({
+            comment: c.comment,
+            created_at: c.created_at,
+            post_id: c.post_id,
+            title: c.postTitle?.title ?? "",
+          })
+        );
+
+        console.log(formmatedComments);
+        setComments(formmatedComments);
+
+        if (commentsError) throw commentsError;
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchComments();
   }, [profile._id]);
 
   //팔로우 하는 함수
@@ -338,32 +376,9 @@ export default function ProfileHeaderSection() {
 
         {/* 진환 파트 */}
         <div className="w-full mt-5 flex flex-col gap-6">
-          <div className="flex justify-end border-b border-gray-700">
-            <button
-              onClick={() => setActiveTab("posts")}
-              className={twMerge(
-                "text-sm font-medium px-4 py-2 transition-colors",
-                activeTab === "posts"
-                  ? "text-white border-b-2 border-white"
-                  : "text-gray-500 hover:text-white"
-              )}
-            >
-              작성글
-            </button>
-            <button
-              onClick={() => setActiveTab("comments")}
-              className={twMerge(
-                "text-sm font-medium px-4 py-2 transition-colors",
-                activeTab === "comments"
-                  ? "text-white border-b-2 border-white"
-                  : "text-gray-500 hover:text-white"
-              )}
-            >
-              댓글
-            </button>
-          </div>
-          {/* 작성글, 댓글 불러오기 부분 */}
-          <div>{activeTab === "posts" && <UserPagePosts posts={posts} />}</div>
+          <UserTabSwitcher activeTab={activeTab} setActiveTab={setActiveTab} />
+          {activeTab === "posts" && <UserPagePosts posts={posts} />}
+          {activeTab === "comments" && <UserPageComments comments={comments} />}
         </div>
       </div>
       {/* 작성글 또는 댓글 리스트 영역 */}

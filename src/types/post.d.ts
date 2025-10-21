@@ -1,5 +1,5 @@
 import type { Database } from "./database";
-import type { Profile } from "./profile";
+import type { SearchProfile } from "./profile";
 
 type Post = Database["public"]["Tables"]["posts"]["Row"];
 
@@ -13,33 +13,22 @@ interface PopularPosts extends Post {
     profile_image: string | null;
   };
 }
-
 // 사이드바 - 해시태그 계산용
 interface HashTags {
   hashtag: string;
   count: number;
 }
-
-interface UserProfile extends Profile {
-  display_name: string;
-  profile_image: string | null;
-  level: number | null;
-  badge: string | null;
-  exp: number | null;
-}
-
 interface PostSearchItem {
   _id: string;
   title: string;
   content: string;
   channel_id: string | null;
   created_at: string;
-  user: Profile | Profile[];
+  user: SearchProfile | SearchProfile[];
   likes: { count: number }[];
   comments: { count: number }[];
   hashtags: { hashtag: string }[];
 }
-
 interface PostListItem {
   _id: string;
   title: string;

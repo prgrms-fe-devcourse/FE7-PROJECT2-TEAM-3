@@ -3,15 +3,19 @@ import { useEffect, useState } from "react";
 import Posts from "../../components/Posts";
 import supabase from "../../utils/supabase";
 import type { PostListItem, PostSearchItem } from "../../types/post";
+import PostSkeleton from "../../components/ui/loading/PostSkeleton";
 
 export default function PostSearch() {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("content") || "";
   const hashtag = searchParams.get("hashtag") || "";
   const [posts, setPosts] = useState<PostListItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     async function fetchPosts() {
+      setIsLoading(true);
+
       let queryBuilder = supabase
         .from("posts")
         .select(
@@ -46,6 +50,7 @@ export default function PostSearch() {
       if (error) {
         console.error("Error fetching posts:", error);
         setPosts([]);
+        setIsLoading(false);
       } else if (data) {
         const formatted: PostListItem[] = (data || []).map(
           (post: PostSearchItem) => {
@@ -72,11 +77,14 @@ export default function PostSearch() {
           }
         );
         setPosts(formatted);
+        setIsLoading(false);
       }
     }
 
     fetchPosts();
   }, [query, hashtag]);
+
+  if (isLoading) return <PostSkeleton line={2} />;
 
   return <Posts posts={posts} channel={undefined} />;
 }

@@ -2,9 +2,9 @@ import { Heart, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router";
 import defaultProfile from "../../assets/image/no_profile_image.png";
 import { twMerge } from "tailwind-merge";
-import type { PostListItem } from "../../types/post";
-import { formaRelativeTime } from "../../utils/formatRelativeTime";
 import ProfileImage from "../ui/ProfileImage";
+import { formaRelativeTime } from "../../utils/formatRelativeTime";
+import type { PostListItem } from "../../types/post";
 
 export default function UserPagePosts({ posts }: { posts: PostListItem[] }) {
   const navigate = useNavigate();
