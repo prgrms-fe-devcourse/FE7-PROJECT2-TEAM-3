@@ -8,10 +8,10 @@ import { LogOut, Pencil } from "lucide-react";
 import Modal from "../../components/Modal";
 import type { Profile } from "../../types/profile";
 import SetUpModal from "../../components/SetUpModal";
-import FollowerModal from "../../components/FollowerModal";
 import { twMerge } from "tailwind-merge";
 import type { PostListItem, PostSearchItem } from "../../types/post";
 import UserPagePosts from "../../components/userPage/UserPagePosts";
+import FollowsModal from "../../components/FollowsModal";
 
 export default function ProfileHeaderSection() {
   const navigate = useNavigate();
