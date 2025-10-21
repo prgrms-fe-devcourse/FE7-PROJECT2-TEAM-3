@@ -155,7 +155,7 @@ export default function DetailPost() {
     console.log("커런트 타겟:", e.currentTarget);
     console.log("타겟:", e.target);
 
-    if (!title.trim() || !images[0]?.trim() || !content.trim()) {
+    if (!title.trim() || !images.some((image) => image.trim()) || !content.trim()) {
       alert("제목, 내용, 이미지 모두 입력해주세요.");
       return;
     }

@@ -3,11 +3,12 @@ import { twMerge } from "tailwind-merge";
 import {  MessageSquare, Heart, SquarePen, Trash2 } from "lucide-react";
 import Comment, {Badge} from "./Comment";
 import { useParams } from "react-router";
-// const hashtags = ["해", "시", "태", "그", "!"];
 import supabase from "../../utils/supabase";
 import defaultProfile from "../../assets/image/no_profile_image.png";
 import { useNavigate } from "react-router";
 import { formaRelativeTime } from "../../utils/formatRelativeTime";
+import ProfileImage from "../../components/ui/ProfileImage.tsx";
+import { Link } from "react-router-dom";
 
 // 공통 카드 (shadow 제거 + 지정 배경색)
 const Card = ({
@@ -266,11 +267,6 @@ export default function PostDetail() {
           .from('likes')
           .insert([{ user_id: userId, post_id: params?.postId }]);
         if (insertError) throw insertError;
-        // 좋아요 알림 등록
-        const { error: notifiError } = await supabase
-          .from('notification')
-          .insert([{ user_to_notify: writerId, actor_id: userId, type: "like", target_post_id: params?.postId }]);
-          if (notifiError) throw notifiError;
         setLiked(true);
         setLikeCount((prev) => (prev+1));
       }
@@ -318,11 +314,6 @@ export default function PostDetail() {
           .single();
     
         if (selectError || !commentData) throw selectError;
-        
-        const { error: notifiError } = await supabase
-        .from('notification')
-        .insert([{ user_to_notify: writerId, actor_id: userId, type: "comment", target_post_id: params?.postId }]);
-        if (notifiError) throw notifiError;
 
         // 상태 업데이트
         setComments((prev) => [...prev, commentData]);
@@ -380,7 +371,13 @@ export default function PostDetail() {
       <Card className="p-6">
         {/* 작성자 프로필 */}
         <div className="flex items-center gap-4">
-            <img src={profileImage || defaultProfile} alt="프로필 이미지" className="w-16 h-16 rounded-full object-cover shrink-0" />
+          <Link to={`/userPage/${writerId}`}>
+            <ProfileImage
+              className="w-16 h-16 rounded-full object-cover shrink-0"
+              src={profileImage}
+              alt={`${writerId}님의 이미지`}
+              />
+          </Link>
           <div className="flex-1">
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-2xl font-extrabold leading-none">{nickname}</h3>
@@ -424,7 +421,7 @@ export default function PostDetail() {
           </div>
         </div>
 
-        {/* 태그 */}
+        {/* 해시시태그 */}
         <div
           className={twMerge(
               "mt-4 mb-[10px] w-full transition-all duration-100", // ✅ 본문과의 간격 mt-4 추가
@@ -447,7 +444,7 @@ export default function PostDetail() {
                   pastelColors[idx % pastelColors.length]
                   )}
               >
-                  {tag}
+                  #{tag}
               </span>
               );
           })}
@@ -547,6 +544,7 @@ export default function PostDetail() {
           <Comment
             key={c._id}
             id={c._id}
+            userId={c.user_id}
             author={c.profiles?.display_name || "익명"}
             level={c.profiles?.level || "0"}
             badge={c.profiles?.badge || ""}

@@ -286,13 +286,13 @@ export default function ProfileHeaderSection() {
                 <div className="text-sm text-gray-400">
                   {/* 팔로잉/팔로우 수 - 임시 데이터 */}
                   <button
-                    className="hover:bg-[#303A4B] rounded-md px-2 py-[2] transition-colors"
+                    className="hover:bg-[#303A4B] rounded-md px-2 py-[2] transition-colors cursor-pointer"
                     onClick={openFollowings}
                   >
                     {followings} 팔로잉
                   </button>
                   <button
-                    className="hover:bg-[#303A4B] rounded-md px-2 py-[2] transition-colors"
+                    className="hover:bg-[#303A4B] rounded-md px-2 py-[2] transition-colors cursor-pointer"
                     onClick={openFollowers}
                   >
                     {followers} 팔로워
@@ -304,14 +304,14 @@ export default function ProfileHeaderSection() {
             <Activity mode={userId === myProfile?._id ? "visible" : "hidden"}>
               <div className="flex gap-2 self-start pt-2">
                 <button
-                  className="bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-1"
+                  className="bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-1 cursor-pointer"
                   onClick={signOut}
                 >
                   <LogOut size={14} /> 로그아웃
                 </button>
 
                 <button
-                  className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-1"
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-1 cursor-pointer"
                   onClick={openSetUp}
                 >
                   <Pencil size={14} /> 수정
@@ -327,7 +327,7 @@ export default function ProfileHeaderSection() {
             >
               <button
                 onClick={followSubmit}
-                className="bg-[#5C4DCA] hover:bg-[#7b6cdb] text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors"
+                className="bg-[#5C4DCA] hover:bg-[#7b6cdb] text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors cursor-pointer"
               >
                 팔로우
               </button>
@@ -341,7 +341,7 @@ export default function ProfileHeaderSection() {
             >
               <button
                 onClick={unfollowSubmit}
-                className="bg-[#9297AC] hover:bg-[#696F86] text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors"
+                className="bg-[#9297AC] hover:bg-[#696F86] text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors cursor-pointer"
               >
                 팔로잉
               </button>
@@ -383,9 +383,7 @@ export default function ProfileHeaderSection() {
         </div>
       </div>
       {/* 작성글 또는 댓글 리스트 영역 */}
-      <div className="w-full rounded-lg p-6 mt-4 min-h-[500px]">
-        {/* <Outlet /> */}
-      </div>
+
       {/* 수정 모달 */}
       <Modal isOpen={isSetUpOpened} onClose={closeSetUp}>
         <SetUpModal onClose={closeSetUp} />
