@@ -89,7 +89,6 @@ export default function PostsList() {
     };
 
     fetchPosts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [channel, selectedChannel]);
 
   if (isLoading && !hasFetchedOnce) return <PostSkeleton line={3} />;
