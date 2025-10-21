@@ -256,7 +256,7 @@ export default function ProfileHeaderSection() {
 
   return (
     <div className="w-full">
-      <div className="fixed top-[104px] right-[352px] left-[352px]">
+      <div className="top-[104px] right-[352px] left-[352px]">
         <div className="w-full h-[200px] bg-gray-200 rounded-t-lg">
           <CoverImage
             className="w-full h-full object-cover"

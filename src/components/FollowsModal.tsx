@@ -115,7 +115,7 @@ export default function FollowsModal({
           </p>
         </div>
       )}
-      <div>
+      <div className="max-h-[600px] overflow-y-auto">
         {profiles.map((profile) => {
           return (
             <FollowList key={profile._id} profile={profile} onClose={onClose} />

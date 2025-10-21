@@ -82,7 +82,7 @@ export default function FollowList({
   return (
     <>
       <div>
-        <div className="p-0 max-h-[400px] overflow-y-auto">
+        <div className="p-0">
           <div className="flex items-start gap-4 p-4 border-b border-[#303A4B] hover:bg-[#1f2d44] transition-colors">
             <div
               onClick={() => directUserPage(profile)}
