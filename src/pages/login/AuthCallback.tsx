@@ -28,19 +28,22 @@ export default function AuthCallback() {
         await supabase
           .from("profiles")
           .update({ is_online: true })
-          .eq("_id", claims.sub);
+          .eq("_id", claims.sub)
+          .select();
         navigate("/home");
       } else {
-        await supabase.from("profiles").insert([
-          {
+        await supabase
+          .from("profiles")
+          .update({
             _id: claims.sub,
             exp: 0,
             badge: "치킨 미개봉자",
             level: 0,
             is_online: true,
             bio: "",
-          },
-        ]);
+          })
+          .eq("_id", claims.sub)
+          .select();
         navigate("/userSetting");
       }
     };
