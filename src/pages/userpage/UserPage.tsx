@@ -8,11 +8,12 @@ import { LogOut, Pencil } from "lucide-react";
 import Modal from "../../components/Modal";
 import type { Profile } from "../../types/profile";
 import SetUpModal from "../../components/SetUpModal";
-import FollowerModal from "../../components/FollowerModal";
+
 import type { PostListItem, PostSearchItem } from "../../types/post";
 import UserPagePosts from "../../components/userPage/UserPagePosts";
 import UserTabSwitcher from "../../components/userPage/UserTabSwitcher";
 import UserPageComments from "../../components/userPage/UserPageComments";
+import FollowsModal from "../../components/FollowsModal";
 
 export default function ProfileHeaderSection() {
   const navigate = useNavigate();
