@@ -12,7 +12,7 @@ export default function UserTabSwitcher({
   setActiveTab,
 }: UserTabSwitcherProps) {
   return (
-    <div className="flex justify-end border-b border-gray-700">
+    <div className="flex border-b border-gray-700">
       <button
         onClick={() => setActiveTab("posts")}
         className={twMerge(
