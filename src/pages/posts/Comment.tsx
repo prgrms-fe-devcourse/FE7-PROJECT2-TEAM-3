@@ -21,7 +21,7 @@ type CommentProps = {
   _id: string;
   userId: string;
   author: string;
-  level: string;
+  level: number;
   badge: string;
   profileImage?: string | null;
   time: string;
@@ -46,6 +46,7 @@ const Comment = ({
   onEditSave,
   onDelete,
 }: CommentProps) => {
+  console.log("Comment()");
   const [isEditing, setIsEditing] = useState(false);
   const [text, setText] = useState(content);
 

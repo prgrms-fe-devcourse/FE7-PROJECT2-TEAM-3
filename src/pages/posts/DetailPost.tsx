@@ -4,7 +4,6 @@ import {  MessageSquare, Heart, SquarePen, Trash2 } from "lucide-react";
 import Comment, {Badge} from "./Comment";
 import { useParams } from "react-router";
 import supabase from "../../utils/supabase";
-import defaultProfile from "../../assets/image/no_profile_image.png";
 import { useNavigate } from "react-router";
 import { formaRelativeTime } from "../../utils/formatRelativeTime";
 import ProfileImage from "../../components/ui/ProfileImage.tsx";
@@ -26,7 +25,8 @@ const Card = ({
   </div>
 );
 
-export default function PostDetail() {
+export default function DetailPost() {
+    console.log("DetailPost()");
     const navigate = useNavigate();
     const goBackHandler = () => {
       navigate(-1);
@@ -58,10 +58,11 @@ export default function PostDetail() {
     const [newComment, setNewComment] = useState<string>('');
 
     type CommentProfile = {
-      display_name: string | null;
+      display_name: string;
       profile_image: string | null;
-      level: string | null;
-      badge: string | null;
+      exp: number;
+      badge: string;
+      level: number;
     };
     
     type CommentType = {
@@ -71,7 +72,7 @@ export default function PostDetail() {
       user_id: string;
       comment: string;
       update_at: string | null;
-      profiles: CommentProfile | null;
+      profiles: CommentProfile;
     };
 
     const [comments, setComments] = useState<CommentType[]>([]);
@@ -86,7 +87,7 @@ export default function PostDetail() {
           const {
             data: { user },
           } = await supabase.auth.getUser();
-    
+          console.log("DP: auth");
           if (!user) {
             setIsLogin(false);
             return;
@@ -97,7 +98,7 @@ export default function PostDetail() {
             .select("_id, email")
             .eq("email", user.email)
             .single();
-    
+          console.log("DP: get Profiles");
           if (!profile) throw new Error("프로필 정보를 찾을 수 없습니다.");
     
           setUserId(profile._id);
@@ -109,7 +110,7 @@ export default function PostDetail() {
             .select("_id, user_id, title, content, created_at")
             .eq("_id", params?.postId)
             .single();
-    
+            console.log("DP: get Post");
           if (error) throw error;
     
           setTitle(post.title);
@@ -137,7 +138,7 @@ export default function PostDetail() {
           .select("_id, display_name, profile_image, is_online, level, badge")
           .eq("_id", writerId)
           .single();
-  
+          console.log("DP: get writerId");
         if (error) {
           console.error("글쓴이 프로필 불러오기 실패:", error);
         } else {
@@ -157,7 +158,8 @@ export default function PostDetail() {
         .from("images")
         .select("src")
         .eq("post_id", params?.postId);
-      
+        console.log("DP: get Images");
+
         if (error) {
           console.error("이미지 불러오기 실패:", error);
         } else if (imageRows) {
@@ -182,6 +184,7 @@ export default function PostDetail() {
         .from("hashtags")
         .select("hashtag")
         .eq("post_id", params?.postId)
+        console.log("DP: get Hashtags");
 
         if (error) {
           console.error("해시태그 불러오기 실패:", error);
@@ -199,6 +202,7 @@ export default function PostDetail() {
       .from("likes")
       .select("user_id")
       .eq("post_id", params?.postId);
+      console.log("DP: get Likes");
       if (error) {
         console.error("좋아요 불러오기 실패:", error);
       } else {
@@ -230,6 +234,7 @@ export default function PostDetail() {
               ) `)
       .eq("post_id", params?.postId)
       .order("created_at", { ascending: true });
+      console.log("DP: get Comments");
 
       if (error) {
         console.error("댓글 불러오기 실패:", error);
@@ -252,12 +257,13 @@ export default function PostDetail() {
     try {
       if (liked) {
         // 이미 좋아요한 경우 → 삭제
-        const { data: del, error: deleteError } = await supabase
+        const { error: deleteError } = await supabase
           .from('likes')
           .delete()
           .eq('user_id', userId)
           .eq('post_id', params?.postId)
           .select();
+          console.log("DP: delete Like");
         if (deleteError) throw  deleteError;
         setLiked(false);
         setLikeCount((prev) => (prev-1));
@@ -266,6 +272,7 @@ export default function PostDetail() {
         const { error: insertError } = await supabase
           .from('likes')
           .insert([{ user_id: userId, post_id: params?.postId }]);
+          console.log("DP: update Like");
         if (insertError) throw insertError;
         setLiked(true);
         setLikeCount((prev) => (prev+1));
@@ -290,7 +297,8 @@ export default function PostDetail() {
           .insert([{ post_id: params.postId, user_id: userId, comment: newComment.trim() }])
           .select("_id")
           .single();
-    
+          console.log("DP: get Comment ID");
+
         if (insertError || !inserted) throw insertError;
     
         // 전체 정보 다시 조회
@@ -306,18 +314,43 @@ export default function PostDetail() {
             profiles:user_id (
               display_name,
               profile_image,
-              level,
-              badge
+              exp,
+              badge,
+              level
             )
           `)
           .eq("_id", inserted._id)
           .single();
-    
+          console.log("DP: get Comment Data");
+
         if (selectError || !commentData) throw selectError;
 
         // 상태 업데이트
         setComments((prev) => [...prev, commentData]);
         setNewComment("");
+
+        // 경험치 업데이트
+        let newExp = (commentData.profiles?.exp || 0) + 15; // 댓글 등록 시 경험치 +15
+        let newLevel = commentData.profiles?.level || 0;
+
+        // 레벨업 조건 체크
+        if (newExp >= 100) {
+          if (newLevel < 10) {
+            newLevel += 1; // 레벨 +1
+            newExp = newExp % 100; // 경험치 초기화
+          } else {
+            newExp = 100;
+          }
+        }
+
+        // 업데이트 쿼리 실행
+        const { error: updateError } = await supabase
+          .from("profiles")
+          .update({ exp: newExp, level: newLevel })
+          .eq("_id", userId);
+          console.log("DP: update EXP");
+
+        if (updateError) throw updateError;
     
       } catch (err) {
         console.error("댓글 등록 중 오류:", err);
@@ -326,20 +359,21 @@ export default function PostDetail() {
     };
 
     // 댓글 수정
-  const handleCommentEdit = async (_id: string, newText: string) => {
-    const { error } = await supabase
-      .from("comments")
-      .update({ comment: newText, update_at: new Date().toISOString() })
-      .eq("_id", _id);
+    const handleCommentEdit = async (_id: string, newText: string) => {
+      const { error } = await supabase
+        .from("comments")
+        .update({ comment: newText, update_at: new Date().toISOString() })
+        .eq("_id", _id);
+        console.log("DP: update Comment");
 
-    if (!error) {
-      setComments((prev) =>
-        prev.map((c) =>
-          c._id === _id ? { ...c, comment: newText, update_at: new Date().toISOString() } : c
-        )
-      );
-    }
-  };
+      if (!error) {
+        setComments((prev) =>
+          prev.map((c) =>
+            c._id === _id ? { ...c, comment: newText, update_at: new Date().toISOString() } : c
+          )
+        );
+      }
+    };
 
 
     const handleCommentDelete = async (_id: string) => {
@@ -351,18 +385,25 @@ export default function PostDetail() {
         .delete()
         .eq("_id", _id)
         .eq("user_id", userId);
-  
-      if (!error) {
+        console.log("DP: delete Comment");
+
+      if (error) {
+        console.error(error);
+      } else {
         setComments((prev) => prev.filter((c) => c._id !== _id));
       }
     };
 
     const handleDelete = async () => {
-      const { data: post, error } = await supabase
+      const { error } = await supabase
       .from('posts')
       .delete() // 삭제
       .eq("_id", params?.postId);
+      console.log("DP: delete POST");
       goBackHandler();
+      if (error) {
+        console.error(error);
+      }
     }
 
   return (
@@ -551,7 +592,7 @@ export default function PostDetail() {
             _id={c._id}
             userId={c.user_id}
             author={c.profiles?.display_name || "익명"}
-            level={c.profiles?.level || "0"}
+            level={c.profiles?.level || 0}
             badge={c.profiles?.badge || ""}
             profileImage={c.profiles?.profile_image}
             time={formaRelativeTime(c.created_at)}
