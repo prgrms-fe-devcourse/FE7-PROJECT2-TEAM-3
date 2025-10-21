@@ -4,6 +4,11 @@ type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
 type SearchProfile = Pick<
   Profile,
+  "display_name" | "profile_image" | "level" | "badge"
+>;
+
+type UserProfile = Pick<
+  Profile,
   | "_id"
   | "display_name"
   | "profile_image"
