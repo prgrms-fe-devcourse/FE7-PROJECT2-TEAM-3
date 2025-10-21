@@ -81,7 +81,7 @@ export default function PostDetail() {
     useEffect(() => {
       const fetchData = async () => {
         try {
-          // 사용자자 정보 조회
+          // 사용자 정보 조회
           const {
             data: { user },
           } = await supabase.auth.getUser();
@@ -265,7 +265,12 @@ export default function PostDetail() {
         const { error: insertError } = await supabase
           .from('likes')
           .insert([{ user_id: userId, post_id: params?.postId }]);
-        if (insertError) throw insertError;  
+        if (insertError) throw insertError;
+        // 좋아요 알림 등록
+        const { error: notifiError } = await supabase
+          .from('notification')
+          .insert([{ user_to_notify: writerId, actor_id: userId, type: "like", target_post_id: params?.postId }]);
+          if (notifiError) throw notifiError;
         setLiked(true);
         setLikeCount((prev) => (prev+1));
       }
@@ -313,7 +318,12 @@ export default function PostDetail() {
           .single();
     
         if (selectError || !commentData) throw selectError;
-    
+        
+        const { error: notifiError } = await supabase
+        .from('notification')
+        .insert([{ user_to_notify: writerId, actor_id: userId, type: "comment", target_post_id: params?.postId }]);
+        if (notifiError) throw notifiError;
+
         // 상태 업데이트
         setComments((prev) => [...prev, commentData]);
         setNewComment("");
@@ -323,7 +333,6 @@ export default function PostDetail() {
         alert("댓글 등록 중 문제가 발생했습니다.");
       }
     };
-    
 
     // 댓글 수정
   const handleCommentEdit = async (id: string, newText: string) => {
