@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import supabase from "../../utils/supabase";
 import { Search } from "lucide-react";
-import type { SearchProfile } from "../../types/profile";
+import type { UserProfile } from "../../types/profile";
 import ProfileImage from "../../components/ui/ProfileImage";
 import { twMerge } from "tailwind-merge";
 import { Link } from "react-router";
@@ -9,7 +9,7 @@ import { Link } from "react-router";
 export default function UserSearch() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
-  const [allUsers, setAllUsers] = useState<SearchProfile[]>([]);
+  const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
   useEffect(() => {
     const fetchUsers = async () => {
       try {
