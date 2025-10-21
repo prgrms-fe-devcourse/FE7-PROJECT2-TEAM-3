@@ -7,7 +7,7 @@ export default function ProfileImage({
   alt,
 }: {
   className: string | null;
-  src: string | null;
+  src: string | null | undefined;
   alt: string;
 }) {
   return (

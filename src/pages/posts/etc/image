@@ -1,0 +1,19 @@
+        {/* 이미지 */}
+        <div className="mb-5">
+          <div className="grid grid-flow-col grid-rows-2 grid-cols-2 gap-4 mb-5">
+            {images.map((img, idx) => (
+              img && (
+                  <div
+                    key={idx}
+                    className="relative flex flex-col items-center justify-center w-full h-full border border-[#D1D5DB] rounded-md cursor-pointer hover:border-blue-400 transition"
+                  >
+                    <img
+                      src={img}
+                      alt={`uploaded ${idx + 1}`}
+                      className="w-full h-full object-cover rounded-md"
+                    />
+                  </div>
+              )
+            ))}
+          </div>
+        </div>
