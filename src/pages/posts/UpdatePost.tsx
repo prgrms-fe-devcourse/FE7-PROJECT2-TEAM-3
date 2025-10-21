@@ -155,7 +155,7 @@ export default function DetailPost() {
     console.log("커런트 타겟:", e.currentTarget);
     console.log("타겟:", e.target);
 
-    if (!title.trim() || !images.some((image) => image.trim()) || !content.trim()) {
+    if (!title.trim() || !images.some((image) => image?.trim()) || !content.trim()) {
       alert("제목, 내용, 이미지 모두 입력해주세요.");
       return;
     }
@@ -214,7 +214,7 @@ export default function DetailPost() {
         if (insErr) throw insErr;
       }
 
-      // hashtag 저장 (전체 삭제 -> 재삽입)
+      // hashtag(해시태그) 저장 (전체 삭제 -> 재삽입)
       {
         const { error: delTagsErr } = await supabase
           .from("hashtags")
@@ -224,8 +224,10 @@ export default function DetailPost() {
 
         if (hashtags.length > 0) {
           const rows = hashtags.map((hashtag) => ({ post_id: postData._id, hashtag }));
-          const { error: insTagsErr } = await supabase.from("hashtags").insert(rows);
-          if (insTagsErr) throw insTagsErr;
+          const { error: insTagsErr } = await supabase
+          .from("hashtags")
+          .insert(rows);
+          if (insTagsErr) throw insTagsErr; 
         }
       }
 
@@ -383,7 +385,7 @@ export default function DetailPost() {
           <input
             type="text"
             id="hashtags"
-            placeholder="태그를 입력하세요."
+            placeholder="해시태그를 입력하세요."
             className="placeholder-[#ADAEBC] w-full bg-white h-[42px] rounded-[8px] pl-4"
             value={hashtagInput}
             onChange={(e) => setHashtagInput(e.target.value)}
