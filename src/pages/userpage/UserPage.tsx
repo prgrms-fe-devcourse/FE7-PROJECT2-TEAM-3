@@ -99,7 +99,7 @@ export default function ProfileHeaderSection() {
       };
       fetchfollows();
     }
-  }, [userId, myProfile?._id]);
+  }, [userId, myProfile?._id, isFollowerOpend, isFollowingOpend]);
 
   // 작성글 불러오는 로직
   useEffect(() => {

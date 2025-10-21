@@ -4,6 +4,7 @@ import { useAuthStore } from "../stores/authStore";
 import supabase from "../utils/supabase";
 import CoverImage from "./ui/CoverImage";
 import ProfileImage from "./ui/ProfileImage";
+import toast from "react-hot-toast";
 
 type SetUpModalProps = {
   onClose: () => void;
@@ -35,7 +36,7 @@ export default function SetUpModal({ onClose }: SetUpModalProps) {
       .single();
     if (error) throw error;
     if (data) {
-      alert("회원정보 수정이 완료 되었습니다!");
+      toast.success("회원가입이 수정이 완료 되었습니다!");
       setProfile(data);
       onClose();
     }
