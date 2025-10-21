@@ -114,7 +114,7 @@ const Comment = ({
             rows={4}
           />
         ) : (
-          <p className="text-sm text-gray-300 leading-relaxed">{content}</p>
+          <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-line">{content}</p>
         )}
       </div>
     </div>
