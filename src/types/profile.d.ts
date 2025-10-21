@@ -7,6 +7,17 @@ type SearchProfile = Pick<
   "display_name" | "profile_image" | "level" | "badge"
 >;
 
+type UserProfile = Pick<
+  Profile,
+  | "_id"
+  | "display_name"
+  | "profile_image"
+  | "level"
+  | "badge"
+  | "is_online"
+  | "bio"
+>;
+
 interface UserRankItem
   extends Pick<
     Profile,
