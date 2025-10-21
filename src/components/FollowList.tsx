@@ -3,6 +3,7 @@ import { useAuthStore } from "../stores/authStore";
 import { useNavigate } from "react-router";
 import supabase from "../utils/supabase";
 import ProfileImage from "./ui/ProfileImage";
+import Badge from "./ui/Badge";
 
 type FollowerProfile = {
   _id: string;
@@ -107,9 +108,10 @@ export default function FollowList({
                   Lv.{profile.level}
                 </span>
 
-                <span className="text-xs text-white bg-[#334155] px-2 py-0.5 rounded-full">
-                  {profile.badge}
-                </span>
+                <Badge
+                  className="px-2 py-0.5 whitespace-nowrap"
+                  level={profile.level}
+                />
               </div>
 
               <p className="text-sm text-gray-400 overflow-hidden text-ellipsis display-box line-clamp-2 ">

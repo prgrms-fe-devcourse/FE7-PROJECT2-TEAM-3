@@ -14,6 +14,7 @@ import UserPagePosts from "../../components/userPage/UserPagePosts";
 import UserTabSwitcher from "../../components/userPage/UserTabSwitcher";
 import UserPageComments from "../../components/userPage/UserPageComments";
 import FollowsModal from "../../components/FollowsModal";
+import Badge from "../../components/ui/Badge";
 
 export default function ProfileHeaderSection() {
   const navigate = useNavigate();
@@ -172,8 +173,6 @@ export default function ProfileHeaderSection() {
           .select(`comment, created_at, post_id, postTitle: posts(title)`)
           .eq("user_id", profile._id);
 
-        console.log(comments);
-
         const formmatedComments = (comments || []).map(
           (c: CommentListItem) => ({
             comment: c.comment,
@@ -183,7 +182,6 @@ export default function ProfileHeaderSection() {
           })
         );
 
-        console.log(formmatedComments);
         setComments(formmatedComments);
 
         if (commentsError) throw commentsError;
@@ -279,9 +277,10 @@ export default function ProfileHeaderSection() {
                   <span className="text-white text-xl font-bold">
                     {profile.display_name}
                   </span>
-                  <div className="text-xs px-2 py-0.5 rounded-full bg-gray-500 text-white whitespace-nowrap">
-                    {profile.badge}
-                  </div>
+                  <Badge
+                    className="px-2 py-0.5 whitespace-nowrap"
+                    level={profile.level}
+                  />
                 </div>
                 <div className="text-sm text-gray-400">
                   {/* 팔로잉/팔로우 수 - 임시 데이터 */}

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import ProfileImage from "../ui/ProfileImage";
 import { formaRelativeTime } from "../../utils/formatRelativeTime";
 import type { PostListItem } from "../../types/post";
+import Badge from "../ui/Badge";
 
 export default function UserPagePosts({ posts }: { posts: PostListItem[] }) {
   const navigate = useNavigate();
@@ -35,9 +36,10 @@ export default function UserPagePosts({ posts }: { posts: PostListItem[] }) {
                     <span className="text-[#F59E0B] text-[12px]">
                       {`Lv ${post.user.level || "0"}`}
                     </span>
-                    <div className="flex px-3 h-[17px] items-center justify-center bg-[#9F9F9F] text-white text-[10px] rounded-[30px] whitespace-nowrap overflow-hidden">
-                      {post.user.badge || "정보 없음"}
-                    </div>
+                    <Badge
+                      className="flex px-3 h-[17px] items-center justify-center whitespace-nowrap overflow-hidden"
+                      level={post.user.level}
+                    />
                     {/* 시간 표시 부분 */}
                     <span className="text-xs text-gray-400">
                       {formaRelativeTime(post.created_at)}
