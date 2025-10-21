@@ -326,16 +326,16 @@ export default function PostDetail() {
     };
 
     // 댓글 수정
-  const handleCommentEdit = async (id: string, newText: string) => {
+  const handleCommentEdit = async (_id: string, newText: string) => {
     const { error } = await supabase
       .from("comments")
       .update({ comment: newText, update_at: new Date().toISOString() })
-      .eq("_id", id);
+      .eq("_id", _id);
 
     if (!error) {
       setComments((prev) =>
         prev.map((c) =>
-          c._id === id ? { ...c, comment: newText, update_at: new Date().toISOString() } : c
+          c._id === _id ? { ...c, comment: newText, update_at: new Date().toISOString() } : c
         )
       );
     }
@@ -394,7 +394,7 @@ export default function PostDetail() {
         </h1>
 
         {/* 본문 */}
-        <div className="mt-4 space-y-4 text-sm text-gray-300 leading-relaxed">
+        <div className="mt-4 space-y-4 text-sm text-gray-300 leading-relaxed whitespace-pre-line">
           {content}
         </div>
         
@@ -421,7 +421,7 @@ export default function PostDetail() {
           </div>
         </div>
 
-        {/* 해시시태그 */}
+        {/* 해시태그 */}
         <div
           className={twMerge(
               "mt-4 mb-[10px] w-full transition-all duration-100", // ✅ 본문과의 간격 mt-4 추가
@@ -543,7 +543,7 @@ export default function PostDetail() {
         {comments.map((c) =>
           <Comment
             key={c._id}
-            id={c._id}
+            _id={c._id}
             userId={c.user_id}
             author={c.profiles?.display_name || "익명"}
             level={c.profiles?.level || "0"}

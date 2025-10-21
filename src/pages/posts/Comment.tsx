@@ -1,6 +1,6 @@
 import { twMerge } from "tailwind-merge";
 import { SquarePen, Trash2 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ProfileImage from "../../components/ui/ProfileImage.tsx";
 import { Link } from "react-router-dom";
 
@@ -48,6 +48,11 @@ const Comment = ({
 }: CommentProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [text, setText] = useState(content);
+
+  // content prop이 바뀔 때 text state도 갱신
+  useEffect(() => {
+    setText(content);
+  }, [content]);
 
   const handleEdit = () => {
     if (isEditing) {
