@@ -155,8 +155,8 @@ export default function DetailPost() {
     console.log("커런트 타겟:", e.currentTarget);
     console.log("타겟:", e.target);
 
-    if (!title.trim() || !images.some((image) => image.trim()) || !content.trim()) {
-      alert("제목, 내용, 이미지 모두 입력해주세요.");
+    if (!title.trim() || !content.trim()) {
+      alert("제목과 내용을 모두 입력해주세요.");
       return;
     }
     // 포스트 수정 로직
@@ -180,41 +180,53 @@ export default function DetailPost() {
       if (!postData) throw new Error("게시글 수정 실패: 데이터 없음");
 
       // image 등록
-      // 저장 직전, 이전 목록을 가져옴
+      // 기존 이미지 목록 불러오기
       const { data: prevRows, error: prevErr } = await supabase
         .from("images")
         .select("_id, src")
-        .eq("post_id", postData._id);
+        .eq("post_id", postData._id)
+        .order("_id", { ascending: true }); // 순서 보장
       if (prevErr) throw prevErr;
 
-      const prevSrcs = new Set((prevRows ?? []).map(r => r.src));
-      const nextSrcs = new Set(images.filter(Boolean) as string[]);
+      const prev = prevRows ?? [];
+      const next = images.filter(Boolean) as string[];
 
-      // 삭제할 것들
-      const toDeleteIds = (prevRows ?? [])
-        .filter(r => !nextSrcs.has(r.src))
-        .map(r => r._id);
-
-      // 추가할 것들
-      const toInsert = (images.filter(Boolean) as string[])
-        .filter(src => !prevSrcs.has(src))
-        .map(src => ({ post_id: postData._id, src }));
-
-      if (toDeleteIds.length) {
-        const { error: delErr } = await supabase
-          .from("images")
-          .delete()
-          .in("_id", toDeleteIds);
-        if (delErr) throw delErr;
+      // 기존보다 이미지가 줄었으면, 초과분 삭제
+      if (next.length < prev.length) {
+        const toDeleteIds = prev.slice(next.length).map(r => r._id);
+        if (toDeleteIds.length) {
+          const { error: delErr } = await supabase
+            .from("images")
+            .delete()
+            .in("_id", toDeleteIds);
+          if (delErr) throw delErr;
+        }
       }
-      if (toInsert.length) {
-        const { error: insErr } = await supabase
-          .from("images")
-          .insert(toInsert);
+
+      // 기존보다 이미지가 늘었으면, 새로 추가
+      if (next.length > prev.length) {
+        const toInsert = next.slice(prev.length).map(src => ({
+          post_id: postData._id,
+          src,
+        }));
+        const { error: insErr } = await supabase.from("images").insert(toInsert);
         if (insErr) throw insErr;
       }
 
-      // hashtag 저장 (전체 삭제 -> 재삽입)
+      // 기존 개수와 같으면, 순서가 바뀌었을 수 있으므로 업데이트
+      if (next.length === prev.length) {
+        for (let i = 0; i < next.length; i++) {
+          if (next[i] !== prev[i]?.src) {
+            const { error: updErr } = await supabase
+              .from("images")
+              .update({ src: next[i] })
+              .eq("_id", prev[i]._id);
+            if (updErr) throw updErr;
+          }
+        }
+      }
+
+      // hashtag(해시태그) 저장 (전체 삭제 -> 재삽입)
       {
         const { error: delTagsErr } = await supabase
           .from("hashtags")
@@ -224,8 +236,10 @@ export default function DetailPost() {
 
         if (hashtags.length > 0) {
           const rows = hashtags.map((hashtag) => ({ post_id: postData._id, hashtag }));
-          const { error: insTagsErr } = await supabase.from("hashtags").insert(rows);
-          if (insTagsErr) throw insTagsErr;
+          const { error: insTagsErr } = await supabase
+          .from("hashtags")
+          .insert(rows);
+          if (insTagsErr) throw insTagsErr; 
         }
       }
 
@@ -238,13 +252,6 @@ export default function DetailPost() {
       setIsSubmitting(false);
     }
   };
-
-  const handleDelete = async () => {
-    const { post, error } = await supabase
-    .from('posts')
-    .delete() // 삭제
-    .eq("_id", params?.postId);
-  }
   
   return (
     <div className="bg-[#161C27] text-[14px] p-[30px] rounded-[16px]">
@@ -383,7 +390,7 @@ export default function DetailPost() {
           <input
             type="text"
             id="hashtags"
-            placeholder="태그를 입력하세요."
+            placeholder="해시태그를 입력하세요."
             className="placeholder-[#ADAEBC] w-full bg-white h-[42px] rounded-[8px] pl-4"
             value={hashtagInput}
             onChange={(e) => setHashtagInput(e.target.value)}
@@ -394,9 +401,9 @@ export default function DetailPost() {
         <div className="flex justify-between w-full border-t border-t-[#E5E7EB] pt-6">
           <button type="button"
             className="text-white w-[150px] h-10 rounded-[8px] border border-[#303A4B] shadow-[0_4px_4px_rgba(0,0,0,0.25)]"
-            onClick={handleDelete}
+            onClick={goBackHandler}
           >
-            삭제
+            취소
           </button>
           <button
             className="text-white w-[150px] h-10 rounded-[8px] bo bg-gradient-to-r from-[#6366F1] via-[#7761F3] to-[#8B5CF6] shadow-[0_0_4px_#8B5CF6]"
