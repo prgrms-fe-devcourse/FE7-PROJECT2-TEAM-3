@@ -21,7 +21,7 @@ type CommentProps = {
   _id: string;
   userId: string;
   author: string;
-  level: string;
+  level: number;
   badge: string;
   profileImage?: string | null;
   time: string;
@@ -46,6 +46,7 @@ const Comment = ({
   onEditSave,
   onDelete,
 }: CommentProps) => {
+  console.log("Comment()");
   const [isEditing, setIsEditing] = useState(false);
   const [text, setText] = useState(content);
 
@@ -114,7 +115,7 @@ const Comment = ({
             rows={4}
           />
         ) : (
-          <p className="text-sm text-gray-300 leading-relaxed">{content}</p>
+          <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-line">{content}</p>
         )}
       </div>
     </div>
