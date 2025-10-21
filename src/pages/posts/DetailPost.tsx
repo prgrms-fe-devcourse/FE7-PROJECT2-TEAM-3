@@ -404,21 +404,26 @@ export default function PostDetail() {
         {/* 이미지 */}
         <div className="mb-5">
           <div className="grid grid-cols-2 gap-4 mb-5">
-            {images.map((img, idx) => (
-              img && (
-                  <div
-                    key={idx}
-                    className="relative flex flex-col items-center justify-center w-full h-40 border border-[#D1D5DB] rounded-md cursor-pointer hover:border-blue-400 transition"
-                  >
-                    <img
-                      src={img}
-                      alt={`uploaded ${idx + 1}`}
-                      className="w-full h-full object-cover rounded-md"
-                    />
-                  </div>
+          {images.map((img, idx) => {
+              if (!img) return null;
+              const imageLength = images.filter(Boolean).length;
+              const baseClass = "relative flex flex-col items-center justify-center w-full border border-[#D1D5DB] rounded-md cursor-pointer hover:border-blue-400 transition";
+              const additionClass = imageLength === 1 ? "h-80 col-span-2" : imageLength === 2 ? "h-80 col-span-1" : "h-40";
+
+              return (
+                <div
+                  key={idx}
+                  className={twMerge(baseClass, additionClass)}
+                >
+                  <img
+                    src={img}
+                    alt={`uploaded ${idx + 1}`}
+                    className="w-full h-full object-cover rounded-md"
+                  />
+                </div>
               )
-            ))}
-          </div>
+            })}
+            </div>
         </div>
 
         {/* 해시태그 */}
