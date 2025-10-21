@@ -64,6 +64,7 @@ export default function UserSearch() {
           <div className="flex flex-col gap-4 bg-[#1A2537]">
             {filteredUsers.map((user) => (
               <Link
+                key={user._id}
                 to={`/userPage/${user._id}`}
                 className="flex gap-3 p-6 border border-[#303A4B] rounded-lg bg-[#161C27] cursor-pointer hover:bg-[#171f2b] hover:border-[#4E46A5]"
               >
