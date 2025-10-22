@@ -61,10 +61,10 @@ export default function Header() {
             }
           >
             <UserRoundSearch className="w-6 h-6 stroke-[#F59E0B]" />
-            유저 검색
+            메세지 목록
           </NavLink>
           <NavLink
-            to="/search"
+            to="/messages"
             className={({ isActive }) =>
               twMerge(
                 "flex items-center gap-3 px-4 py-3 border border-transparent text-white font-semibold rounded-lg hover:bg-[rgba(0,0,0,0.1)]",
