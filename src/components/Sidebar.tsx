@@ -7,10 +7,10 @@ import Modal from "./Modal";
 import SearchModal from "./SearchModal";
 import { useAuthStore } from "../stores/authStore";
 import ProfileImage from "./ui/ProfileImage";
-import type { AppNotification } from "../types/notification";
+import type { NotificationJoined } from "../types/notification";
 
 export default function Sidebar() {
-  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [notifications, setNotifications] = useState<NotificationJoined[]>([]);
   const [isNotiOpened, setIsNotiOpened] = useState(false);
   const [isSearchOpened, setIsSearchOpened] = useState(false);
   const isLogined = useAuthStore((state) => state.profile);

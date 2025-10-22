@@ -22,6 +22,7 @@ export default function Notifications({
             type,
             created_at,
             is_read,
+            user_to_notify,
             actor:actor_id ( _id, display_name, profile_image ),
             post:target_post_id ( _id, title )
           `
@@ -32,7 +33,17 @@ export default function Notifications({
         if (error) throw error;
 
         console.log(notificationData);
-        setNotifications(notificationData);
+
+        const formmated = notificationData.map((n) => ({
+          ...n,
+          actor: Array.isArray(n.actor)
+            ? (n.actor[0] ?? null)
+            : (n.actor ?? null),
+          post: Array.isArray(n.post) ? (n.post[0] ?? null) : (n.post ?? null),
+        }));
+
+        console.log(formmated);
+        setNotifications(formmated);
       } catch (e) {
         console.error(e);
       }
