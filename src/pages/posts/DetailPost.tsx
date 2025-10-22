@@ -271,17 +271,17 @@ export default function DetailPost() {
         setLiked(false);
         setLikeCount((prev) => (prev-1));
 
-        const { data, error: likeExpError } = await supabase
+        const { data: likeExpUp, error: likeExpUpError } = await supabase
         .from('profiles')
         .select("exp, level")
         .eq("_id", writerId)
         .single();
 
-        if (likeExpError) throw likeExpError;
+        if (likeExpUpError) throw likeExpUpError;
 
         // 경험치 업데이트
-        let newExp = (data?.exp || 0) - 10; // 좋아요 취소되면 경험치 -10
-        let newLevel = data?.level || 0;
+        let newExp = (likeExpUp?.exp || 0) - 10; // 좋아요 취소되면 경험치 -10
+        let newLevel = likeExpUp?.level || 0;
 
         // 레벨업 조건 체크
         if (newExp < 0) {
@@ -295,7 +295,7 @@ export default function DetailPost() {
           .update({ exp: newExp, level: newLevel })
           .eq("_id", writerId);
           // console.log("DP: update like EXP");
-
+        
         if (updateError) throw updateError;
       } else {
         // 좋아요 안 한 경우 → 등록
@@ -307,17 +307,17 @@ export default function DetailPost() {
         setLiked(true);
         setLikeCount((prev) => (prev+1));
 
-        const { data, error: likeExpError } = await supabase
+        const { data : likeExpDown, error: likeExpDownError } = await supabase
         .from('profiles')
         .select("exp, level")
         .eq("_id", writerId)
         .single();
 
-        if (likeExpError) throw likeExpError;
+        if (likeExpDownError) throw likeExpDownError;
 
         // 경험치 업데이트
-        let newExp = (data?.exp || 0) + 10; // 좋아요 받으면 경험치 +10
-        let newLevel = data?.level || 0;
+        let newExp = (likeExpDown?.exp || 0) + 10; // 좋아요 받으면 경험치 +10
+        let newLevel = likeExpDown?.level || 0;
 
         // 레벨업 조건 체크
         if (newExp >= 100) {
@@ -335,8 +335,6 @@ export default function DetailPost() {
           .update({ exp: newExp, level: newLevel })
           .eq("_id", writerId);
           // console.log("DP: update like EXP");
-
-        console.log("으아악", writerId, newLevel, newExp);
         if (updateError) throw updateError;
       }
     } catch (e) {
