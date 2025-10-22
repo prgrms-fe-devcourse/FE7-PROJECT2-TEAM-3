@@ -28,7 +28,7 @@ const Card = ({
 );
 
 export default function DetailPost() {
-    console.log("DetailPost()");
+    // console.log("DetailPost()");
     const navigate = useNavigate();
     const goBackHandler = () => {
       navigate(-1);
@@ -83,51 +83,64 @@ export default function DetailPost() {
     useEffect(() => {
       const fetchData = async () => {
         try {
+          console.log("페치");
+          let profile: { _id: string; email: string } | null = null;
           // 사용자 정보 조회
           const {
             data: { user },
           } = await supabase.auth.getUser();
+          console.log("user", user);
           // console.log("DP: auth");
+
           if (!user) {
             setIsLogin(false);
-            return;
+          } else {
+            const { data, error } = await supabase
+              .from("profiles")
+              .select("_id, email")
+              .eq("email", user.email)
+              .single();
+            console.log("데이터: ", data);
+            // console.log("DP: get Profiles");
+            if (error || !data) throw new Error("프로필 정보를 찾을 수 없습니다.");
+            profile = data;
+            setUserId(profile._id);
+            setIsLogin(true);
           }
-    
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("_id, email")
-            .eq("email", user.email)
-            .single();
-          // console.log("DP: get Profiles");
-          if (!profile) throw new Error("프로필 정보를 찾을 수 없습니다.");
-    
-          setUserId(profile._id);
-          setIsLogin(true);
-    
+          console.log("프로필: ", profile);
+
           // 게시글 조회
-          const { data: post, error } = await supabase
+          const { data: post, error: postError } = await supabase
             .from("posts")
             .select("_id, user_id, title, content, created_at")
             .eq("_id", params?.postId)
             .single();
             // console.log("DP: get Post");
-          if (error) throw error;
+          if (postError) throw postError;
     
           setTitle(post.title);
           setContent(post.content);
           setCreatedAt(post.created_at);
           setWriterId(post.user_id);
-          setIsMyPost(post.user_id === profile._id);
-    
+
+          console.log("포스트: ", post.title);
+          console.log("콘텐츠: ", post.content);
+          console.log("작성시간: ", post.created_at);
+          console.log("글 작성자: ", post.user_id);
+
+          // profile이 null이 아닌 경우에만 비교
+          if (profile) {
+            setIsMyPost(post.user_id === profile._id);
+          } else {
+            setIsMyPost(false);
+          }
         } catch (e) {
           console.error("데이터 로드 중 오류:", e);
           alert(`데이터 로드 중 오류가 발생했습니다.\n${(e as Error).message}`);
         }
       };
-    
       fetchData();
     }, [params?.postId]);
-    
 
     // 글쓴이 프로필 가져오기
     useEffect(() => {
@@ -152,6 +165,7 @@ export default function DetailPost() {
 
     // 본문 이미지 가져오기
     useEffect(() => {
+      console.log("image");
       const fetchImage = async () => {
         const { data: imageRows, error } = await supabase
         .from("images")
@@ -178,6 +192,7 @@ export default function DetailPost() {
 
     // 해시태그 가져오기
     useEffect(() => {
+      console.log("hash");
       const fetchHashtags = async () => {
         const { data: hashtag, error } = await supabase
         .from("hashtags")
@@ -196,6 +211,7 @@ export default function DetailPost() {
 
   // 하트 가져오기
   useEffect(() => {
+    console.log("like");
     const fetchLikes = async () => {
       const { data: likes, error } = await supabase
       .from("likes")
@@ -215,6 +231,7 @@ export default function DetailPost() {
 
   // 댓글 가져오기
   useEffect(() => {
+    console.log("comment");
     const fetchComments = async () => {
       const { data: commentsObj, error } = await supabase
       .from("comments")
