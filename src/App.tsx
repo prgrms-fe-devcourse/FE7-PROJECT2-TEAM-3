@@ -5,7 +5,6 @@ import DetailPost from "./pages/posts/DetailPost";
 import PostsList from "./pages/posts/PostsList";
 import PostCreatePage from "./pages/posts/PostCreatePage";
 import Login from "./pages/login/Login";
-import NotFound from "./pages/NotFound";
 import UserSetting from "./pages/login/UserSetting";
 import PostSearch from "./pages/search/PostSearch";
 import UserSearch from "./pages/search/UserSearch";
@@ -17,6 +16,7 @@ import UpdatePost from "./pages/posts/UpdatePost";
 import { Toaster } from "react-hot-toast";
 import MessagesPage from "./pages/chat/MessagesPage";
 import ChatRoom from "./pages/chat/ChatRoom";
+import NotFound from "./pages/NotFound";
 
 export default function App() {
   return (
