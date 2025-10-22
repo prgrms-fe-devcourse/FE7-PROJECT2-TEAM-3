@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 type BadgeProps = {
@@ -34,31 +35,16 @@ const BADGE_COLORS = [
 ];
 
 export default function Badge({ className, level }: BadgeProps) {
-  const validLevel = Math.max(0, Math.min(level!, ALL_BADGES.length - 1));
-  const badgeName = ALL_BADGES[validLevel];
-  const colorClasses = BADGE_COLORS[validLevel] || BADGE_COLORS[0];
-
-  // useEffect(() => {
-  //   const fetchUser = async () => {
-  //     try {
-  //       // Supabase DB 업데이트 요청
-  //       const { error } = await supabase
-  //         .from("profiles")
-  //         .update({ badge: badgeName })
-  //         .eq("_id", Id)
-  //         .select()
-  //         .single();
-
-  //       if (error) {
-  //         throw error;
-  //       }
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   };
-
-  //   fetchUser();
-  // }, []);
+  const [badgeName, SetBadgeName] = useState("");
+  const [colorClasses, SetColorClasses] = useState("");
+  useEffect(() => {
+    const fetchUser = async () => {
+      const validLevel = Math.max(0, Math.min(level!, ALL_BADGES.length - 1));
+      SetBadgeName(ALL_BADGES[validLevel]);
+      SetColorClasses(BADGE_COLORS[validLevel] || BADGE_COLORS[0]);
+    };
+    fetchUser();
+  }, [level]);
 
   return (
     <div
