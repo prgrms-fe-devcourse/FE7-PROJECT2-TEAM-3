@@ -171,7 +171,7 @@ export default function DetailPost() {
         .from("images")
         .select("src")
         .eq("post_id", params?.postId);
-        // console.log("DP: get Images");
+      // console.log("DP: get Images");
 
         if (error) {
           console.error("이미지 불러오기 실패:", error);
@@ -197,8 +197,8 @@ export default function DetailPost() {
         const { data: hashtag, error } = await supabase
         .from("hashtags")
         .select("hashtag")
-        .eq("post_id", params?.postId)
-        // console.log("DP: get Hashtags");
+        .eq("post_id", params?.postId);
+      // console.log("DP: get Hashtags");
 
         if (error) {
           console.error("해시태그 불러오기 실패:", error);
@@ -214,9 +214,9 @@ export default function DetailPost() {
     console.log("like");
     const fetchLikes = async () => {
       const { data: likes, error } = await supabase
-      .from("likes")
-      .select("user_id")
-      .eq("post_id", params?.postId);
+        .from("likes")
+        .select("user_id")
+        .eq("post_id", params?.postId);
       // console.log("DP: get Likes");
       if (error) {
         console.error("좋아요 불러오기 실패:", error);
@@ -319,7 +319,7 @@ export default function DetailPost() {
         const { error: insertError } = await supabase
           .from('likes')
           .insert([{ user_id: userId, post_id: params?.postId }]);
-          // console.log("DP: update Like");
+        // console.log("DP: update Like");
         if (insertError) throw insertError;
         setLiked(true);
         setLikeCount((prev) => (prev+1));
@@ -478,12 +478,12 @@ export default function DetailPost() {
       .from('posts')
       .delete() // 삭제
       .eq("_id", params?.postId);
-      // console.log("DP: delete POST");
-      goBackHandler();
-      if (error) {
-        console.error(error);
-      }
+    // console.log("DP: delete POST");
+    goBackHandler();
+    if (error) {
+      console.error(error);
     }
+  };
 
   return (
     <div className="max-w-4xl mx-auto p-6 text-gray-100">

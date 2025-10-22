@@ -51,7 +51,7 @@ export default function ChatRoom() {
     };
 
     fetchMessages();
-  }, [roomId]);
+  }, [roomId, myProfile?._id]);
 
   // 실시간 새 메시지 구독
   useEffect(() => {
@@ -90,6 +90,24 @@ export default function ChatRoom() {
         }
       )
       .subscribe();
+
+    const markMessagesAsRead = async () => {
+      if (!roomId || !myProfile?._id) return;
+
+      const { error } = await supabase
+        .from("messages")
+        .update({ is_read: true })
+        .eq("room_id", roomId) // 현재 방
+        .eq("is_read", false) // 아직 안 읽은 것만
+        .neq("user_id", myProfile._id); // 내가 보낸 메시지 제외
+
+      if (error) {
+        console.error("메시지 읽음 처리 실패:", error);
+      }
+    };
+
+    markMessagesAsRead();
+
     return () => {
       supabase.removeChannel(subscription);
     };
@@ -99,6 +117,26 @@ export default function ChatRoom() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  //"읽음"으로 처리하는 기능
+  useEffect(() => {
+    const markMessagesAsRead = async () => {
+      if (!roomId || !myProfile?._id) return;
+
+      const { error } = await supabase
+        .from("messages")
+        .update({ is_read: true })
+        .eq("room_id", roomId) // 현재 방
+        .eq("is_read", false) // 아직 안 읽은 것만
+        .neq("user_id", myProfile._id); // 내가 보낸 메시지 제외
+
+      if (error) {
+        console.error("메시지 읽음 처리 실패:", error);
+      }
+    };
+
+    markMessagesAsRead();
+  }, [roomId, myProfile?._id]);
 
   return (
     <div className="flex flex-col h-[calc(95vh-60px)]">

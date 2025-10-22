@@ -25,7 +25,8 @@
     animation: shootingStar 5s linear infinite;
   }
   .animate-flyingRocket {
-    animation: flyingRocket 1s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite alternate;
+    animation: flyingRocket 1s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite
+      alternate;
   }
   .animate-textZoom {
     animation: textZoom 1s linear infinite alternate;
@@ -35,5 +36,8 @@
   }
   .animate-loading-text {
     animation: loading-text 2s infinite ease-in-out both;
+  }
+  .animate-flyingAstronut {
+    animation: flyingAstronut 2s infinite linear both alternate;
   }
 }

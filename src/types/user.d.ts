@@ -1,4 +1,4 @@
-import type { JwtPayload } from '@supabase/supabase-js';
+import type { JwtPayload } from "@supabase/supabase-js";
 
 type Claims =
   | (JwtPayload & {

@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { Bell, Search, UserRound } from "lucide-react";
+import { Bell, Menu, Search, UserRound } from "lucide-react";
 import { Activity, useEffect, useState } from "react";
 import Notifications from "./aside/Notifications";
 import SidebarContents from "./aside/SidebarContents";
@@ -9,8 +9,12 @@ import { useAuthStore } from "../stores/authStore";
 import ProfileImage from "./ui/ProfileImage";
 import type { NotificationJoined } from "../types/notification";
 import supabase from "../utils/supabase";
+import { useBreakpoint } from "../hooks/useBreakPoint";
 
 export default function Sidebar() {
+  // 반응형 작업
+  const { isWearable } = useBreakpoint();
+  const [isSideOpened, setIsSideOpened] = useState(false);
   const [notifications, setNotifications] = useState<NotificationJoined[]>([]);
 
   const [isNotiOpened, setIsNotiOpened] = useState(false);
@@ -18,9 +22,13 @@ export default function Sidebar() {
   const isLogined = useAuthStore((state) => state.profile);
   const notiCount = notifications.filter((n) => n.is_read !== true);
 
-  const openSearch = () => setIsSearchOpened(true);
+  const openSearch = () => {
+    setIsSearchOpened(true);
+    if (isWearable) setIsSideOpened(false);
+  };
   const closeSearch = () => setIsSearchOpened(false);
   const toggleNotifications = () => setIsNotiOpened((p) => !p);
+  const toggleSidebar = () => setIsSideOpened((p) => !p);
 
   useEffect(() => {
     if (!isLogined?._id) return;
@@ -103,10 +111,7 @@ export default function Sidebar() {
           filter: `user_to_notify=eq.${isLogined._id}`,
         },
         async (payload) => {
-          // ... (기존 INSERT 로직) ...
-          console.log("🔔 새 알림 도착:", payload.new);
           await fetchJoinedNotification(payload.new._id);
-          // ... (이하 생략)
         }
       )
       .on(
@@ -200,6 +205,139 @@ export default function Sidebar() {
           <SidebarContents />
         </Activity>
       </aside>
+      {isWearable && (
+        <>
+          <Activity mode={!isSideOpened ? "visible" : "hidden"}>
+            <button
+              aria-label="메뉴여닫기"
+              className="flex-center fixed right-3 top-3 z-10 w-10 h-10 bg-[#161C27] rounded-lg border border-[#303A4B] shadow-[0_0_10px_#303A4B]"
+              onClick={toggleSidebar}
+            >
+              <Menu className="stroke-white" />
+            </button>
+          </Activity>
+          <Activity mode={isSideOpened ? "visible" : "hidden"}>
+            <div
+              className="fixed top-0 left-0 z-10 w-full h-full flex-center bg-[rgba(0,0,0,0.3)] backdrop-blur-lg"
+              onClick={toggleSidebar}
+            ></div>
+            <aside className="fixed right-0 z-10 bg-[#1a2537] border-l border-l-[#303A4B] lg:border-0 lg:relative w-full max-w-8/10 lg:max-w-80 min-h-full max-h-full overflow-y-scroll scrollbar-hide">
+              <div className="sticky top-0 z-[1] flex-center gap-2 h-18 px-3 border-b border-b-[#303A4B] bg-[#1A2537]">
+                <button
+                  className="flex-1 flex items-center gap-2 h-10 px-3 bg-[#161C27] rounded-lg text-sm font-medium text-gray-300 cursor-pointer hover:opacity-70"
+                  onClick={openSearch}
+                >
+                  <Search className="w-4 h-4 stroke-gray-300" />
+                  Explore...
+                </button>
+                {isLogined && (
+                  <>
+                    <button
+                      className="notification flex-center relative w-10 h-10 rounded-full cursor-pointer hover:bg-[#161C27] hover:opacity-70"
+                      onClick={toggleNotifications}
+                    >
+                      <Bell className="w-6 h-6 stroke-gray-300 fill-gray-300" />
+                      {/* 알림 있을 경우 뱃지 형성 */}
+                      {notifications.length > 0 && (
+                        <span className="absolute top-1.5 right-2.5 w-2 h-2 bg-[#A62F03] border-2 border-[#1A2537] rounded-full"></span>
+                      )}
+                    </button>
+                    <div className="">
+                      <Link
+                        to={`userPage/${isLogined._id}`}
+                        className="block hover:opacity-70"
+                      >
+                        {/* 프로필 이미지 src */}
+                        <ProfileImage
+                          className="w-10 h-10"
+                          src={isLogined.profile_image}
+                          alt={isLogined.display_name}
+                        />
+                      </Link>
+                    </div>
+                  </>
+                )}
+                {!isLogined && (
+                  <Link
+                    to="/login"
+                    className="flex-center relative w-10 h-10 rounded-full cursor-pointer hover:bg-[#161C27] hover:opacity-70"
+                  >
+                    <UserRound className="w-6 h-6 stroke-gray-300" />
+                  </Link>
+                )}
+              </div>
+              <Activity mode={isNotiOpened ? "visible" : "hidden"}>
+                <Notifications
+                  notifications={notifications}
+                  setNotifications={setNotifications}
+                  toggle={toggleNotifications}
+                />
+              </Activity>
+              <Activity mode={!isNotiOpened ? "visible" : "hidden"}>
+                <SidebarContents />
+              </Activity>
+            </aside>
+          </Activity>
+        </>
+      )}
+      {!isWearable && (
+        <aside className="fixed right-0 bg-[#1a2537] border-l border-l-[#303A4B] lg:border-0 lg:relative w-full max-w-80 overflow-y-scroll scrollbar-hide">
+          <div className="sticky top-0 z-[1] flex-center gap-2 h-18 px-3 border-b border-b-[#303A4B] bg-[#1A2537]">
+            <button
+              className="flex-1 flex items-center gap-2 h-10 px-3 bg-[#161C27] rounded-lg text-sm font-medium text-gray-300 cursor-pointer hover:opacity-70"
+              onClick={openSearch}
+            >
+              <Search className="w-4 h-4 stroke-gray-300" />
+              Explore...
+            </button>
+            {isLogined && (
+              <>
+                <button
+                  className="notification flex-center relative w-10 h-10 rounded-full cursor-pointer hover:bg-[#161C27] hover:opacity-70"
+                  onClick={toggleNotifications}
+                >
+                  <Bell className="w-6 h-6 stroke-gray-300 fill-gray-300" />
+                  {/* 알림 있을 경우 뱃지 형성 */}
+                  {notiCount.length > 0 && (
+                    <span className="absolute top-1.5 right-2.5 w-2 h-2 bg-[#A62F03] border-2 border-[#1A2537] rounded-full"></span>
+                  )}
+                </button>
+                <div className="">
+                  <Link
+                    to={`userPage/${isLogined._id}`}
+                    className="block hover:opacity-70"
+                  >
+                    {/* 프로필 이미지 src */}
+                    <ProfileImage
+                      className="w-10 h-10"
+                      src={isLogined.profile_image}
+                      alt={isLogined.display_name}
+                    />
+                  </Link>
+                </div>
+              </>
+            )}
+            {!isLogined && (
+              <Link
+                to="/login"
+                className="flex-center relative w-10 h-10 rounded-full cursor-pointer hover:bg-[#161C27] hover:opacity-70"
+              >
+                <UserRound className="w-6 h-6 stroke-gray-300" />
+              </Link>
+            )}
+          </div>
+          <Activity mode={isNotiOpened ? "visible" : "hidden"}>
+            <Notifications
+              notifications={notifications}
+              setNotifications={setNotifications}
+              toggle={toggleNotifications}
+            />
+          </Activity>
+          <Activity mode={!isNotiOpened ? "visible" : "hidden"}>
+            <SidebarContents />
+          </Activity>
+        </aside>
+      )}
       <Modal isOpen={isSearchOpened} onClose={closeSearch}>
         <SearchModal onClose={closeSearch} />
       </Modal>

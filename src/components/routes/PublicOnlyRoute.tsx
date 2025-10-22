@@ -1,5 +1,5 @@
-import { Navigate, Outlet, useLocation } from 'react-router';
-import { useAuthStore } from '../../stores/authStore';
+import { Navigate, Outlet, useLocation } from "react-router";
+import { useAuthStore } from "../../stores/authStore";
 
 // 로그인 하지 않은 사용자만 접근
 export default function PublicOnlyRoute() {
@@ -10,7 +10,7 @@ export default function PublicOnlyRoute() {
   if (isLoading) return null;
 
   if (claims) {
-    const to = location.state?.from?.pathname ?? '/home';
+    const to = location.state?.from?.pathname ?? "/home";
     return <Navigate to={to} replace />;
   }
 
