@@ -6,7 +6,7 @@ import { useParams } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
 import toast from "react-hot-toast";
 
-export default function DetailPost() {
+export default function UpdatePost() {
   const navigate = useNavigate();
   const goBackHandler = () => {
     navigate(-1);
@@ -85,6 +85,7 @@ export default function DetailPost() {
     fetchPost();
     fetchImage();
     fetchHashtags();
+    console.log("Update Post: fetchPost");
   }, [params?.postId]);
 
   // 이미지 업로드 핸들러
@@ -156,9 +157,6 @@ export default function DetailPost() {
       toast.success("유효한 게시물 ID가 필요합니다.");
       return;
     }
-    console.log("이벤트:", e);
-    console.log("커런트 타겟:", e.currentTarget);
-    console.log("타겟:", e.target);
 
     if (!title.trim() || !content.trim()) {
       toast.success("제목과 내용을 모두 입력해주세요.");
@@ -175,10 +173,12 @@ export default function DetailPost() {
           content,
           user_id: userId,
           channel_id: channelId,
-        })
-        .eq("_id", params?.postId)
-        .select()
-        .single();
+        }
+      )
+      .eq("_id", params?.postId)
+      .select()
+      .single();
+      console.log("UpdatePost: handleSubmit 게시글 수정");
       if (postError) throw postError;
       if (!postData) throw new Error("게시글 수정 실패: 데이터 없음");
 

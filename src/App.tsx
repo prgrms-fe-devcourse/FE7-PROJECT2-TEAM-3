@@ -51,7 +51,20 @@ export default function App() {
         </Route>
         <Route path="*" element={<NotFound />}></Route>
       </Routes>
-      <Toaster reverseOrder={false} />
+      <Toaster
+        position="bottom-right"
+        reverseOrder={false}
+        toastOptions={{
+          style: {
+            padding: "12px 16px",
+            background: "#1f2535",
+            border: "1px solid #44387D",
+            boxShadow: "0 0 15px rgba(123,97,255,0.2)",
+            fontSize: "14px",
+            color: "#fff",
+          },
+        }}
+      />
     </>
   );
 }
