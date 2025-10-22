@@ -74,7 +74,7 @@ export default function Header() {
             }
           >
             <Gamepad2 className="w-6 h-6 stroke-[#EF4444]" />
-            미니 게임
+            메세지 목록
           </NavLink>
         </nav>
         <div className="p-4">
