@@ -7,6 +7,14 @@ import Badge from "../ui/Badge";
 
 export default function UserPagePosts({ posts }: { posts: PostListItem[] }) {
   const navigate = useNavigate();
+
+  if (!posts || posts.length === 0) {
+    return (
+      <div className="text-center text-gray-400 mt-10">
+        아직 작성한 글이 없습니다.
+      </div>
+    );
+  }
   return (
     <>
       <div>

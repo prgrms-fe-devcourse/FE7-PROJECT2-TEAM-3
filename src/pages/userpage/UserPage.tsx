@@ -271,17 +271,24 @@ export default function ProfileHeaderSection() {
           <div className="flex justify-between items-center">
             <div className="flex items-start gap-2 -mt-12">
               <div className="border-8 rounded-full border-[#181c26] bg-[#181c26] -ml-2">
-                <div className={twMerge("relative w-24 h-24 rounded-full border-4", profile.is_online ? "border-[#44387D] shadow-[0px_0px_10px_0px_rgba(123,97,255,0.5)]" : "border-gray-400")}>
+                <div
+                  className={twMerge(
+                    "relative w-24 h-24 rounded-full border-4",
+                    profile.is_online
+                      ? "border-[#44387D] shadow-[0px_0px_10px_0px_rgba(123,97,255,0.5)]"
+                      : "border-gray-400"
+                  )}
+                >
                   <ProfileImage
                     className="w-full h-full object-cover"
                     src={profile.profile_image}
                     alt={profile.display_name}
                   />
                   <span
-                      title={profile.is_online ? "온라인" : "오프라인"}
-                      className={`absolute bottom-1.5 right-0 w-4.5 h-4.5 rounded-full border-3 border-[#1A2537] 
+                    title={profile.is_online ? "온라인" : "오프라인"}
+                    className={`absolute bottom-1.5 right-0 w-4.5 h-4.5 rounded-full border-3 border-[#1A2537] 
                     ${profile.is_online ? "bg-green-500" : "bg-gray-500"}`}
-                    ></span>
+                  ></span>
                 </div>
               </div>
               <div className="flex flex-col pt-12">
@@ -331,25 +338,25 @@ export default function ProfileHeaderSection() {
             </Activity>
             <Activity mode={userId !== myProfile?._id ? "visible" : "hidden"}>
               <div className="flex gap-2 self-start pt-2">
-            <Activity
+                <Activity
                   mode={myProfile && !isFollowing ? "visible" : "hidden"}
-            >
-              <button
-                onClick={followSubmit}
+                >
+                  <button
+                    onClick={followSubmit}
                     className="bg-[#5C4DCA] hover:bg-[#7b6cdb] text-white text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-1 cursor-pointer"
-              >
-                팔로우
-              </button>
-            </Activity>
-            <Activity
+                  >
+                    팔로우
+                  </button>
+                </Activity>
+                <Activity
                   mode={myProfile && isFollowing ? "visible" : "hidden"}
-            >
-              <button
-                onClick={unfollowSubmit}
+                >
+                  <button
+                    onClick={unfollowSubmit}
                     className="bg-[#9297AC] hover:bg-[#696F86] text-white text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-1 cursor-pointer"
-              >
-                팔로잉
-              </button>
+                  >
+                    팔로잉
+                  </button>
                 </Activity>
                 <button
                   onClick={() => findOrCreateChatRoom(`${userId}`)}
