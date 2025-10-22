@@ -97,6 +97,7 @@ const Comment = ({
         {/* 댓글 내용 영역 */}
         {isEditing ? (
           <textarea
+            aria-label="댓글 쓰는 영역"
             value={text}
             onChange={(e) => setText(e.target.value)}
             className="w-full bg-white text-gray-900 rounded-xl p-4 text-sm shadow-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 transition resize-none mt-2"

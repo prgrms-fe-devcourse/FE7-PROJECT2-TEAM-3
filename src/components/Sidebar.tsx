@@ -9,7 +9,7 @@ import { useAuthStore } from "../stores/authStore";
 import ProfileImage from "./ui/ProfileImage";
 
 export default function Sidebar() {
-  // const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isNotiOpened, setIsNotiOpened] = useState(false);
   const [isSearchOpened, setIsSearchOpened] = useState(false);
   const isLogined = useAuthStore((state) => state.profile);

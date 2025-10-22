@@ -332,6 +332,7 @@ export default function UpdatePost() {
                       className="w-full h-full object-cover rounded-md"
                     />
                     <button
+                    aria-label="이미지 파일 삭제 버튼"
                       type="button"
                       onClick={() => removeImage(idx)}
                       className="absolute top-2 right-2 bg-black bg-opacity-60 text-white rounded-full px-2 py-1 text-xs"
@@ -346,6 +347,7 @@ export default function UpdatePost() {
                       Click to upload image {idx + 1}
                     </p>
                     <input
+                    aria-label="이미지 파일 업로드"
                       type="file"
                       accept="image/*"
                       className="absolute inset-0 opacity-0 cursor-pointer"
@@ -384,6 +386,7 @@ export default function UpdatePost() {
                 >
                   #{tag}
                   <button
+                  aria-label="해시태그 삭제 버튼"
                     type="button"
                     onClick={() => removeHashtag(tag)}
                     className="cursor-pointer"
@@ -403,18 +406,20 @@ export default function UpdatePost() {
             value={hashtagInput}
             onChange={(e) => setHashtagInput(e.target.value)}
             onKeyDown={handleHashtagKeyDown}
+            aria-label="해시태그 입력 칸"
           />
         </div>
 
-        <div className="flex justify-between w-full border-t border-t-[#E5E7EB] pt-6">
+        <div className="flex justify-between w-full border-t-1 border-t-[#E5E7EB] pt-6">
           <button
-            type="button"
-            className="text-white w-[150px] h-10 rounded-[8px] border border-[#303A4B] shadow-[0_4px_4px_rgba(0,0,0,0.25)]"
+            aria-label="포스트 작성 취소"
+            className="text-white w-[150px] h-10 rounded-[8px] border-1 border-[#303A4B] shadow-[0_4px_4px_rgba(0,0,0,0.25)]"
             onClick={goBackHandler}
           >
             취소
           </button>
           <button
+            aria-label="포스트 수정"
             className="text-white w-[150px] h-10 rounded-[8px] bo bg-gradient-to-r from-[#6366F1] via-[#7761F3] to-[#8B5CF6] shadow-[0_0_4px_#8B5CF6]"
             disabled={isSubmitting}
           >
