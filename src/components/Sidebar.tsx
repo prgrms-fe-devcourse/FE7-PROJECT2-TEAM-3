@@ -16,6 +16,7 @@ export default function Sidebar() {
   const [isNotiOpened, setIsNotiOpened] = useState(false);
   const [isSearchOpened, setIsSearchOpened] = useState(false);
   const isLogined = useAuthStore((state) => state.profile);
+  const notiCount = notifications.filter((n) => n.is_read !== true);
 
   const openSearch = () => setIsSearchOpened(true);
   const closeSearch = () => setIsSearchOpened(false);
@@ -93,6 +94,7 @@ export default function Sidebar() {
     const channel = supabase
       .channel("realtime-notifications")
       .on(
+        // 👈 1. INSERT 구독
         "postgres_changes",
         {
           event: "INSERT",
@@ -101,24 +103,32 @@ export default function Sidebar() {
           filter: `user_to_notify=eq.${isLogined._id}`,
         },
         async (payload) => {
+          // ... (기존 INSERT 로직) ...
           console.log("🔔 새 알림 도착:", payload.new);
-
-          // INSERT된 알림 단건 다시 조회
-          const data = await fetchJoinedNotification(payload.new._id);
-          if (!data) return;
-
-          const formatted = {
-            ...data,
-            actor: Array.isArray(data.actor)
-              ? (data.actor[0] ?? null)
-              : (data.actor ?? null),
-            post: Array.isArray(data.post)
-              ? (data.post[0] ?? null)
-              : (data.post ?? null),
-          };
+          await fetchJoinedNotification(payload.new._id);
+          // ... (이하 생략)
+        }
+      )
+      .on(
+        // 👈 2. DELETE 구독 (여기를 추가!)
+        "postgres_changes",
+        {
+          event: "DELETE",
+          schema: "public",
+          table: "notifications",
+          filter: `user_to_notify=eq.${isLogined._id}`,
+        },
+        (payload) => {
+          // payload.old에 삭제된 데이터가 포함됩니다.
+          console.log("🗑️ 다른 곳에서 알림 삭제됨:", payload.old);
 
           if (mounted) {
-            setNotifications((prev) => [formatted, ...prev]);
+            // 로컬 state에서도 해당 ID를 가진 알림을 제거합니다.
+            setNotifications((prev) =>
+              prev.filter(
+                (notification) => notification._id !== payload.old._id
+              )
+            );
           }
         }
       )
@@ -151,7 +161,7 @@ export default function Sidebar() {
               >
                 <Bell className="w-6 h-6 stroke-gray-300 fill-gray-300" />
                 {/* 알림 있을 경우 뱃지 형성 */}
-                {notifications.length > 0 && (
+                {notiCount.length > 0 && (
                   <span className="absolute top-1.5 right-2.5 w-2 h-2 bg-[#A62F03] border-2 border-[#1A2537] rounded-full"></span>
                 )}
               </button>
@@ -183,6 +193,7 @@ export default function Sidebar() {
           <Notifications
             notifications={notifications}
             setNotifications={setNotifications}
+            toggle={toggleNotifications}
           />
         </Activity>
         <Activity mode={!isNotiOpened ? "visible" : "hidden"}>
