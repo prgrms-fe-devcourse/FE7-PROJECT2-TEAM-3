@@ -2,8 +2,8 @@ import { NavLink, useNavigate } from "react-router";
 import { twMerge } from "tailwind-merge";
 import Logo from "../assets/image/logo.png";
 import {
-  Gamepad2,
   House,
+  Mail,
   MoonStar,
   SatelliteDish,
   UserRoundSearch,
@@ -35,7 +35,7 @@ export default function Header() {
               )
             }
           >
-            <House className="w-6 h-6 stroke-[#06B6D4]" />홈
+            <House className="w-6 h-6 stroke-[#EF4444]" />홈
           </NavLink>
           <NavLink
             to="/channel/all"
@@ -61,7 +61,7 @@ export default function Header() {
             }
           >
             <UserRoundSearch className="w-6 h-6 stroke-[#F59E0B]" />
-            메세지 목록
+            유저 검색
           </NavLink>
           <NavLink
             to="/messages"
@@ -73,8 +73,8 @@ export default function Header() {
               )
             }
           >
-            <Gamepad2 className="w-6 h-6 stroke-[#EF4444]" />
-            미니 게임
+            <Mail className="w-6 h-6 stroke-[#06B6D4]" />
+            채팅 목록
           </NavLink>
         </nav>
         <div className="p-4">
