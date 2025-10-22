@@ -1,0 +1,27 @@
+import type { Database } from "./database";
+
+type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+
+type SearchProfile = Pick<
+  Profile,
+  "display_name" | "profile_image" | "level" | "badge"
+>;
+
+type UserProfile = Pick<
+  Profile,
+  | "_id"
+  | "display_name"
+  | "profile_image"
+  | "level"
+  | "badge"
+  | "is_online"
+  | "bio"
+>;
+
+interface UserRankItem
+  extends Pick<
+    Profile,
+    "_id" | "display_name" | "profile_image" | "level" | "exp" | "badge"
+  > {
+  rank: number;
+}

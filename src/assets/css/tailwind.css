@@ -1,0 +1,39 @@
+@import "tailwindcss";
+@import "tailwind-scrollbar-hide/v4";
+
+@tailwind utilities;
+@layer utilities {
+  /* center */
+  .flex-center {
+    @apply flex justify-center items-center;
+  }
+  .font-yangjin {
+    @apply font-['Yangjin'];
+  }
+  /* 헤더 */
+  .on svg {
+    stroke: #f2913d;
+  }
+  /* 메인 - 채널:반짝이는 애니메이션 */
+  .animate-twinkle {
+    animation: twinkle 2.4s ease-in-out infinite;
+  }
+  .animate-twinkleBackground {
+    animation: twinkleBackground 4s ease-in-out infinite;
+  }
+  .animate-shootingStar {
+    animation: shootingStar 5s linear infinite;
+  }
+  .animate-flyingRocket {
+    animation: flyingRocket 1s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite alternate;
+  }
+  .animate-textZoom {
+    animation: textZoom 1s linear infinite alternate;
+  }
+  .animate-dot-pulse {
+    animation: dot-pulse 1.4s infinite ease-in-out both;
+  }
+  .animate-loading-text {
+    animation: loading-text 2s infinite ease-in-out both;
+  }
+}

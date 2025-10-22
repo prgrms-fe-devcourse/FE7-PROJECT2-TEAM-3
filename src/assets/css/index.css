@@ -1,0 +1,13 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css");
+
+@import "./tailwind.css";
+@import "./font.css";
+@import "./keyframes.css";
+
+body {
+  font-family: "Pretendard", sans-serif;
+  font-weight: 500;
+  line-height: 150%;
+  letter-spacing: -0.03rem;
+  background: #1a2537; /* 기본 어두운 남색 배경 */
+}
