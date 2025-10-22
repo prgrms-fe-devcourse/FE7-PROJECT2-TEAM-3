@@ -28,7 +28,6 @@ export default function UserPageComments({ comments }: Props) {
         >
           {/* 💬 댓글 (아이콘 + 텍스트) */}
           <div className="flex items-center mb-2 text-gray-400">
-            {/* <MessageSquare className="w-4 h-4 mr-2 fill-gray-400" /> */}
             {/* 💬 댓글 내용 */}
             <p className="text-white">{c.comment}</p>
           </div>
