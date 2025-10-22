@@ -16,6 +16,7 @@ import UserPageComments from "../../components/userPage/UserPageComments";
 import FollowsModal from "../../components/FollowsModal";
 import Badge from "../../components/ui/Badge";
 import useChatRoom from "../../stores/useChatRoom";
+import type { CommentListItem, FormattedComments } from "../../types/comment";
 
 export default function ProfileHeaderSection() {
   const navigate = useNavigate();

@@ -1,16 +1,16 @@
-// import type { Database } from "./database";
+import type { Database } from "./database";
+import type { Profile } from "./profile";
 
-interface UserCommentItem {
-  _id: string;
-  comment: string;
-  created_at: string;
-  post: {
-    _id: string;
-    title: string;
-  };
+type CommentType = Database["public"]["Tables"]["comments"]["Row"];
+
+type CommentProfile = Pick<
+  Profile,
+  "display_name" | "profile_image" | "exp" | "badge" | "level"
+>;
+
+interface CommentDetailItem extends CommentType {
+  profiles: CommentProfile[0];
 }
-
-// type CommentListItem = Database["public"]["Tables"]["comments"]["Row"];
 
 interface CommentListItem {
   comment: string;
