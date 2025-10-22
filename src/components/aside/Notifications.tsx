@@ -10,7 +10,8 @@ import { useNavigate } from "react-router";
 export default function Notifications({
   notifications,
   setNotifications,
-}: NotificationProps) {
+  toggle,
+}: NotificationProps & { toggle: () => void }) {
   const navigate = useNavigate();
   const profile = useAuthStore((state) => state.profile);
 
@@ -35,8 +36,6 @@ export default function Notifications({
 
         if (error) throw error;
 
-        console.log(notificationData);
-
         const formmated = notificationData.map((n) => ({
           ...n,
           actor: Array.isArray(n.actor)
@@ -45,18 +44,40 @@ export default function Notifications({
           post: Array.isArray(n.post) ? (n.post[0] ?? null) : (n.post ?? null),
         }));
 
-        console.log(formmated);
         setNotifications(formmated);
       } catch (e) {
         console.error(e);
       }
     };
 
-    fetchNotifi();
+    if (profile?._id) {
+      fetchNotifi();
+    }
   }, [profile?._id, setNotifications]);
 
-  const clickHandler = (type: string, option: string | null | undefined) => {
+  const clickHandler = async (
+    type: string,
+    option: string | null | undefined,
+    notificationId: string
+  ) => {
     if (!option) return; // option이 null/undefined면 아무 작업도 하지 않음
+
+    if (profile?._id) {
+      try {
+        await supabase
+          .from("notifications")
+          .update({ is_read: true })
+          .eq("_id", notificationId);
+
+        setNotifications((prev) =>
+          prev.map((n) =>
+            n._id === notificationId ? { ...n, is_read: true } : n
+          )
+        );
+      } catch (e) {
+        console.error(e);
+      }
+    }
 
     console.log(type, option);
     switch (type) {
@@ -74,64 +95,112 @@ export default function Notifications({
     }
   };
 
-  return (
-    <div className="notifications p-4 text-gray-300 space-y-4">
-      {notifications.length === 0 ? (
-        <p>🔔 새로운 알림이 없습니다.</p>
-      ) : (
-        notifications.map((n) => (
-          <div
-            key={n._id}
-            className="p-4 rounded-lg bg-[#1B2333] flex gap-3 cursor-pointer border border-transparent hover:bg-[#2A3244] hover:border-[#4E46A5] transition-all duration-200"
-            onClick={() =>
-              clickHandler(
-                n.type,
-                n.type === "follow" ? n.actor?._id : n.post?._id
-              )
-            }
-          >
-            <div className="flex items-center justify-center flex-shrink-0 w-6 h-8">
-              {n.type === "like" && (
-                <Heart className="text-[#FF0000] fill-[#FF0000] w-5 h-5 mx-auto" />
-              )}
-              {n.type === "comment" && (
-                <MessageSquare className="text-[#F59E0B] fill-[#F59E0B] w-5 h-5 mx-auto" />
-              )}
-              {n.type === "follow" && (
-                <UserPlus className="text-green-500 fill-green-500 w-5 h-5 mx-auto" />
-              )}
-            </div>
-            <div className="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden bg-gray-500 flex items-center justify-center">
-              <ProfileImage
-                src={n.actor?.profile_image}
-                alt={n.actor?.display_name || "프로필 이미지"}
-                className="w-8 h-8 rounded-full object-cover"
-              />
-            </div>
-            <div className="flex flex-col justify-center flex-1">
-              <p className="text-sm text-white font-semibold">
-                {n.actor?.display_name || "알 수 없는 사용자"} 님이{" "}
-                {n.type === "like"
-                  ? "내 게시물을 좋아합니다."
-                  : n.type === "comment"
-                    ? "게시물에 댓글을 남겼습니다."
-                    : "나를 팔로우했습니다."}
-              </p>
+  const deleteNotification = async (notificationId: string) => {
+    console.log("클릭됨");
+    console.log(notificationId);
 
-              {n.post?.title ? (
-                <p className="text-xs text-gray-400 italic">
-                  게시글: {n.post.title}
-                </p>
-              ) : n.type !== "follow" ? (
-                <p className="text-xs text-gray-400 italic">게시글 정보 없음</p>
-              ) : null}
+    setNotifications([]);
+    try {
+      const { error } = await supabase
+        .from("notifications")
+        .delete()
+        .eq("user_to_notify", notificationId);
+
+      if (error) throw error;
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  return (
+    <>
+      <div className="flex justify-between px-4 pt-4">
+        <button
+          className="px-3 py-1.5 rounded-md bg-[#4A77E4] text-white font-medium text-sm hover:bg-[#3d68d0]"
+          onClick={toggle}
+        >
+          뒤로 가기
+        </button>
+        <button
+          onClick={() => deleteNotification(notifications[0].user_to_notify)}
+          className="px-3 py-1.5 rounded-md bg-[#D94A3D] text-white font-medium text-sm hover:bg-[#c23c30] cursor-pointer"
+        >
+          모두 삭제
+        </button>
+      </div>
+      <div className="notifications p-4 text-gray-300 space-y-4">
+        {notifications.length === 0 ? (
+          <p>새로운 알림이 없습니다.</p>
+        ) : (
+          notifications.map((n) => (
+            <div
+              key={n._id}
+              className={`p-3 rounded-lg flex gap-3 cursor-pointer border border-transparent transition-all duration-200 ${
+                n.is_read
+                  ? "bg-[#1B2333]/60 filter grayscale opacity-70"
+                  : "bg-[#1B2333] text-gray-300 hover:bg-[#2A3244] hover:border-[#4E46A5]"
+              }`}
+              onClick={() =>
+                clickHandler(
+                  n.type,
+                  n.type === "follow" ? n.actor?._id : n.post?._id,
+                  n._id
+                )
+              }
+            >
+              <div className="flex gap-3 w-full">
+                <div>
+                  {n.type === "like" && (
+                    <Heart className="text-[#FF0000] fill-[#FF0000] w-5 h-5 mx-auto" />
+                  )}
+                  {n.type === "comment" && (
+                    <MessageSquare className="text-[#F59E0B] fill-[#F59E0B] w-5 h-5 mx-auto" />
+                  )}
+                  {n.type === "follow" && (
+                    <UserPlus className="text-green-500 fill-green-500 w-5 h-5 mx-auto" />
+                  )}
+                </div>
+                <div className="flex flex-col flex-1 gap-2">
+                  <div className="flex justify-between">
+                    <div>
+                      <ProfileImage
+                        src={n.actor?.profile_image}
+                        alt={n.actor?.display_name || "프로필 이미지"}
+                        className="w-5 h-5 rounded-full object-cover"
+                      />
+                    </div>
+                    <div className="text-[8px] text-[#9CA4AF] whitespace-nowrap self-start">
+                      {formaRelativeTime(n.created_at)}
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-[#9CA3AF] font-semibold">
+                    <span className="text-white text-[16px]">
+                      {n.actor?.display_name || "알 수 없는 사용자"}
+                    </span>{" "}
+                    님이{" "}
+                    {n.type === "like"
+                      ? "내 게시물을 좋아합니다."
+                      : n.type === "comment"
+                        ? "게시물에 댓글을 남겼습니다."
+                        : "나를 팔로우했습니다."}
+                  </p>
+
+                  {n.post?.title ? (
+                    <p className="text-xs text-gray-400 italic">
+                      게시글: {n.post.title}
+                    </p>
+                  ) : n.type !== "follow" ? (
+                    <p className="text-xs text-gray-400 italic">
+                      게시글 정보 없음
+                    </p>
+                  ) : null}
+                </div>
+              </div>
             </div>
-            <div className="text-xs text-gray-500 whitespace-nowrap self-start">
-              {formaRelativeTime(n.created_at)}
-            </div>
-          </div>
-        ))
-      )}
-    </div>
+          ))
+        )}
+      </div>
+    </>
   );
 }
