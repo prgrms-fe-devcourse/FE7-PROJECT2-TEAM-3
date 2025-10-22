@@ -419,11 +419,11 @@ export default function UpdatePost() {
             취소
           </button>
           <button
-            aria-label="포스트 등록"
+            aria-label="포스트 수정"
             className="text-white w-[150px] h-10 rounded-[8px] bo bg-gradient-to-r from-[#6366F1] via-[#7761F3] to-[#8B5CF6] shadow-[0_0_4px_#8B5CF6]"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "등록 중..." : "작성"}
+            {isSubmitting ? "등록 중..." : "수정"}
           </button>
         </div>
       </form>
