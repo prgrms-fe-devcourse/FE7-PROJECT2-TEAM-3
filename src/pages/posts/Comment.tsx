@@ -31,7 +31,7 @@ const Comment = ({
   onEditSave,
   onDelete,
 }: CommentProps) => {
-  console.log("Comment()");
+  // console.log("Comment()");
   const [isEditing, setIsEditing] = useState(false);
   const [text, setText] = useState(content);
 
