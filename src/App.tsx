@@ -16,6 +16,7 @@ import UpdatePost from "./pages/posts/UpdatePost";
 import { Toaster } from "react-hot-toast";
 import MessagesPage from "./pages/chat/MessagesPage";
 import ChatRoom from "./pages/chat/ChatRoom";
+import NotFound from "./pages/NotFound";
 
 export default function App() {
   return (
