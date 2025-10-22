@@ -42,18 +42,36 @@ export type Database = {
       channels: {
         Row: {
           _id: string;
-          description: string;
+          description: string | null;
           name: string;
         };
         Insert: {
           _id: string;
-          description: string;
+          description?: string | null;
           name: string;
         };
         Update: {
           _id?: string;
-          description?: string;
+          description?: string | null;
           name?: string;
+        };
+        Relationships: [];
+      };
+      chat_rooms: {
+        Row: {
+          created_at: string;
+          id: string;
+          participants: string[];
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          participants: string[];
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          participants?: string[];
         };
         Relationships: [];
       };
@@ -120,15 +138,15 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: "follows_following_id_fkey";
-            columns: ["following_id"];
+            foreignKeyName: "follows_follower_id_fkey";
+            columns: ["follower_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["_id"];
           },
           {
-            foreignKeyName: "follows_user_id_fkey";
-            columns: ["follower_id"];
+            foreignKeyName: "follows_following_id_fkey";
+            columns: ["following_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["_id"];
@@ -232,39 +250,91 @@ export type Database = {
           },
         ];
       };
-      notification: {
+      messages: {
         Row: {
-          _id: string;
+          content: string;
           created_at: string;
-          notification: string | null;
-          post_id: string | null;
+          id: string;
+          room_id: string | null;
           user_id: string | null;
         };
         Insert: {
-          _id?: string;
+          content: string;
           created_at?: string;
-          notification?: string | null;
-          post_id?: string | null;
+          id?: string;
+          room_id?: string | null;
           user_id?: string | null;
         };
         Update: {
-          _id?: string;
+          content?: string;
           created_at?: string;
-          notification?: string | null;
-          post_id?: string | null;
+          id?: string;
+          room_id?: string | null;
           user_id?: string | null;
         };
         Relationships: [
           {
-            foreignKeyName: "notification_post_id_fkey";
-            columns: ["post_id"];
+            foreignKeyName: "messages_room_id_fkey";
+            columns: ["room_id"];
+            isOneToOne: false;
+            referencedRelation: "chat_rooms";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "messages_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["_id"];
+          },
+        ];
+      };
+      notifications: {
+        Row: {
+          _id: string;
+          actor_id: string;
+          created_at: string;
+          is_read: boolean;
+          target_post_id: string | null;
+          type: string;
+          user_to_notify: string;
+        };
+        Insert: {
+          _id?: string;
+          actor_id?: string;
+          created_at?: string;
+          is_read?: boolean;
+          target_post_id?: string | null;
+          type: string;
+          user_to_notify?: string;
+        };
+        Update: {
+          _id?: string;
+          actor_id?: string;
+          created_at?: string;
+          is_read?: boolean;
+          target_post_id?: string | null;
+          type?: string;
+          user_to_notify?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notification_actor_id_fkey";
+            columns: ["actor_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["_id"];
+          },
+          {
+            foreignKeyName: "notification_target_post_id_fkey";
+            columns: ["target_post_id"];
             isOneToOne: false;
             referencedRelation: "posts";
             referencedColumns: ["_id"];
           },
           {
-            foreignKeyName: "notification_user_id_fkey";
-            columns: ["user_id"];
+            foreignKeyName: "notification_user_to_notify_fkey";
+            columns: ["user_to_notify"];
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["_id"];
@@ -324,30 +394,33 @@ export type Database = {
           cover_image: string | null;
           display_name: string;
           email: string | null;
-          exp: string | null;
+          exp: number | null;
           is_online: boolean | null;
+          level: number | null;
           profile_image: string | null;
         };
         Insert: {
           _id?: string;
-          badges?: string | null;
+          badge?: string | null;
           bio?: string | null;
           cover_image?: string | null;
           display_name: string;
           email?: string | null;
-          exp?: string | null;
+          exp?: number | null;
           is_online?: boolean | null;
+          level?: number | null;
           profile_image?: string | null;
         };
         Update: {
           _id?: string;
-          badges?: string | null;
+          badge?: string | null;
           bio?: string | null;
           cover_image?: string | null;
           display_name?: string;
           email?: string | null;
-          exp?: string | null;
+          exp?: number | null;
           is_online?: boolean | null;
+          level?: number | null;
           profile_image?: string | null;
         };
         Relationships: [];

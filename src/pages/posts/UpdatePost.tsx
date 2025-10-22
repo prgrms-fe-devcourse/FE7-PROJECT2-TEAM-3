@@ -1,22 +1,18 @@
 import { ImageUp, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import supabase from "../../utils/supabase";
-import { useParams } from "react-router";
 import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
 import toast from "react-hot-toast";
 
-// TODO: 제목 글자 제한, 내용 최소 글자 수 제한
-
-const allowedChannels = ["weird", "todayPick", "new", "bestCombo"] as const;
-export default function PostCreatePage() {
+export default function UpdatePost() {
   const navigate = useNavigate();
   const goBackHandler = () => {
     navigate(-1);
   };
-
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const [title, setTitle] = useState<string>("");
+  const [content, setContent] = useState<string>("");
   const [images, setImages] = useState<(string | null)[]>([
     null,
     null,
@@ -24,65 +20,75 @@ export default function PostCreatePage() {
     null,
   ]);
   const [userId, setUserId] = useState<string | null>(null);
+  const [postId, setPostId] = useState<string>("");
   const [channelId, setChannelId] = useState<string | null>(null);
   const [hashtags, setHashtags] = useState<string[]>([]);
   const [hashtagInput, setHashtagInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { channel } = useParams();
+  // 포스트 id 가져오기
+  const params = useParams();
 
-  // 잘못된 URL로 접근했을 때 막는 로직
+  const { channel } = params;
+
+  // params.postId
   useEffect(() => {
-    if (
-      channel &&
-      !allowedChannels.includes(
-        channel as "weird" | "todayPick" | "new" | "bestCombo"
-      )
-    ) {
-      alert("잘못된 채널입니다.");
-      navigate("/channel/write", { replace: true });
-    } else setChannelId(channel ?? null);
-  }, [channel, navigate]);
+    const fetchPost = async () => {
+      const { data: post, error } = await supabase
+        .from("posts")
+        .select("_id, user_id, channel_id, title, content")
+        .eq("_id", params?.postId)
+        .single();
 
-  useEffect(() => {
-    const fetchProfileId = async () => {
-      try {
-        const {
-          data: { user },
-          error: userError,
-        } = await supabase.auth.getUser();
-
-        // 로그인되지 않은 사용자 예외처리 부분
-        if (!user) {
-          toast.success("로그인 후 이용 가능한 페이지입니다.");
-
-          navigate("/login");
-          return;
-        }
-
-        if (userError) throw userError;
-        if (!user) throw new Error("로그인 된 사용자가 없습니다.");
-
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("_id, email")
-          .eq("email", user.email)
-          .single();
-
-        if (profileError) throw profileError;
-        if (!profile) throw new Error("프로필 정보를 찾을 수 없습니다.");
-
-        setUserId(profile._id);
-      } catch (e) {
-        console.error("사용자 정보 조회 중 오류", e);
-        alert(`게시글 등록 중 오류가 발생했습니다.\n${(e as Error).message}`);
+      if (error) {
+        console.error("게시글 불러오기 실패:", error);
+      } else {
+        setChannelId(post.channel_id);
+        setPostId(post._id);
+        setUserId(post.user_id);
+        setTitle(post.title);
+        setContent(post.content);
       }
     };
+    const fetchImage = async () => {
+      const { data: imageRows, error } = await supabase
+        .from("images")
+        .select("src")
+        .eq("post_id", params?.postId);
 
-    fetchProfileId();
-  }, [navigate]);
+      if (error) {
+        console.error("이미지 불러오기 실패:", error);
+      } else if (imageRows) {
+        // src 필드만 추출해서 상태에 넣기
+        const imageSrcList = imageRows.map((img) => img.src);
 
-  // 업로드 핸들러
+        // 이미지 배열을 최대 4칸 구조에 맞게 채우기
+        const updatedImages = Array(4)
+          .fill(null)
+          .map((_, idx) => imageSrcList[idx] || null);
+
+        setImages(updatedImages);
+      }
+    };
+    const fetchHashtags = async () => {
+      const { data: hashtag, error } = await supabase
+        .from("hashtags")
+        .select("hashtag")
+        .eq("post_id", params?.postId);
+
+      if (error) {
+        console.error("해시태그 불러오기 실패:", error);
+      } else {
+        setHashtags(hashtag.map((h) => h.hashtag));
+      }
+    };
+    fetchPost();
+    fetchImage();
+    fetchHashtags();
+    console.log("Update Post: fetchPost");
+  }, [params?.postId]);
+
+  // 이미지 업로드 핸들러
   const handleImageUpload = (
     e: React.ChangeEvent<HTMLInputElement>,
     index: number
@@ -141,103 +147,111 @@ export default function PostCreatePage() {
   // 폼 제출 시 함수
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (isSubmitting) return;
 
     // 예외처리 부분
     if (!userId || userId.trim() === "") {
       toast.success("유효한 사용자 ID가 필요합니다.");
-
       return;
     }
-    if (!title.trim() || !content.trim() || !channelId?.trim()) {
-      toast.success("제목, 내용, 채널 아이디를 모두 입력해주세요.");
+    if (!postId || postId.trim() === "") {
+      toast.success("유효한 게시물 ID가 필요합니다.");
       return;
     }
 
-    // 실제 포스트 등록 로직
+    if (!title.trim() || !content.trim()) {
+      toast.success("제목과 내용을 모두 입력해주세요.");
+      return;
+    }
+    // 포스트 수정 로직
     try {
       setIsSubmitting(true);
-      // post 등록
+      // post 수정
       const { data: postData, error: postError } = await supabase
         .from("posts")
-        .insert([
-          {
-            title,
-            content,
-            user_id: userId,
-            channel_id: channelId,
-          },
-        ])
-        .select()
-        .single();
-      if (postError) throw postError;
-
-      try {
-        // 현재 프로필 정보 가져오기
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("exp, level")
-          .eq("_id", userId)
-          .single();
-
-        if (profileError) throw profileError;
-
-        let newExp = (profile?.exp || 0) + 30; // 게시글 등록 시 경험치 +30
-        let newLevel = profile?.level || 0;
-
-        // 레벨업 조건 체크
-        if (newExp >= 100) {
-          if (newLevel < 10) {
-            newLevel += 1; // 레벨 +1
-            newExp = newExp % 100; // 경험치 초기화
-          } else {
-            newExp = 100;
-          }
+        .update({
+          title,
+          content,
+          user_id: userId,
+          channel_id: channelId,
         }
-
-        // 업데이트 쿼리 실행
-        const { error: updateError } = await supabase
-          .from("profiles")
-          .update({ exp: newExp, level: newLevel })
-          .eq("_id", userId);
-
-        if (updateError) throw updateError;
-      } catch (e) {
-        console.error("경험치 업데이트 중 오류:", e);
-      }
+      )
+      .eq("_id", params?.postId)
+      .select()
+      .single();
+      console.log("UpdatePost: handleSubmit 게시글 수정");
+      if (postError) throw postError;
+      if (!postData) throw new Error("게시글 수정 실패: 데이터 없음");
 
       // image 등록
-      if (images.filter(Boolean).length > 0) {
-        const { error: imageError } = await supabase
+      // 기존 이미지 목록 불러오기
+      const { data: prevRows, error: prevErr } = await supabase
+        .from("images")
+        .select("_id, src")
+        .eq("post_id", postData._id)
+        .order("_id", { ascending: true }); // 순서 보장
+      if (prevErr) throw prevErr;
+
+      const prev = prevRows ?? [];
+      const next = images.filter(Boolean) as string[];
+
+      // 기존보다 이미지가 줄었으면, 초과분 삭제
+      if (next.length < prev.length) {
+        const toDeleteIds = prev.slice(next.length).map((r) => r._id);
+        if (toDeleteIds.length) {
+          const { error: delErr } = await supabase
+            .from("images")
+            .delete()
+            .in("_id", toDeleteIds);
+          if (delErr) throw delErr;
+        }
+      }
+
+      // 기존보다 이미지가 늘었으면, 새로 추가
+      if (next.length > prev.length) {
+        const toInsert = next.slice(prev.length).map((src) => ({
+          post_id: postData._id,
+          src,
+        }));
+        const { error: insErr } = await supabase
           .from("images")
-          .insert(
-            images.filter(Boolean).map((src) => ({
-              post_id: postData._id,
-              src,
-            }))
-          )
-          .select();
-
-        if (imageError) throw imageError;
+          .insert(toInsert);
+        if (insErr) throw insErr;
       }
 
-      // hashtag 등록
-      if (hashtags.length > 0) {
-        const { error: hashtagError } = await supabase
+      // 기존 개수와 같으면, 순서가 바뀌었을 수 있으므로 업데이트
+      if (next.length === prev.length) {
+        for (let i = 0; i < next.length; i++) {
+          if (next[i] !== prev[i]?.src) {
+            const { error: updErr } = await supabase
+              .from("images")
+              .update({ src: next[i] })
+              .eq("_id", prev[i]._id);
+            if (updErr) throw updErr;
+          }
+        }
+      }
+
+      // hashtag(해시태그) 저장 (전체 삭제 -> 재삽입)
+      {
+        const { error: delTagsErr } = await supabase
           .from("hashtags")
-          .insert(
-            hashtags.map((hashtag) => ({
-              post_id: postData._id,
-              hashtag,
-            }))
-          )
-          .select();
+          .delete()
+          .eq("post_id", postData._id);
+        if (delTagsErr) throw delTagsErr;
 
-        if (hashtagError) throw hashtagError;
+        if (hashtags.length > 0) {
+          const rows = hashtags.map((hashtag) => ({
+            post_id: postData._id,
+            hashtag,
+          }));
+          const { error: insTagsErr } = await supabase
+            .from("hashtags")
+            .insert(rows);
+          if (insTagsErr) throw insTagsErr;
+        }
       }
 
-      toast.success("게시글이 등록되었습니다.");
-
+      toast.success("게시글이 수정되었습니다.");
       navigate(`/channel/${channelId}`);
     } catch (e) {
       console.log(e);
@@ -318,6 +332,7 @@ export default function PostCreatePage() {
                       className="w-full h-full object-cover rounded-md"
                     />
                     <button
+                    aria-label="이미지 파일 삭제 버튼"
                       type="button"
                       onClick={() => removeImage(idx)}
                       className="absolute top-2 right-2 bg-black bg-opacity-60 text-white rounded-full px-2 py-1 text-xs"
@@ -332,7 +347,7 @@ export default function PostCreatePage() {
                       Click to upload image {idx + 1}
                     </p>
                     <input
-                      aria-label="이미지 업로드 영역"
+                    aria-label="이미지 파일 업로드"
                       type="file"
                       accept="image/*"
                       className="absolute inset-0 opacity-0 cursor-pointer"
@@ -371,7 +386,7 @@ export default function PostCreatePage() {
                 >
                   #{tag}
                   <button
-                  aria-label="해시태그 지우기"
+                  aria-label="해시태그 삭제 버튼"
                     type="button"
                     onClick={() => removeHashtag(tag)}
                     className="cursor-pointer"
@@ -386,12 +401,12 @@ export default function PostCreatePage() {
           <input
             type="text"
             id="hashtags"
-            placeholder="태그를 입력하세요."
+            placeholder="해시태그를 입력하세요."
             className="placeholder-[#ADAEBC] w-full bg-white h-[42px] rounded-[8px] pl-4"
             value={hashtagInput}
             onChange={(e) => setHashtagInput(e.target.value)}
             onKeyDown={handleHashtagKeyDown}
-            aria-label="해시태그 입력칸"
+            aria-label="해시태그 입력 칸"
           />
         </div>
 
@@ -404,11 +419,11 @@ export default function PostCreatePage() {
             취소
           </button>
           <button
-            aria-label="포스트 등록"
+            aria-label="포스트 수정"
             className="text-white w-[150px] h-10 rounded-[8px] bo bg-gradient-to-r from-[#6366F1] via-[#7761F3] to-[#8B5CF6] shadow-[0_0_4px_#8B5CF6]"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "등록 중..." : "작성"}
+            {isSubmitting ? "등록 중..." : "수정"}
           </button>
         </div>
       </form>

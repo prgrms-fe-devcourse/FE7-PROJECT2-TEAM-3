@@ -11,10 +11,21 @@ export default function CoverImage({
   alt: string;
 }) {
   return (
-    <img
-      className={twMerge("rounded-full object-cover", className)}
-      src={src !== null ? src : NoCoverImage}
-      alt={alt}
-    />
+    <>
+      {src && (
+        <img
+          className={twMerge("object-cover", className)}
+          src={src}
+          alt={alt}
+        />
+      )}
+      {!src && (
+        <img
+          className={twMerge("object-cover", className)}
+          src={NoCoverImage}
+          alt={alt}
+        />
+      )}
+    </>
   );
 }

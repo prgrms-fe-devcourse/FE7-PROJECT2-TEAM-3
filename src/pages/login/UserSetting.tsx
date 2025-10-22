@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuthStore } from "../../stores/authStore";
 import supabase from "../../utils/supabase";
+import toast from "react-hot-toast";
 
 export default function UserSetting() {
   const claims = useAuthStore((state) => state.claims);
@@ -23,7 +24,7 @@ export default function UserSetting() {
         .select();
       if (error) throw error;
       if (data) {
-        alert("회원가입이 완료되었습니다!");
+        toast.success("회원가입이 완료되었습니다!");
         navigate("/home");
       }
     } catch (error) {
@@ -55,7 +56,7 @@ export default function UserSetting() {
           return;
         }
 
-        if (profiles?.display_name) {
+        if (profiles?.exp) {
           navigate("/home");
         }
       }
