@@ -42,18 +42,36 @@ export type Database = {
       channels: {
         Row: {
           _id: string;
-          description: string;
+          description: string | null;
           name: string;
         };
         Insert: {
           _id: string;
-          description: string;
+          description?: string | null;
           name: string;
         };
         Update: {
           _id?: string;
-          description?: string;
+          description?: string | null;
           name?: string;
+        };
+        Relationships: [];
+      };
+      chat_rooms: {
+        Row: {
+          created_at: string;
+          id: string;
+          participants: string[];
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          participants: string[];
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          participants?: string[];
         };
         Relationships: [];
       };
@@ -67,12 +85,12 @@ export type Database = {
           user_id: string;
         };
         Insert: {
-          _id: string;
+          _id?: string;
           comment: string;
-          created_at: string;
-          post_id: string;
-          update_at: string;
-          user_id: string;
+          created_at?: string;
+          post_id?: string;
+          update_at?: string;
+          user_id?: string;
         };
         Update: {
           _id?: string;
@@ -84,7 +102,7 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: "comments_post_id_fkey1";
+            foreignKeyName: "comments_post_id_fkey";
             columns: ["post_id"];
             isOneToOne: false;
             referencedRelation: "posts";
@@ -107,10 +125,10 @@ export type Database = {
           following_id: string;
         };
         Insert: {
-          _id: string;
-          created_at: string;
-          follower_id: string;
-          following_id: string;
+          _id?: string;
+          created_at?: string;
+          follower_id?: string;
+          following_id?: string;
         };
         Update: {
           _id?: string;
@@ -143,10 +161,10 @@ export type Database = {
           post_id: string;
         };
         Insert: {
-          _id: string;
-          created_at: string;
+          _id?: string;
+          created_at?: string;
           hashtag: string;
-          post_id: string;
+          post_id?: string;
         };
         Update: {
           _id?: string;
@@ -172,9 +190,9 @@ export type Database = {
           src: string | null;
         };
         Insert: {
-          _id: string;
-          created_at: string;
-          post_id: string;
+          _id?: string;
+          created_at?: string;
+          post_id?: string;
           src?: string | null;
         };
         Update: {
@@ -202,8 +220,8 @@ export type Database = {
           user_id: string | null;
         };
         Insert: {
-          _id: string;
-          created_at: string;
+          _id?: string;
+          created_at?: string;
           post_id?: string | null;
           update_at?: string | null;
           user_id?: string | null;
@@ -232,39 +250,91 @@ export type Database = {
           },
         ];
       };
-      notification: {
+      messages: {
         Row: {
-          _id: string;
+          content: string;
           created_at: string;
-          notification: string | null;
-          post_id: string | null;
+          id: string;
+          room_id: string | null;
           user_id: string | null;
         };
         Insert: {
-          _id: string;
-          created_at: string;
-          notification?: string | null;
-          post_id?: string | null;
+          content: string;
+          created_at?: string;
+          id?: string;
+          room_id?: string | null;
           user_id?: string | null;
         };
         Update: {
-          _id?: string;
+          content?: string;
           created_at?: string;
-          notification?: string | null;
-          post_id?: string | null;
+          id?: string;
+          room_id?: string | null;
           user_id?: string | null;
         };
         Relationships: [
           {
-            foreignKeyName: "notification_post_id_fkey";
-            columns: ["post_id"];
+            foreignKeyName: "messages_room_id_fkey";
+            columns: ["room_id"];
+            isOneToOne: false;
+            referencedRelation: "chat_rooms";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "messages_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["_id"];
+          },
+        ];
+      };
+      notifications: {
+        Row: {
+          _id: string;
+          actor_id: string;
+          created_at: string;
+          is_read: boolean;
+          target_post_id: string | null;
+          type: string;
+          user_to_notify: string;
+        };
+        Insert: {
+          _id?: string;
+          actor_id?: string;
+          created_at?: string;
+          is_read?: boolean;
+          target_post_id?: string | null;
+          type: string;
+          user_to_notify?: string;
+        };
+        Update: {
+          _id?: string;
+          actor_id?: string;
+          created_at?: string;
+          is_read?: boolean;
+          target_post_id?: string | null;
+          type?: string;
+          user_to_notify?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notification_actor_id_fkey";
+            columns: ["actor_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["_id"];
+          },
+          {
+            foreignKeyName: "notification_target_post_id_fkey";
+            columns: ["target_post_id"];
             isOneToOne: false;
             referencedRelation: "posts";
             referencedColumns: ["_id"];
           },
           {
-            foreignKeyName: "notification_user_id_fkey";
-            columns: ["user_id"];
+            foreignKeyName: "notification_user_to_notify_fkey";
+            columns: ["user_to_notify"];
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["_id"];
@@ -282,13 +352,13 @@ export type Database = {
           user_id: string;
         };
         Insert: {
-          _id: string;
+          _id?: string;
           channel_id?: string | null;
           content: string;
-          created_at: string;
+          created_at?: string;
           title: string;
-          update_at: string;
-          user_id: string;
+          update_at?: string;
+          user_id?: string;
         };
         Update: {
           _id?: string;
@@ -330,7 +400,7 @@ export type Database = {
           profile_image: string | null;
         };
         Insert: {
-          _id: string;
+          _id?: string;
           badge?: string | null;
           bio?: string | null;
           cover_image?: string | null;

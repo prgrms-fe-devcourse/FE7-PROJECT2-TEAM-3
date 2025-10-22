@@ -1,6 +1,5 @@
 import { Link } from "react-router";
 import { Bell, Search, UserRound } from "lucide-react";
-import type { Database } from "../types/database";
 import { Activity, useState } from "react";
 import Notifications from "./aside/Notifications";
 import SidebarContents from "./aside/SidebarContents";
@@ -8,8 +7,6 @@ import Modal from "./Modal";
 import SearchModal from "./SearchModal";
 import { useAuthStore } from "../stores/authStore";
 import ProfileImage from "./ui/ProfileImage";
-
-type Notification = Database["public"]["Tables"]["notification"]["Row"];
 
 export default function Sidebar() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -69,7 +66,10 @@ export default function Sidebar() {
           )}
         </div>
         <Activity mode={isNotiOpened ? "visible" : "hidden"}>
-          <Notifications />
+          <Notifications
+            notifications={notifications}
+            setNotifications={setNotifications}
+          />
         </Activity>
         <Activity mode={!isNotiOpened ? "visible" : "hidden"}>
           <SidebarContents />
