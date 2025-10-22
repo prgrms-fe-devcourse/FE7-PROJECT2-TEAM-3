@@ -24,83 +24,104 @@ export default function MessagesPage() {
   const [chatRooms, setChatRooms] = useState<ChatRoomInboxItem[]>([]);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchChatRooms = async () => {
-      if (!myProfile?._id) return;
+  //  Realtime 적용을 위해 초기 데이터 로딩 함수를 외부에 정의
+  const fetchRoomList = async () => {
+    if (!myProfile?._id) return;
 
-      try {
-        const { data: roomsData, error: roomsError } = await supabase
-          .from("chat_rooms")
-          .select("id, participants")
-          .contains("participants", [myProfile._id]);
+    try {
+      // 채팅방 목록 조회 (기존 로직 유지)
+      const { data: roomsData, error: roomsError } = await supabase
+        .from("chat_rooms")
+        .select("id, participants")
+        .contains("participants", [myProfile._id]);
 
-        if (roomsError) throw roomsError;
-        if (!roomsData) return;
+      if (roomsError) throw roomsError;
+      if (!roomsData) return;
 
-        const roomDetailsPromises = roomsData.map(async (room) => {
-          const otherUserId = room.participants.find(
-            (id: string) => id !== myProfile._id
-          );
-          if (!otherUserId) return null;
-
-          // 상대방 프로필 가져오기
-          const profilePromise = supabase
-            .from("profiles")
-            .select("display_name, profile_image, level")
-            .eq("_id", otherUserId)
-            .single();
-
-          // 마지막 메시지 가져오기
-          const lastMessagePromise = supabase
-            .from("messages")
-            .select("content, created_at")
-            .eq("room_id", room.id)
-            .order("created_at", { ascending: false })
-            .limit(1)
-            .single();
-
-          // 동시 실행
-          const [profileResult, messageResult] = await Promise.all([
-            profilePromise,
-            lastMessagePromise,
-          ]);
-
-          // 결과 조합
-          return {
-            roomId: room.id,
-            otherParticipant: {
-              id: otherUserId,
-              display_name: profileResult.data?.display_name || "알 수 없음",
-              profile_image: profileResult.data?.profile_image,
-              level: profileResult.data?.level,
-            },
-            lastMessage: {
-              content: messageResult.data?.content || null,
-              created_at: messageResult.data?.created_at || null,
-            },
-          };
-        });
-
-        // 모든 방의 상세 정보가 로드될 때까지 기다림
-        const resolvedRoomDetails = (
-          await Promise.all(roomDetailsPromises)
-        ).filter(Boolean) as ChatRoomInboxItem[];
-
-        // (선택) 마지막 메시지 시간 기준으로 방 목록 정렬
-        resolvedRoomDetails.sort(
-          (a, b) =>
-            b.lastMessage.created_at?.localeCompare(
-              a.lastMessage.created_at || ""
-            ) || 0
+      // 각 방의 상세 정보 (프로필, 마지막 메시지) 로드 (기존 로직 유지)
+      const roomDetailsPromises = roomsData.map(async (room) => {
+        const otherUserId = room.participants.find(
+          (id: string) => id !== myProfile._id
         );
+        if (!otherUserId) return null;
 
-        setChatRooms(resolvedRoomDetails);
-      } catch (error) {
-        console.error("채팅방 목록 로드 실패:", error);
-      }
+        // 상대방 프로필 가져오기 (프로필은 정적으로 유지)
+        const profilePromise = supabase
+          .from("profiles")
+          .select("display_name, profile_image, level")
+          .eq("_id", otherUserId)
+          .single();
+
+        // 마지막 메시지 가져오기 (정적으로 가져옴)
+        const lastMessagePromise = supabase
+          .from("messages")
+          .select("content, created_at")
+          .eq("room_id", room.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .single();
+
+        const [profileResult, messageResult] = await Promise.all([
+          profilePromise,
+          lastMessagePromise,
+        ]);
+
+        return {
+          roomId: room.id,
+          otherParticipant: {
+            id: otherUserId,
+            display_name: profileResult.data?.display_name || "알 수 없음",
+            profile_image: profileResult.data?.profile_image,
+            level: profileResult.data?.level,
+          },
+          lastMessage: {
+            content: messageResult.data?.content || null,
+            created_at: messageResult.data?.created_at || null,
+          },
+        };
+      });
+
+      const resolvedRoomDetails = (
+        await Promise.all(roomDetailsPromises)
+      ).filter(Boolean) as ChatRoomInboxItem[];
+
+      resolvedRoomDetails.sort(
+        (a, b) =>
+          b.lastMessage.created_at?.localeCompare(
+            a.lastMessage.created_at || ""
+          ) || 0
+      );
+
+      setChatRooms(resolvedRoomDetails);
+
+      return resolvedRoomDetails;
+    } catch (error) {
+      console.error("채팅방 목록 로드 실패:", error);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    fetchRoomList();
+
+    const messageSubscription = supabase
+      .channel("message_inbox_updates")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+        },
+        () => {
+          fetchRoomList();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      messageSubscription.unsubscribe();
     };
-
-    fetchChatRooms();
   }, [myProfile?._id]);
 
   return (
