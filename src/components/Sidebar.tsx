@@ -1,18 +1,18 @@
 import { Link } from "react-router";
 import { Bell, Search, UserRound } from "lucide-react";
-import type { Database } from "../types/database";
+// import type { Database } from "../types/database";
 import { Activity, useState } from "react";
-import Notifications from "./aside/Notifications";
+// import Notifications from "./aside/Notifications";
 import SidebarContents from "./aside/SidebarContents";
 import Modal from "./Modal";
 import SearchModal from "./SearchModal";
 import { useAuthStore } from "../stores/authStore";
 import ProfileImage from "./ui/ProfileImage";
 
-type Notification = Database["public"]["Tables"]["notification"]["Row"];
+// type Notification = Database["public"]["Tables"]["notification"]["Row"];
 
 export default function Sidebar() {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  // const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isNotiOpened, setIsNotiOpened] = useState(false);
   const [isSearchOpened, setIsSearchOpened] = useState(false);
   const isLogined = useAuthStore((state) => state.profile);
@@ -40,9 +40,9 @@ export default function Sidebar() {
               >
                 <Bell className="w-6 h-6 stroke-gray-300 fill-gray-300" />
                 {/* 알림 있을 경우 뱃지 형성 */}
-                {notifications.length > 0 && (
+                {/* {notifications.length > 0 && (
                   <span className="absolute top-1.5 right-2.5 w-2 h-2 bg-[#A62F03] border-2 border-[#1A2537] rounded-full"></span>
-                )}
+                )} */}
               </button>
               <div className="">
                 <Link
@@ -69,7 +69,9 @@ export default function Sidebar() {
           )}
         </div>
         <Activity mode={isNotiOpened ? "visible" : "hidden"}>
-          <Notifications />
+          {/* <Notifications /> */}
+          {/* 임시 */}
+          <div></div>
         </Activity>
         <Activity mode={!isNotiOpened ? "visible" : "hidden"}>
           <SidebarContents />
