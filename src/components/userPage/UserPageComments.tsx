@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router";
 import { NotebookPen } from "lucide-react";
 import { formaRelativeTime } from "../../utils/formatRelativeTime";
+import type { FormattedComments } from "../../types/comment";
 
 interface Props {
   comments: FormattedComments[];

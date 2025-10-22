@@ -15,11 +15,14 @@ import UserTabSwitcher from "../../components/userPage/UserTabSwitcher";
 import UserPageComments from "../../components/userPage/UserPageComments";
 import FollowsModal from "../../components/FollowsModal";
 import Badge from "../../components/ui/Badge";
+import useChatRoom from "../../stores/useChatRoom";
+import type { CommentListItem, FormattedComments } from "../../types/comment";
 
 export default function ProfileHeaderSection() {
   const navigate = useNavigate();
   const { userId } = useParams();
   const myProfile = useAuthStore((state) => state.profile);
+  const { findOrCreateChatRoom } = useChatRoom();
 
   // 팔로워, 팔로잉 수 상태
   const [followers, setFollowers] = useState<number>(0);
@@ -317,33 +320,35 @@ export default function ProfileHeaderSection() {
                 </button>
               </div>
             </Activity>
-            <Activity
-              mode={
-                myProfile && userId !== myProfile?._id && !isFollowing
-                  ? "visible"
-                  : "hidden"
-              }
-            >
-              <button
-                onClick={followSubmit}
-                className="bg-[#5C4DCA] hover:bg-[#7b6cdb] text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors cursor-pointer"
-              >
-                팔로우
-              </button>
-            </Activity>
-            <Activity
-              mode={
-                myProfile && userId !== myProfile?._id && isFollowing
-                  ? "visible"
-                  : "hidden"
-              }
-            >
-              <button
-                onClick={unfollowSubmit}
-                className="bg-[#9297AC] hover:bg-[#696F86] text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors cursor-pointer"
-              >
-                팔로잉
-              </button>
+            <Activity mode={userId !== myProfile?._id ? "visible" : "hidden"}>
+              <div className="flex gap-2 self-start pt-2">
+                <Activity
+                  mode={myProfile && !isFollowing ? "visible" : "hidden"}
+                >
+                  <button
+                    onClick={followSubmit}
+                    className="bg-[#5C4DCA] hover:bg-[#7b6cdb] text-white text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    팔로우
+                  </button>
+                </Activity>
+                <Activity
+                  mode={myProfile && isFollowing ? "visible" : "hidden"}
+                >
+                  <button
+                    onClick={unfollowSubmit}
+                    className="bg-[#9297AC] hover:bg-[#696F86] text-white text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    팔로잉
+                  </button>
+                </Activity>
+                <button
+                  onClick={() => findOrCreateChatRoom(`${userId}`)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  채팅
+                </button>
+              </div>
             </Activity>
           </div>
           <p className="text-sm text-gray-300 mt-4 mb-6 overflow-hidden text-ellipsis display-box line-clamp-6">
