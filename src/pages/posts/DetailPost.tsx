@@ -328,7 +328,7 @@ export default function DetailPost() {
         // 상태 업데이트
         setComments((prev) => [...prev, commentData]);
         setNewComment("");
-
+        
         // 경험치 업데이트
         let newExp = (commentData.profiles?.exp || 0) + 15; // 댓글 등록 시 경험치 +15
         let newLevel = commentData.profiles?.level || 0;
