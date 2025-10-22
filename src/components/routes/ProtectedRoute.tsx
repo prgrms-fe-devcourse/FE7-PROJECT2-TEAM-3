@@ -1,5 +1,5 @@
-import { Navigate, Outlet, useLocation } from 'react-router';
-import { useAuthStore } from '../../stores/authStore';
+import { Navigate, Outlet, useLocation } from "react-router";
+import { useAuthStore } from "../../stores/authStore";
 
 // 로그인한 사용자만 접근
 export default function ProtectedRoutes() {
@@ -10,7 +10,7 @@ export default function ProtectedRoutes() {
   if (isLoading) return null;
 
   if (!claims) {
-    return <Navigate to={'/login'} replace state={{ from: location }} />;
+    return <Navigate to={"/login"} replace state={{ from: location }} />;
   }
 
   return <Outlet />;

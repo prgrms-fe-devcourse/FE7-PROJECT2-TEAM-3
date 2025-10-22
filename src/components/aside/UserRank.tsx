@@ -3,14 +3,20 @@ import ProfileImage from "../ui/ProfileImage";
 import { Link } from "react-router";
 import type { UserRankItem } from "../../types/profile";
 
-export default function UserRank({ user, index }: { user: UserRankItem; index: number }) {
+export default function UserRank({
+  user,
+  index,
+}: {
+  user: UserRankItem;
+  index: number;
+}) {
   return (
     <article>
       <Link
         to={`/userPage/${user._id}`}
         className="flex-center gap-2 p-3 border border-transparent rounded-lg hover:border-[#85523E] hover:bg-[linear-gradient(180deg,_rgba(255,255,255,0.1)_0%,_rgba(242,145,61,0.1)_100%)]"
       >
-        <div className="relative -z-1">
+        <div className="relative">
           <ProfileImage
             className="w-10 h-10"
             src={user.profile_image}
