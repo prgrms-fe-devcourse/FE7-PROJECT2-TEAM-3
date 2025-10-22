@@ -1,7 +1,7 @@
 import React, {useState, useEffect, type FormEvent} from "react";
 import { twMerge } from "tailwind-merge";
 import {  MessageSquare, Heart, SquarePen, Trash2 } from "lucide-react";
-import Comment, {Badge} from "./Comment";
+import Comment from "./Comment";
 import { useParams } from "react-router";
 import supabase from "../../utils/supabase";
 import { useNavigate } from "react-router";
@@ -9,6 +9,7 @@ import { formaRelativeTime } from "../../utils/formatRelativeTime";
 import ProfileImage from "../../components/ui/ProfileImage.tsx";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
+import Badge from "../../components/ui/Badge.tsx";
 
 // 공통 카드 (shadow 제거 + 지정 배경색)
 const Card = ({
@@ -42,8 +43,7 @@ export default function DetailPost() {
     const [writerId, setWriterId] = useState<string>("");
     const [profileImage, setProfileImage] = useState<string | undefined>(undefined);
     const [nickname, setNickname] = useState<string>("");
-    const [level, setLevel] = useState<string>("");
-    const [badge, setBadge] = useState<string>("");
+    const [level, setLevel] = useState<number>(0);
     const [createdAt, setCreatedAt] = useState<string>("");
     
     // 본문 영역
@@ -62,7 +62,6 @@ export default function DetailPost() {
       display_name: string;
       profile_image: string | null;
       exp: number;
-      badge: string;
       level: number;
     };
     
@@ -136,7 +135,7 @@ export default function DetailPost() {
       const fetchProfile = async () => {
         const { data: profile, error } = await supabase
           .from("profiles")
-          .select("_id, display_name, profile_image, is_online, level, badge")
+          .select("_id, display_name, profile_image, is_online, level")
           .eq("_id", writerId)
           .single();
           // console.log("DP: get writerId");
@@ -146,7 +145,6 @@ export default function DetailPost() {
           setNickname(profile.display_name);
           setProfileImage(profile.profile_image);
           setLevel(profile.level);
-          setBadge(profile.badge);
         }
       };
       fetchProfile();
@@ -231,8 +229,7 @@ export default function DetailPost() {
                 display_name,
                 profile_image,
                 exp,
-                level,
-                badge
+                level
               ) `)
       .eq("post_id", params?.postId)
       .order("created_at", { ascending: true });
@@ -273,6 +270,33 @@ export default function DetailPost() {
         if (deleteError) throw  deleteError;
         setLiked(false);
         setLikeCount((prev) => (prev-1));
+
+        const { data, error: likeExpError } = await supabase
+        .from('profiles')
+        .select("exp, level")
+        .eq("_id", writerId)
+        .single();
+
+        if (likeExpError) throw likeExpError;
+
+        // 경험치 업데이트
+        let newExp = (data?.exp || 0) - 10; // 좋아요 취소되면 경험치 -10
+        let newLevel = data?.level || 0;
+
+        // 레벨업 조건 체크
+        if (newExp < 0) {
+            newLevel -= 1; // 레벨 -1
+            newExp = newExp + 100; // 경험치 업데이트
+        }
+
+        // 업데이트 쿼리 실행
+        const { error: updateError } = await supabase
+          .from("profiles")
+          .update({ exp: newExp, level: newLevel })
+          .eq("_id", writerId);
+          // console.log("DP: update like EXP");
+
+        if (updateError) throw updateError;
       } else {
         // 좋아요 안 한 경우 → 등록
         const { error: insertError } = await supabase
@@ -282,6 +306,38 @@ export default function DetailPost() {
         if (insertError) throw insertError;
         setLiked(true);
         setLikeCount((prev) => (prev+1));
+
+        const { data, error: likeExpError } = await supabase
+        .from('profiles')
+        .select("exp, level")
+        .eq("_id", writerId)
+        .single();
+
+        if (likeExpError) throw likeExpError;
+
+        // 경험치 업데이트
+        let newExp = (data?.exp || 0) + 10; // 좋아요 받으면 경험치 +10
+        let newLevel = data?.level || 0;
+
+        // 레벨업 조건 체크
+        if (newExp >= 100) {
+          if (newLevel < 10) {
+            newLevel += 1; // 레벨 +1
+            newExp = newExp % 100; // 경험치 초기화
+          } else {
+            newExp = 100;
+          }
+        }
+
+        // 업데이트 쿼리 실행
+        const { error: updateError } = await supabase
+          .from("profiles")
+          .update({ exp: newExp, level: newLevel })
+          .eq("_id", writerId);
+          // console.log("DP: update like EXP");
+
+        console.log("으아악", writerId, newLevel, newExp);
+        if (updateError) throw updateError;
       }
     } catch (e) {
       console.error('좋아요 처리 중 오류:', e);
@@ -321,7 +377,6 @@ export default function DetailPost() {
               display_name,
               profile_image,
               exp,
-              badge,
               level
             )
           `)
@@ -332,12 +387,16 @@ export default function DetailPost() {
         if (selectError || !commentData) throw selectError;
 
         // 상태 업데이트
-        setComments((prev) => [...prev, commentData]);
+        setComments((prev) => [...prev, commentData] as unknown as CommentType[]);
         setNewComment("");
 
         // 경험치 업데이트
-        let newExp = (commentData.profiles?.exp || 0) + 15; // 댓글 등록 시 경험치 +15
-        let newLevel = commentData.profiles?.level || 0;
+        const profile =
+        Array.isArray(commentData.profiles)
+          ? commentData.profiles[0]
+          : commentData.profiles;
+        let newExp = (profile?.exp || 0) + 15; // 댓글 등록 시 경험치 +15
+        let newLevel = profile?.level || 0;
 
         // 레벨업 조건 체크
         if (newExp >= 100) {
@@ -354,7 +413,7 @@ export default function DetailPost() {
           .from("profiles")
           .update({ exp: newExp, level: newLevel })
           .eq("_id", userId);
-          // console.log("DP: update EXP");
+          // console.log("DP: update comment EXP");
 
         if (updateError) throw updateError;
     
@@ -380,7 +439,6 @@ export default function DetailPost() {
         );
       }
     };
-
 
     const handleCommentDelete = async (_id: string) => {
       const ok = confirm("정말 삭제하시겠어요?");
@@ -429,7 +487,10 @@ export default function DetailPost() {
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-2xl font-extrabold leading-none">{nickname}</h3>
               <span className="text-sm font-bold text-amber-400">{`Lv ${level || "0"}`}</span>
-              <Badge>{badge || "정보 없음"}</Badge>
+              <Badge
+                className="px-2 py-0.5 whitespace-nowrap"
+                level={level}
+              />              
             </div>
             <p className="mt-2 text-sm text-gray-400">{formaRelativeTime(createdAt)}</p>
           </div>
@@ -599,7 +660,6 @@ export default function DetailPost() {
             userId={c.user_id}
             author={c.profiles?.display_name || "익명"}
             level={c.profiles?.level || 0}
-            badge={c.profiles?.badge || ""}
             profileImage={c.profiles?.profile_image}
             time={formaRelativeTime(c.created_at)}
             content={c.comment}
