@@ -106,6 +106,7 @@ export default function SetUpModal({ onClose }: SetUpModalProps) {
       <div className="flex justify-between items-center p-4 border-b border-[#303A4B]">
         <h2 className="text-xl font-bold">회원정보 수정</h2>
         <button
+          aria-label="창 닫기"
           onClick={onClose}
           className="text-gray-400 hover:text-white transition-colors cursor-pointer"
         >
@@ -131,6 +132,7 @@ export default function SetUpModal({ onClose }: SetUpModalProps) {
           <label className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-700 hover:bg-gray-600 cursor-pointer transition-colors">
             <ImageIcon size={16} className="text-white" />
             <input
+              aria-label="커버이미지 파일 입력칸"
               type="file"
               accept="image/*"
               className="hidden"
@@ -140,6 +142,7 @@ export default function SetUpModal({ onClose }: SetUpModalProps) {
           </label>
           <Activity mode={formData.cover_image ? "visible" : "hidden"}>
             <button
+              aria-label="커버이미지 파일 삭제"
               onClick={() =>
                 setFormData((prev) => ({
                   ...prev,
@@ -155,7 +158,6 @@ export default function SetUpModal({ onClose }: SetUpModalProps) {
       </div>
 
       <div className="relative p-6 -mt-16 z-10">
-        {" "}
         <div className="relative w-28 h-28 rounded-full border-4 border-[#1A2537] bg-gray-600 overflow-hidden">
           <ProfileImage
             src={formData.profile_image}
@@ -167,6 +169,7 @@ export default function SetUpModal({ onClose }: SetUpModalProps) {
             <label className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-700 hover:bg-gray-600 cursor-pointer">
               <ImageIcon size={20} className="text-white" />
               <input
+                aria-label="프로필 이미지 파일 입력칸"
                 type="file"
                 accept="image/*"
                 className="hidden"
@@ -177,6 +180,7 @@ export default function SetUpModal({ onClose }: SetUpModalProps) {
             {/* 프로필 이미지 삭제 버튼 */}
             <Activity mode={formData.profile_image ? "visible" : "hidden"}>
               <button
+                aria-label="프로필 이미지 삭제"
                 onClick={() =>
                   setFormData((prev) => ({
                     ...prev,

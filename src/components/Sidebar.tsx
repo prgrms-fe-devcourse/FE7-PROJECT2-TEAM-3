@@ -12,6 +12,7 @@ import supabase from "../utils/supabase";
 
 export default function Sidebar() {
   const [notifications, setNotifications] = useState<NotificationJoined[]>([]);
+
   const [isNotiOpened, setIsNotiOpened] = useState(false);
   const [isSearchOpened, setIsSearchOpened] = useState(false);
   const isLogined = useAuthStore((state) => state.profile);

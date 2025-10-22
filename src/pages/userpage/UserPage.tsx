@@ -15,12 +15,16 @@ import UserTabSwitcher from "../../components/userPage/UserTabSwitcher";
 import UserPageComments from "../../components/userPage/UserPageComments";
 import FollowsModal from "../../components/FollowsModal";
 import Badge from "../../components/ui/Badge";
+import useChatRoom from "../../stores/useChatRoom";
+
 import type { CommentListItem, FormattedComments } from "../../types/comment";
+import { twMerge } from "tailwind-merge";
 
 export default function ProfileHeaderSection() {
   const navigate = useNavigate();
   const { userId } = useParams();
   const myProfile = useAuthStore((state) => state.profile);
+  const { findOrCreateChatRoom } = useChatRoom();
 
   // 팔로워, 팔로잉 수 상태
   const [followers, setFollowers] = useState<number>(0);
@@ -256,7 +260,7 @@ export default function ProfileHeaderSection() {
   return (
     <div className="w-full">
       <div className="top-[104px] right-[352px] left-[352px]">
-        <div className="w-full h-[200px] bg-gray-200 rounded-t-lg">
+        <div className="overflow-hidden w-full h-[200px] bg-gray-200 rounded-t-lg">
           <CoverImage
             className="w-full h-full object-cover"
             src={profile.cover_image}
@@ -266,12 +270,19 @@ export default function ProfileHeaderSection() {
         <div className="bg-[#161C27] rounded-b-lg p-6 shadow-lg relative">
           <div className="flex justify-between items-center">
             <div className="flex items-start gap-2 -mt-12">
-              <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-[#161C27]">
-                <ProfileImage
-                  className="w-full h-full object-cover"
-                  src={profile.profile_image}
-                  alt={profile.display_name}
-                />
+              <div className="border-8 rounded-full border-[#181c26] bg-[#181c26] -ml-2">
+                <div className={twMerge("relative w-24 h-24 rounded-full border-4", profile.is_online ? "border-[#44387D] shadow-[0px_0px_10px_0px_rgba(123,97,255,0.5)]" : "border-gray-400")}>
+                  <ProfileImage
+                    className="w-full h-full object-cover"
+                    src={profile.profile_image}
+                    alt={profile.display_name}
+                  />
+                  <span
+                      title={profile.is_online ? "온라인" : "오프라인"}
+                      className={`absolute bottom-1.5 right-0 w-4.5 h-4.5 rounded-full border-3 border-[#1A2537] 
+                    ${profile.is_online ? "bg-green-500" : "bg-gray-500"}`}
+                    ></span>
+                </div>
               </div>
               <div className="flex flex-col pt-12">
                 <div className="px-2 flex items-center gap-2">
@@ -318,33 +329,35 @@ export default function ProfileHeaderSection() {
                 </button>
               </div>
             </Activity>
+            <Activity mode={userId !== myProfile?._id ? "visible" : "hidden"}>
+              <div className="flex gap-2 self-start pt-2">
             <Activity
-              mode={
-                myProfile && userId !== myProfile?._id && !isFollowing
-                  ? "visible"
-                  : "hidden"
-              }
+                  mode={myProfile && !isFollowing ? "visible" : "hidden"}
             >
               <button
                 onClick={followSubmit}
-                className="bg-[#5C4DCA] hover:bg-[#7b6cdb] text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors cursor-pointer"
+                    className="bg-[#5C4DCA] hover:bg-[#7b6cdb] text-white text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-1 cursor-pointer"
               >
                 팔로우
               </button>
             </Activity>
             <Activity
-              mode={
-                myProfile && userId !== myProfile?._id && isFollowing
-                  ? "visible"
-                  : "hidden"
-              }
+                  mode={myProfile && isFollowing ? "visible" : "hidden"}
             >
               <button
                 onClick={unfollowSubmit}
-                className="bg-[#9297AC] hover:bg-[#696F86] text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors cursor-pointer"
+                    className="bg-[#9297AC] hover:bg-[#696F86] text-white text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-1 cursor-pointer"
               >
                 팔로잉
               </button>
+                </Activity>
+                <button
+                  onClick={() => findOrCreateChatRoom(`${userId}`)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  채팅
+                </button>
+              </div>
             </Activity>
           </div>
           <p className="text-sm text-gray-300 mt-4 mb-6 overflow-hidden text-ellipsis display-box line-clamp-6">

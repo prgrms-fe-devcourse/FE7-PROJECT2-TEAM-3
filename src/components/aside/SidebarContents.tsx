@@ -73,8 +73,12 @@ export default function SidebarContents() {
 
         // 유저 랭킹
         const topUsers = (profilesRes.data ?? [])
-          .sort((a, b) => (b.exp ?? 0) - (a.exp ?? 0))
-          .slice(0, 3);
+        .sort((a, b) => {
+          const levelDiff = (b.level ?? 0) - (a.level ?? 0);
+          if (levelDiff !== 0) return levelDiff;
+          return (b.exp ?? 0) - (a.exp ?? 0);
+        })
+        .slice(0, 3);
 
         setUserRank(topUsers);
 

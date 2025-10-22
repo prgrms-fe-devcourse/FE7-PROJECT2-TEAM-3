@@ -1,28 +1,14 @@
-import { twMerge } from "tailwind-merge";
 import { SquarePen, Trash2 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import ProfileImage from "../../components/ui/ProfileImage.tsx";
 import { Link } from "react-router-dom";
-
-type BadgeProps = { className?: string; children: React.ReactNode };
-export const Badge = ({ className, children }: BadgeProps) => (
-  <span
-    className={twMerge(
-      "inline-flex items-center rounded-full px-2 py-0.5 text-xs",
-      "bg-gray-500/60 text-gray-100",
-      className
-    )}
-  >
-    {children}
-  </span>
-);
+import Badge from "../../components/ui/Badge.tsx";
 
 type CommentProps = {
   _id: string;
   userId: string;
   author: string;
   level: number;
-  badge: string;
   profileImage?: string | null;
   time: string;
   content: string;
@@ -37,7 +23,6 @@ const Comment = ({
   userId,
   author,
   level,
-  badge,
   profileImage,
   time,
   content,
@@ -78,7 +63,10 @@ const Comment = ({
           <div className="flex gap-2 flex-wrap items-center">
             <span className="font-semibold text-sm">{author}</span>
             <span className="text-xs font-bold text-amber-400">{`Lv.${level}`}</span>
-            <Badge>{badge}</Badge>
+            <Badge
+              className="px-2 py-0.5 whitespace-nowrap"
+              level={level}
+            />
             <span className="text-xs text-gray-500">
               {time}
               {isEdited && " (수정됨)"}
@@ -109,6 +97,7 @@ const Comment = ({
         {/* 댓글 내용 영역 */}
         {isEditing ? (
           <textarea
+            aria-label="댓글 쓰는 영역"
             value={text}
             onChange={(e) => setText(e.target.value)}
             className="w-full bg-white text-gray-900 rounded-xl p-4 text-sm shadow-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 transition resize-none mt-2"
