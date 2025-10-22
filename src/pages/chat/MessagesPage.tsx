@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Activity, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../stores/authStore";
 import supabase from "../../utils/supabase";
@@ -16,6 +16,8 @@ type ChatRoomInboxItem = {
   lastMessage: {
     content: string | null;
     created_at: string | null;
+    is_read: boolean | null;
+    user_id: string | null;
   };
 };
 
@@ -55,7 +57,7 @@ export default function MessagesPage() {
         // 마지막 메시지 가져오기 (정적으로 가져옴)
         const lastMessagePromise = supabase
           .from("messages")
-          .select("content, created_at")
+          .select("content, created_at, is_read, user_id")
           .eq("room_id", room.id)
           .order("created_at", { ascending: false })
           .limit(1)
@@ -77,6 +79,8 @@ export default function MessagesPage() {
           lastMessage: {
             content: messageResult.data?.content || null,
             created_at: messageResult.data?.created_at || null,
+            is_read: messageResult.data?.is_read || null,
+            user_id: messageResult.data?.user_id || null,
           },
         };
       });
@@ -135,52 +139,66 @@ export default function MessagesPage() {
         </div>
       ) : (
         <div>
-          {chatRooms.map((room) => (
-            <article
-              key={room.roomId}
-              className="flex gap-3 p-6 border border-[#303A4B] rounded-lg bg-[#161C27] cursor-pointer hover:bg-[#171f2b] hover:border-[#4E46A5]"
-              onClick={() => navigate(`/messages/${room.roomId}`)}
-            >
-              <div className="w-10 h-10">
-                <ProfileImage
-                  className="w-full h-full"
-                  src={room.otherParticipant.profile_image}
-                  alt={`${room.otherParticipant.display_name}의 이미지`}
-                />
-              </div>
-
-              <div className="flex-1 flex flex-col gap-4">
-                <div className="flex items-center gap-2.5">
-                  <div>
-                    <strong className="text-white text-[16px]">
-                      {room.otherParticipant.display_name}
-                    </strong>
-                  </div>
-                  <div className="flex-center gap-2">
-                    <span className="text-[#F59E0B] text-[12px]">
-                      {`Lv ${room.otherParticipant.level || "0"}`}
-                    </span>
-                    <Badge
-                      className="flex px-3 h-[17px] items-center justify-center whitespace-nowrap overflow-hidden"
-                      level={room.otherParticipant.level}
-                    />
-                    {/* 시간 표시 부분 */}
-                    <span className="text-xs text-gray-400">
-                      {room.lastMessage.created_at
-                        ? new Date(room.lastMessage.created_at).toLocaleString()
-                        : ""}
-                    </span>
-                  </div>
+          {chatRooms.map((room) => {
+            // 마지막 메세지가 읽은 메세지인지 && 마지막 메세지가 내 메세지가 아닌지
+            const isRead =
+              !room.lastMessage.is_read &&
+              room.lastMessage.user_id !== myProfile?._id;
+            return (
+              <article
+                key={room.roomId}
+                className={`flex gap-3 p-6 border border-[#303A4B] rounded-lg bg-[#161C27] cursor-pointer hover:bg-[#171f2b] hover:border-[#4E46A5] ${isRead ? "" : "grayscale-50 opacity-50"}`}
+                onClick={() => navigate(`/messages/${room.roomId}`)}
+              >
+                <div className="w-10 h-10">
+                  <ProfileImage
+                    className="w-full h-full"
+                    src={room.otherParticipant.profile_image}
+                    alt={`${room.otherParticipant.display_name}의 이미지`}
+                  />
                 </div>
 
-                <div className="flex flex-col gap-3">
-                  <p className="max-h-23 text-[#D1D5DB] text-sm line-clamp-3">
-                    {room.lastMessage.content || "메시지 없음"}
-                  </p>
+                <div className="flex-1 flex flex-col gap-4">
+                  <div className="flex items-center gap-2.5">
+                    <div>
+                      <strong className="text-white text-[16px]">
+                        {room.otherParticipant.display_name}
+                      </strong>
+                    </div>
+                    <div className="flex-center gap-2">
+                      <span className="text-[#F59E0B] text-[12px]">
+                        {`Lv ${room.otherParticipant.level || "0"}`}
+                      </span>
+                      <Badge
+                        className="flex px-3 h-[17px] items-center justify-center whitespace-nowrap overflow-hidden"
+                        level={room.otherParticipant.level}
+                      />
+                      {/* 시간 표시 부분 */}
+                      <span className="text-xs text-gray-400">
+                        {room.lastMessage.created_at
+                          ? new Date(
+                              room.lastMessage.created_at
+                            ).toLocaleString()
+                          : ""}
+                      </span>
+                    </div>
+                    {/* 안읽음 표시(빨간 점) */}
+                    <Activity mode={isRead ? "visible" : "hidden"}>
+                      <div className="ml-auto w-2 h-2 bg-red-500 rounded-full" />
+                    </Activity>
+                  </div>
+
+                  <div className="flex flex-col gap-3">
+                    <p
+                      className={`max-h-23 ${isRead ? "text-white" : "text-gray-500"} text-sm line-clamp-3`}
+                    >
+                      {room.lastMessage.content || "메시지 없음"}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
       )}
     </div>
