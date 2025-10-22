@@ -1,6 +1,9 @@
 import { Heart, MessageSquare, UserPlus } from "lucide-react";
+import supabase from "../../utils/supabase";
+import { useEffect } from "react";
+import { useAuthStore } from "../../stores/authStore";
 
-const notifications = [
+const notification = [
   {
     id: 1,
     type: "like",
@@ -24,13 +27,35 @@ const notifications = [
   },
 ];
 
-export default function Notifications() {
+export default function Notifications({
+  notifications,
+  setNotifications,
+}: NotificationProps) {
+  const profile = useAuthStore((state) => state.profile);
+
+  useEffect(() => {
+    const fetchNotifi = async () => {
+      try {
+        const { data: notificationData, error } = await supabase
+          .from("notifications")
+          .select(`*`)
+          .eq("user_to_notify", profile?._id);
+        if (error) throw error;
+
+        setNotifications(notificationData);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    fetchNotifi();
+  }, [profile?._id, setNotifications]);
   return (
     <div className="notifications p-4 text-gray-300">
       {notifications.length === 0 ? (
         <p>🔔 새로운 알림이 없습니다.</p>
       ) : (
-        notifications.map(({ id, type, message, postTitle, time }) => (
+        notification.map(({ id, type, message, postTitle, time }) => (
           <div
             key={id}
             className="flex items-center space-x-4 p-3 rounded-md hover:bg-gray-700 transition-colors cursor-pointer"
