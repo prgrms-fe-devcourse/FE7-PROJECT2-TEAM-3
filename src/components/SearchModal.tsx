@@ -83,6 +83,7 @@ export default function SearchModal({ onClose }: SearchModalProps) {
                   {recent}
                 </p>
                 <button
+                  aria-label="최근검색어 지우기"
                   onClick={(e) => deleteRecentQuery(e, idx)}
                   className="absolute top-1/2 right-5 -translate-y-1/2 cursor-pointer"
                 >
