@@ -230,6 +230,7 @@ export default function DetailPost() {
               profiles: user_id (
                 display_name,
                 profile_image,
+                exp,
                 level,
                 badge
               ) `)
@@ -238,9 +239,13 @@ export default function DetailPost() {
       console.log("DP: get Comments");
 
       if (error) {
-        console.error("댓글 불러오기 실패:", error);
+        console.error("댓글 불러오기 실패:", error.message, error.details);
+        return;
       } else {
-        if (commentsObj) setComments(commentsObj);
+        if (commentsObj && JSON.stringify(commentsObj) !== JSON.stringify(comments)) {
+          setComments(commentsObj as unknown as CommentType[]);
+        }
+        
       }
     }
     fetchComments();
