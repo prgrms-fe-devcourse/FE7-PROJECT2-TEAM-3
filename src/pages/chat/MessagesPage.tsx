@@ -4,6 +4,7 @@ import { useAuthStore } from "../../stores/authStore";
 import supabase from "../../utils/supabase";
 import ProfileImage from "../../components/ui/ProfileImage";
 import Badge from "../../components/ui/Badge";
+import { twMerge } from "tailwind-merge";
 
 type ChatRoomInboxItem = {
   roomId: string;
@@ -138,7 +139,7 @@ export default function MessagesPage() {
           <p className="text-gray-500 text-base">아직 대화가 없습니다.</p>
         </div>
       ) : (
-        <div>
+        <div className="flex flex-col gap-4">
           {chatRooms.map((room) => {
             // 마지막 메세지가 읽은 메세지인지 && 마지막 메세지가 내 메세지가 아닌지
             const isRead =
@@ -147,7 +148,11 @@ export default function MessagesPage() {
             return (
               <article
                 key={room.roomId}
-                className={`flex gap-3 p-6 border border-[#303A4B] rounded-lg bg-[#161C27] cursor-pointer hover:bg-[#171f2b] hover:border-[#4E46A5] ${isRead ? "" : "grayscale-50 opacity-50"}`}
+                className={twMerge(
+                  "flex gap-3 p-6 border rounded-lg cursor-pointer bg-[#161C27] border-[#303A4B]",
+                  isRead &&
+                    "border-[#0f748d] bg-[linear-gradient(180deg,_#2f3a4b_0%,_#183347)]"
+                )}
                 onClick={() => navigate(`/messages/${room.roomId}`)}
               >
                 <div className="w-10 h-10">
@@ -182,10 +187,6 @@ export default function MessagesPage() {
                           : ""}
                       </span>
                     </div>
-                    {/* 안읽음 표시(빨간 점) */}
-                    <Activity mode={isRead ? "visible" : "hidden"}>
-                      <div className="ml-auto w-2 h-2 bg-red-500 rounded-full" />
-                    </Activity>
                   </div>
 
                   <div className="flex flex-col gap-3">
