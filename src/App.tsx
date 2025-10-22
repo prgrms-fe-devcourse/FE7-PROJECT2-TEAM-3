@@ -14,6 +14,7 @@ import SubLayout from "./components/SubLayout";
 import UserPage from "./pages/userpage/UserPage";
 import AuthCallback from "./pages/login/AuthCallback";
 import UpdatePost from "./pages/posts/UpdatePost";
+import { Toaster } from "react-hot-toast";
 
 export default function App() {
   return (
@@ -50,6 +51,20 @@ export default function App() {
         </Route>
         <Route path="*" element={<NotFound />}></Route>
       </Routes>
+      <Toaster
+        position="bottom-right"
+        reverseOrder={false}
+        toastOptions={{
+          style: {
+            padding: "12px 16px",
+            background: "#1f2535",
+            border: "1px solid #44387D",
+            boxShadow: "0 0 15px rgba(123,97,255,0.2)",
+            fontSize: "14px",
+            color: "#fff",
+          },
+        }}
+      />
     </>
   );
 }

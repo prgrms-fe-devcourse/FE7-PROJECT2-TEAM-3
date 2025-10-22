@@ -102,7 +102,7 @@ export default function FollowsModal({
         {/* 닫기 버튼 (X 아이콘을 직접 가정하여 classNameName만 적용) */}
         <button
           onClick={onClose}
-          className="text-gray-400 hover:text-white transition-colors"
+          className="text-gray-400 hover:text-white transition-colors cursor-pointer"
         >
           <X size={24} />
         </button>
@@ -115,7 +115,7 @@ export default function FollowsModal({
           </p>
         </div>
       )}
-      <div>
+      <div className="max-h-[600px] overflow-y-auto">
         {profiles.map((profile) => {
           return (
             <FollowList key={profile._id} profile={profile} onClose={onClose} />

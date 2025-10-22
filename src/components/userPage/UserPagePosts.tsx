@@ -1,10 +1,9 @@
 import { Heart, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router";
-import defaultProfile from "../../assets/image/no_profile_image.png";
-import { twMerge } from "tailwind-merge";
 import ProfileImage from "../ui/ProfileImage";
 import { formaRelativeTime } from "../../utils/formatRelativeTime";
 import type { PostListItem } from "../../types/post";
+import Badge from "../ui/Badge";
 
 export default function UserPagePosts({ posts }: { posts: PostListItem[] }) {
   const navigate = useNavigate();
@@ -12,63 +11,55 @@ export default function UserPagePosts({ posts }: { posts: PostListItem[] }) {
     <>
       <div>
         {posts.map((post) => {
-          const profileSrc = post.user.profile_image || defaultProfile;
-
           return (
-            <div
+            <article
               key={post._id}
-              className="flex w-full h-[210px] gap-3 p-6 mb-6 border border-[#303A4B] rounded-lg bg-[#161C27] cursor-pointer hover:bg-[#171f2b] hover:border-[#4E46A5]"
+              className="flex gap-3 p-6 border border-[#303A4B] rounded-lg bg-[#161C27] cursor-pointer hover:bg-[#171f2b] hover:border-[#4E46A5]"
               onClick={() => navigate(`/posts/${post._id}`)}
             >
-              <div id="user-image">
+              <div className="w-10 h-10">
                 <ProfileImage
-                  src={profileSrc}
-                  alt={`${post.user.display_name}의 프로필 이미지`}
-                  className="h-10 w-10"
+                  className="w-full h-full"
+                  src={post.user.profile_image}
+                  alt={`${post.user.display_name}의 이미지`}
                 />
               </div>
 
-              <div id="user-data" className="flex-1 h-[168px]">
-                <div id="heading" className="flex items-center mb-4">
-                  <span className="text-white text-[16px] font-bold pr-[10px]">
-                    {post.user.display_name}
-                  </span>
-                  <span className="text-[#F59E0B] text-[12px] pr-2">
-                    {`Lv ${post.user.level || "0"}`}
-                  </span>
-                  <div className="inline-flex mr-2 px-3 h-[17px] items-center justify-center bg-[#9F9F9F] text-white text-[10px] rounded-[30px] whitespace-nowrap overflow-hidden">
-                    {post.user.badge || "정보 없음"}
+              <div className="flex-1 flex flex-col gap-4">
+                <div className="flex items-center gap-2.5">
+                  <div>
+                    <strong className="text-white text-[16px]">
+                      {post.user.display_name}
+                    </strong>
                   </div>
-                  {/* 시간 표시 부분 */}
-                  <p className="text-xs text-gray-400">
-                    {formaRelativeTime(post.created_at)}
+                  <div className="flex-center gap-2">
+                    <span className="text-[#F59E0B] text-[12px]">
+                      {`Lv ${post.user.level || "0"}`}
+                    </span>
+                    <Badge
+                      className="flex px-3 h-[17px] items-center justify-center whitespace-nowrap overflow-hidden"
+                      level={post.user.level}
+                    />
+                    {/* 시간 표시 부분 */}
+                    <span className="text-xs text-gray-400">
+                      {formaRelativeTime(post.created_at)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  <h3 className="line-clamp-1 text-white text-[18px]">
+                    {post.title}
+                  </h3>
+                  <p className="max-h-23 text-[#D1D5DB] text-sm line-clamp-3">
+                    {post.content}
                   </p>
                 </div>
 
-                <div id="content" className="flex flex-col h-[92px] mb-4">
-                  <span className="text-white text-[18px] mb-3">
-                    {post.title.length > 50
-                      ? post.title.slice(0, 50) + "..."
-                      : post.title}
-                  </span>
-                  <span className="text-[#D1D5DB] text-[14px]">
-                    {post.content.length > 400
-                      ? post.content.slice(0, 400) + "..."
-                      : post.content}
-                  </span>
-                </div>
-
-                <div id="footer" className="h-[18px] flex justify-between">
+                <div className="flex justify-between">
                   <div className="flex gap-3">
                     <p className="flex-center gap-1 text-gray-400 text-xs">
-                      <Heart
-                        width={18}
-                        height={18}
-                        className={twMerge(
-                          "stroke-red-600",
-                          post.likeCount > 0 && "fill-red-600"
-                        )}
-                      />
+                      <Heart className="w-4.5 h-4.5 stroke-gray-400 fill-gray-400" />
                       {post.likeCount}
                     </p>
                     <p className="flex-center gap-1 text-gray-400 text-xs">
@@ -88,7 +79,7 @@ export default function UserPagePosts({ posts }: { posts: PostListItem[] }) {
                         onClick={(e) => {
                           e.stopPropagation();
                         }}
-                        className="text-[#2563EB] cursor-pointer bg-[#EFF6FF] text-xs font-medium px-2 py-1 rounded-full hover:bg-[#DBEAFE] transition"
+                        className="block text-[#2563EB] cursor-pointer bg-[#EFF6FF] text-xs font-medium px-2 py-1 rounded-full hover:bg-[#DBEAFE] transition"
                       >
                         #{tag}
                       </button>
@@ -96,7 +87,7 @@ export default function UserPagePosts({ posts }: { posts: PostListItem[] }) {
                   </div>
                 </div>
               </div>
-            </div>
+            </article>
           );
         })}
       </div>

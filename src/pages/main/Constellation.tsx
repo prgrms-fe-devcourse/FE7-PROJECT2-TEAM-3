@@ -91,7 +91,7 @@ export default function Constellation() {
                       className={twMerge(
                         "rounded-full text-[0px]",
                         s.path
-                          ? "w-20 h-20 border-2 border-amber-300 shadow-[0px_0px_20px_0px_#FFD86F] transition-all hover:shadow-[0px_0px_50px_0px_#FFD86F] bg-cover"
+                          ? "w-20 h-20 border-2 border-amber-300 shadow-[0px_0px_20px_0px_#FFD86F] transition-all hover:shadow-[0px_0px_50px_0px_#FFD86F] bg-cover cursor-pointer"
                           : "w-1 h-1 bg-white"
                       )}
                       onClick={() => s.path && navigate(s.path)}
