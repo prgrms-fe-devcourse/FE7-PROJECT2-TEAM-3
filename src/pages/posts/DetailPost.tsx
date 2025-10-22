@@ -78,7 +78,7 @@ export default function DetailPost() {
         const {
           data: { user },
         } = await supabase.auth.getUser();
-        console.log("DP: auth");
+        // console.log("DP: auth");
         if (!user) {
           setIsLogin(false);
           return;
@@ -89,7 +89,7 @@ export default function DetailPost() {
           .select("_id, email")
           .eq("email", user.email)
           .single();
-        console.log("DP: get Profiles");
+        // console.log("DP: get Profiles");
         if (!profile) throw new Error("프로필 정보를 찾을 수 없습니다.");
 
         setUserId(profile._id);
@@ -101,7 +101,7 @@ export default function DetailPost() {
           .select("_id, user_id, title, content, created_at")
           .eq("_id", params?.postId)
           .single();
-        console.log("DP: get Post");
+        // console.log("DP: get Post");
         if (error) throw error;
 
         setTitle(post.title);
@@ -127,7 +127,7 @@ export default function DetailPost() {
         .select("_id, display_name, profile_image, is_online, level, badge")
         .eq("_id", writerId)
         .single();
-      console.log("DP: get writerId");
+      // console.log("DP: get writerId");
       if (error) {
         console.error("글쓴이 프로필 불러오기 실패:", error);
       } else {
@@ -147,7 +147,7 @@ export default function DetailPost() {
         .from("images")
         .select("src")
         .eq("post_id", params?.postId);
-      console.log("DP: get Images");
+        // console.log("DP: get Images");
 
       if (error) {
         console.error("이미지 불러오기 실패:", error);
@@ -172,8 +172,8 @@ export default function DetailPost() {
       const { data: hashtag, error } = await supabase
         .from("hashtags")
         .select("hashtag")
-        .eq("post_id", params?.postId);
-      console.log("DP: get Hashtags");
+        .eq("post_id", params?.postId)
+        // console.log("DP: get Hashtags");
 
       if (error) {
         console.error("해시태그 불러오기 실패:", error);
@@ -188,10 +188,10 @@ export default function DetailPost() {
   useEffect(() => {
     const fetchLikes = async () => {
       const { data: likes, error } = await supabase
-        .from("likes")
-        .select("user_id")
-        .eq("post_id", params?.postId);
-      console.log("DP: get Likes");
+      .from("likes")
+      .select("user_id")
+      .eq("post_id", params?.postId);
+      // console.log("DP: get Likes");
       if (error) {
         console.error("좋아요 불러오기 실패:", error);
       } else {
@@ -224,10 +224,11 @@ export default function DetailPost() {
         )
         .eq("post_id", params?.postId)
         .order("created_at", { ascending: true });
-      console.log("DP: get Comments");
+      // console.log("DP: get Comments");
 
       if (error) {
-        console.error("댓글 불러오기 실패:", error);
+        console.error("댓글 불러오기 실패:", error.message, error.details);
+        return;
       } else {
         if (commentsObj) setComments(commentsObj);
       }
@@ -253,7 +254,7 @@ export default function DetailPost() {
           .eq("user_id", userId)
           .eq("post_id", params?.postId)
           .select();
-        console.log("DP: delete Like");
+        // console.log("DP: delete Like");
         if (deleteError) throw deleteError;
         setLiked(false);
         setLikeCount((prev) => prev - 1);
@@ -262,7 +263,7 @@ export default function DetailPost() {
         const { error: insertError } = await supabase
           .from("likes")
           .insert([{ user_id: userId, post_id: params?.postId }]);
-        console.log("DP: update Like");
+          // console.log("DP: update Like");
         if (insertError) throw insertError;
         setLiked(true);
         setLikeCount((prev) => prev + 1);
@@ -293,7 +294,7 @@ export default function DetailPost() {
         ])
         .select("_id")
         .single();
-      console.log("DP: get Comment ID");
+      // console.log("DP: get Comment ID");
 
       if (insertError || !inserted) throw insertError;
 
@@ -319,7 +320,7 @@ export default function DetailPost() {
         )
         .eq("_id", inserted._id)
         .single();
-      console.log("DP: get Comment Data");
+      // console.log("DP: get Comment Data");
 
       if (selectError || !commentData) throw selectError;
 
@@ -346,7 +347,7 @@ export default function DetailPost() {
         .from("profiles")
         .update({ exp: newExp, level: newLevel })
         .eq("_id", userId);
-      console.log("DP: update EXP");
+      // console.log("DP: update EXP");
 
       if (updateError) throw updateError;
     } catch (err) {
@@ -361,7 +362,7 @@ export default function DetailPost() {
       .from("comments")
       .update({ comment: newText, update_at: new Date().toISOString() })
       .eq("_id", _id);
-    console.log("DP: update Comment");
+    // console.log("DP: update Comment");
 
     if (!error) {
       setComments((prev) =>
@@ -383,7 +384,7 @@ export default function DetailPost() {
       .delete()
       .eq("_id", _id)
       .eq("user_id", userId);
-    console.log("DP: delete Comment");
+    // console.log("DP: delete Comment");
 
     if (error) {
       console.error(error);
@@ -397,12 +398,12 @@ export default function DetailPost() {
       .from("posts")
       .delete() // 삭제
       .eq("_id", params?.postId);
-    console.log("DP: delete POST");
-    goBackHandler();
-    if (error) {
-      console.error(error);
+      // console.log("DP: delete POST");
+      goBackHandler();
+      if (error) {
+        console.error(error);
+      }
     }
-  };
 
   return (
     <div className="max-w-4xl mx-auto p-6 text-gray-100">
