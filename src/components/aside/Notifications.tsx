@@ -2,30 +2,8 @@ import { Heart, MessageSquare, UserPlus } from "lucide-react";
 import supabase from "../../utils/supabase";
 import { useEffect } from "react";
 import { useAuthStore } from "../../stores/authStore";
-
-const notification = [
-  {
-    id: 1,
-    type: "like",
-    message: "사용자A님이 회원님의 게시글을 좋아합니다.",
-    postTitle: "새로운 프로젝트 아이디어",
-    time: "2시간 전",
-  },
-  {
-    id: 2,
-    type: "comment",
-    message: "사용자B님이 회원님의 게시글에 댓글을 남겼습니다.",
-    postTitle: "React 공부하기",
-    time: "3시간 전",
-  },
-  {
-    id: 3,
-    type: "follow",
-    message: "사용자C님이 회원님을 팔로우하기 시작했습니다.",
-    postTitle: "",
-    time: "5시간 전",
-  },
-];
+import type { NotificationProps } from "../../types/notification";
+import { formaRelativeTime } from "../../utils/formatRelativeTime";
 
 export default function Notifications({
   notifications,
@@ -38,10 +16,22 @@ export default function Notifications({
       try {
         const { data: notificationData, error } = await supabase
           .from("notifications")
-          .select(`*`)
-          .eq("user_to_notify", profile?._id);
+          .select(
+            `
+            _id,
+            type,
+            created_at,
+            is_read,
+            actor:actor_id ( _id, display_name, profile_image ),
+            post:target_post_id ( _id, title )
+          `
+          )
+          .eq("user_to_notify", profile?._id)
+          .order("created_at", { ascending: false });
+
         if (error) throw error;
 
+        console.log(notificationData);
         setNotifications(notificationData);
       } catch (e) {
         console.error(e);
@@ -55,32 +45,42 @@ export default function Notifications({
       {notifications.length === 0 ? (
         <p>🔔 새로운 알림이 없습니다.</p>
       ) : (
-        notification.map(({ id, type, message, postTitle, time }) => (
+        notifications.map((n) => (
           <div
-            key={id}
+            key={n._id}
             className="flex items-center space-x-4 p-3 rounded-md hover:bg-gray-700 transition-colors cursor-pointer"
           >
             <div className="flex-shrink-0 text-xl">
-              {type === "like" && (
+              {n.type === "like" && (
                 <Heart className="text-[#FF0000] fill-[#FF0000] w-5 h-5" />
               )}
-              {type === "comment" && (
+              {n.type === "comment" && (
                 <MessageSquare className="text-[#9CA3AF] fill-[#9CA3AF] w-5 h-5" />
               )}
-              {type === "follow" && (
+              {n.type === "follow" && (
                 <UserPlus className="text-green-500 fill-green-500 w-5 h-5" />
               )}
             </div>
             <div className="flex-1">
-              <p className="text-sm">{message}</p>
-              {postTitle && (
+              <p className="text-sm text-white font-semibold">
+                {n.actor?.display_name || "알 수 없는 사용자"} 님이{" "}
+                {n.type === "like"
+                  ? "내 게시물을 좋아합니다."
+                  : n.type === "comment"
+                    ? "내 게시물에 댓글을 남겼습니다."
+                    : "나를 팔로우했습니다."}
+              </p>
+
+              {n.post?.title ? (
                 <p className="text-xs text-gray-400 italic">
-                  게시글: {postTitle}
+                  게시글: {n.post.title}
                 </p>
-              )}
+              ) : n.type !== "follow" ? (
+                <p className="text-xs text-gray-400 italic">게시글 정보 없음</p>
+              ) : null}
             </div>
             <div className="text-xs text-gray-500 whitespace-nowrap">
-              {time}
+              {formaRelativeTime(n.created_at)}
             </div>
           </div>
         ))

@@ -1,6 +1,8 @@
-type Notification = Database["public"]["Tables"]["notifications"]["Row"];
+import type { Database } from "./database";
+
+type AppNotification = Database["public"]["Tables"]["notifications"]["Row"];
 
 interface NotificationProps {
-  notifications: Notification[];
-  setNotifications: React.Dispatch<React.SetStateAction<Notification[]>>;
+  notifications: AppNotification[];
+  setNotifications: React.Dispatch<React.SetStateAction<AppNotification[]>>;
 }
