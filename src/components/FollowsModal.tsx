@@ -101,6 +101,7 @@ export default function FollowsModal({
         </h2>
         {/* 닫기 버튼 (X 아이콘을 직접 가정하여 classNameName만 적용) */}
         <button
+          aria-label="닫기"
           onClick={onClose}
           className="text-gray-400 hover:text-white transition-colors cursor-pointer"
         >
