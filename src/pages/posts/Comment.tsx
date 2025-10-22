@@ -1,5 +1,5 @@
 import { SquarePen, Trash2 } from "lucide-react";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import ProfileImage from "../../components/ui/ProfileImage.tsx";
 import { Link } from "react-router-dom";
 import Badge from "../../components/ui/Badge.tsx";
