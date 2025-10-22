@@ -52,8 +52,8 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/userSetting" element={<UserSetting />} />
           <Route path="/authcallback" element={<AuthCallback />} />
+          <Route path="*" element={<NotFound />}></Route>
         </Route>
-        <Route path="*" element={<NotFound />}></Route>
       </Routes>
       <Toaster
         position="bottom-right"
