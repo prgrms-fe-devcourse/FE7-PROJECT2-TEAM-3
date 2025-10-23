@@ -65,7 +65,11 @@ export default function Posts({
                 <div className="flex justify-between">
                   <div className="flex gap-3">
                     <p className="flex-center gap-1 text-gray-400 text-xs">
-                      <Heart className="w-4.5 h-4.5 stroke-gray-400 fill-gray-400" />
+                      {post.likeCount <= 0 ? (
+                        <Heart className="w-4.5 h-4.5 stroke-gray-400 fill-gray-400" />
+                      ) : (
+                        <Heart className="w-4.5 h-4.5 stroke-red-600 fill-red-600" />
+                      )}
                       {post.likeCount}
                     </p>
                     <p className="flex-center gap-1 text-gray-400 text-xs">
