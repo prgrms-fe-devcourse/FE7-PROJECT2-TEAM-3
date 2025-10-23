@@ -1,7 +1,7 @@
-import {useState, useEffect, type FormEvent} from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { twMerge } from "tailwind-merge";
-import {  MessageSquare, Heart, SquarePen, Trash2 } from "lucide-react";
-import Comment from "./Comment"
+import { MessageSquare, Heart, SquarePen, Trash2 } from "lucide-react";
+import Comment from "./Comment";
 import { useParams } from "react-router";
 import supabase from "../../utils/supabase";
 import { useNavigate } from "react-router";
@@ -12,8 +12,22 @@ import toast from "react-hot-toast";
 import Badge from "../../components/ui/Badge.tsx";
 import DetailPostSkeleton from "../../components/ui/loading/DetailPostSkeleton.tsx";
 import Card from "../../components/ui/Card.tsx";
+import ImageModal from "../../components/ImageModal.tsx";
+import DetailImageZoom from "../../components/DetailImageZoom.tsx";
 
 export default function DetailPost() {
+  // 모달 상태 관리
+  const [modalImageSrc, setModalImageSrc] = useState(null);
+  const [isModalOpened, setIsModalOpened] = useState(false);
+  const openModal = (src) => {
+    setModalImageSrc(src);
+    setIsModalOpened(true);
+  };
+  const closeModal = () => {
+    setModalImageSrc(null);
+    setIsModalOpened(false);
+  };
+
   // console.log("DetailPost()");
   const navigate = useNavigate();
   const goBackHandler = () => {
@@ -28,22 +42,29 @@ export default function DetailPost() {
 
   // 글쓴이 영역
   const [writerId, setWriterId] = useState<string>("");
-  const [profileImage, setProfileImage] = useState<string | undefined>(undefined);
+  const [profileImage, setProfileImage] = useState<string | undefined>(
+    undefined
+  );
   const [nickname, setNickname] = useState<string>("");
   const [level, setLevel] = useState<number>(0);
   const [createdAt, setCreatedAt] = useState<string>("");
-  
+
   // 본문 영역
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
-  const [images, setImages] = useState<(string | null)[]>([null, null, null, null]);
-  const [hashtags, setHashtags] = useState<string[]>([])
+  const [images, setImages] = useState<(string | null)[]>([
+    null,
+    null,
+    null,
+    null,
+  ]);
+  const [hashtags, setHashtags] = useState<string[]>([]);
 
   // 좋아요 & 댓글
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [animating, setAnimating] = useState(false);
-  const [newComment, setNewComment] = useState<string>('');
+  const [newComment, setNewComment] = useState<string>("");
 
   type CommentProfile = {
     display_name: string;
@@ -51,7 +72,7 @@ export default function DetailPost() {
     exp: number;
     level: number;
   };
-  
+
   type CommentType = {
     _id: string;
     post_id: string;
@@ -64,7 +85,7 @@ export default function DetailPost() {
 
   const [comments, setComments] = useState<CommentType[]>([]);
   const params = useParams();
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -89,7 +110,8 @@ export default function DetailPost() {
             .single();
           // console.log("데이터: ", data);
           // console.log("DP: get Profiles");
-          if (error || !data) throw new Error("프로필 정보를 찾을 수 없습니다.");
+          if (error || !data)
+            throw new Error("프로필 정보를 찾을 수 없습니다.");
           userProfile = data;
           setUserId(userProfile._id);
           setIsLogin(true);
@@ -102,9 +124,9 @@ export default function DetailPost() {
           .select("_id, user_id, title, content, created_at")
           .eq("_id", params?.postId)
           .single();
-          // console.log("DP: get Post");
+        // console.log("DP: get Post");
         if (postError) throw postError;
-  
+
         setTitle(post.title);
         setContent(post.content);
         setCreatedAt(post.created_at);
@@ -123,12 +145,13 @@ export default function DetailPost() {
         }
 
         // 글쓴이 프로필 가져오기
-        const { data: writerProfile, error: writerProfileError } = await supabase
-          .from("profiles")
-          .select("_id, display_name, profile_image, is_online, level")
-          .eq("_id", post.user_id)
-          .single();
-          // console.log("DP: get writerId");
+        const { data: writerProfile, error: writerProfileError } =
+          await supabase
+            .from("profiles")
+            .select("_id, display_name, profile_image, is_online, level")
+            .eq("_id", post.user_id)
+            .single();
+        // console.log("DP: get writerId");
         if (writerProfileError) {
           console.error("글쓴이 프로필 불러오기 실패:", writerProfileError);
         } else {
@@ -149,12 +172,12 @@ export default function DetailPost() {
         } else if (imageRows) {
           // src 필드만 추출해서 상태에 넣기
           const imageSrcList = imageRows.map((img) => img.src);
-        
+
           // 이미지 배열을 최대 4칸 구조에 맞게 채우기
           const updatedImages = Array(4)
             .fill(null)
             .map((_, idx) => imageSrcList[idx] || null);
-        
+
           setImages(updatedImages);
         }
 
@@ -174,8 +197,9 @@ export default function DetailPost() {
         // 댓글 가져오기
         // console.log("comment");
         const { data: commentsObj, error } = await supabase
-        .from("comments")
-        .select(`
+          .from("comments")
+          .select(
+            `
                 _id,
                 post_id,
                 created_at,
@@ -187,16 +211,20 @@ export default function DetailPost() {
                   profile_image,
                   exp,
                   level
-                ) `)
-        .eq("post_id", params?.postId)
-        .order("created_at", { ascending: true });
+                ) `
+          )
+          .eq("post_id", params?.postId)
+          .order("created_at", { ascending: true });
         // console.log("DP: get Comments");
-  
+
         if (error) {
           console.error("댓글 불러오기 실패:", error.message, error.details);
           return;
         } else {
-          if (commentsObj && JSON.stringify(commentsObj) !== JSON.stringify(comments)) {
+          if (
+            commentsObj &&
+            JSON.stringify(commentsObj) !== JSON.stringify(comments)
+          ) {
             setComments(commentsObj as unknown as CommentType[]);
           }
         }
@@ -225,7 +253,7 @@ export default function DetailPost() {
         setLikeCount(likes.length);
         setLiked(!!likes.find((entry) => entry.user_id === userId));
       }
-    }
+    };
     fetchLikes();
   }, [params?.postId, userId]);
 
@@ -235,28 +263,28 @@ export default function DetailPost() {
       toast.success("로그인 후 이용해주세요.");
       return;
     }
-  
+
     setAnimating(true);
-  
+
     try {
       if (liked) {
         // 이미 좋아요한 경우 → 삭제
         const { error: deleteError } = await supabase
-          .from('likes')
+          .from("likes")
           .delete()
-          .eq('user_id', userId)
-          .eq('post_id', params?.postId)
+          .eq("user_id", userId)
+          .eq("post_id", params?.postId)
           .select();
-          // console.log("DP: delete Like");
-        if (deleteError) throw  deleteError;
+        // console.log("DP: delete Like");
+        if (deleteError) throw deleteError;
         setLiked(false);
-        setLikeCount((prev) => (prev-1));
+        setLikeCount((prev) => prev - 1);
 
         const { data: likeExpUp, error: likeExpUpError } = await supabase
-        .from('profiles')
-        .select("exp, level")
-        .eq("_id", writerId)
-        .single();
+          .from("profiles")
+          .select("exp, level")
+          .eq("_id", writerId)
+          .single();
 
         if (likeExpUpError) throw likeExpUpError;
 
@@ -266,8 +294,8 @@ export default function DetailPost() {
 
         // 레벨업 조건 체크
         if (newExp < 0) {
-            newLevel -= 1; // 레벨 -1
-            newExp = newExp + 100; // 경험치 업데이트
+          newLevel -= 1; // 레벨 -1
+          newExp = newExp + 100; // 경험치 업데이트
         }
 
         // 업데이트 쿼리 실행
@@ -275,24 +303,24 @@ export default function DetailPost() {
           .from("profiles")
           .update({ exp: newExp, level: newLevel })
           .eq("_id", writerId);
-          // console.log("DP: update like EXP");
-        
+        // console.log("DP: update like EXP");
+
         if (updateError) throw updateError;
       } else {
         // 좋아요 안 한 경우 → 등록
         const { error: insertError } = await supabase
-          .from('likes')
+          .from("likes")
           .insert([{ user_id: userId, post_id: params?.postId }]);
         // console.log("DP: update Like");
         if (insertError) throw insertError;
         setLiked(true);
-        setLikeCount((prev) => (prev+1));
+        setLikeCount((prev) => prev + 1);
 
-        const { data : likeExpDown, error: likeExpDownError } = await supabase
-        .from('profiles')
-        .select("exp, level")
-        .eq("_id", writerId)
-        .single();
+        const { data: likeExpDown, error: likeExpDownError } = await supabase
+          .from("profiles")
+          .select("exp, level")
+          .eq("_id", writerId)
+          .single();
 
         if (likeExpDownError) throw likeExpDownError;
 
@@ -315,37 +343,44 @@ export default function DetailPost() {
           .from("profiles")
           .update({ exp: newExp, level: newLevel })
           .eq("_id", writerId);
-          // console.log("DP: update like EXP");
+        // console.log("DP: update like EXP");
         if (updateError) throw updateError;
       }
     } catch (e) {
-      console.error('좋아요 처리 중 오류:', e);
-      alert('좋아요 처리 중 오류가 발생했습니다.');
+      console.error("좋아요 처리 중 오류:", e);
+      alert("좋아요 처리 중 오류가 발생했습니다.");
     } finally {
       setTimeout(() => setAnimating(false), 300);
     }
   };
-  
-    // 댓글 등록 함수
-    const handleAddComment = async (e: FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      if (!newComment.trim() || !userId || !params?.postId) return;
-    
-      try {
-        // 댓글 등록 (ID만 가져오기)
-        const { data: inserted, error: insertError } = await supabase
-          .from("comments")
-          .insert([{ post_id: params.postId, user_id: userId, comment: newComment.trim() }])
-          .select("_id")
-          .single();
-          // console.log("DP: get Comment ID");
 
-        if (insertError || !inserted) throw insertError;
-    
-        // 전체 정보 다시 조회
-        const { data: commentData, error: selectError } = await supabase
-          .from("comments")
-          .select(`
+  // 댓글 등록 함수
+  const handleAddComment = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!newComment.trim() || !userId || !params?.postId) return;
+
+    try {
+      // 댓글 등록 (ID만 가져오기)
+      const { data: inserted, error: insertError } = await supabase
+        .from("comments")
+        .insert([
+          {
+            post_id: params.postId,
+            user_id: userId,
+            comment: newComment.trim(),
+          },
+        ])
+        .select("_id")
+        .single();
+      // console.log("DP: get Comment ID");
+
+      if (insertError || !inserted) throw insertError;
+
+      // 전체 정보 다시 조회
+      const { data: commentData, error: selectError } = await supabase
+        .from("comments")
+        .select(
+          `
             _id,
             post_id,
             created_at,
@@ -358,88 +393,89 @@ export default function DetailPost() {
               exp,
               level
             )
-          `)
-          .eq("_id", inserted._id)
-          .single();
-          // console.log("DP: get Comment Data");
+          `
+        )
+        .eq("_id", inserted._id)
+        .single();
+      // console.log("DP: get Comment Data");
 
-        if (selectError || !commentData) throw selectError;
+      if (selectError || !commentData) throw selectError;
 
-        // 상태 업데이트
-        setComments((prev) => [...prev, commentData] as unknown as CommentType[]);
-        setNewComment("");
+      // 상태 업데이트
+      setComments((prev) => [...prev, commentData] as unknown as CommentType[]);
+      setNewComment("");
 
-        // 경험치 업데이트
-        const profile =
-        Array.isArray(commentData.profiles)
-          ? commentData.profiles[0]
-          : commentData.profiles;
-        let newExp = (profile?.exp || 0) + 15; // 댓글 등록 시 경험치 +15
-        let newLevel = profile?.level || 0;
+      // 경험치 업데이트
+      const profile = Array.isArray(commentData.profiles)
+        ? commentData.profiles[0]
+        : commentData.profiles;
+      let newExp = (profile?.exp || 0) + 15; // 댓글 등록 시 경험치 +15
+      let newLevel = profile?.level || 0;
 
-        // 레벨업 조건 체크
-        if (newExp >= 100) {
-          if (newLevel < 10) {
-            newLevel += 1; // 레벨 +1
-            newExp = newExp % 100; // 경험치 초기화
-          } else {
-            newExp = 100;
-          }
+      // 레벨업 조건 체크
+      if (newExp >= 100) {
+        if (newLevel < 10) {
+          newLevel += 1; // 레벨 +1
+          newExp = newExp % 100; // 경험치 초기화
+        } else {
+          newExp = 100;
         }
-
-        // 업데이트 쿼리 실행
-        const { error: updateError } = await supabase
-          .from("profiles")
-          .update({ exp: newExp, level: newLevel })
-          .eq("_id", userId);
-          // console.log("DP: update comment EXP");
-
-        if (updateError) throw updateError;
-    
-      } catch (err) {
-        console.error("댓글 등록 중 오류:", err);
-        alert("댓글 등록 중 문제가 발생했습니다.");
       }
-    };
 
-    // 댓글 수정
-    const handleCommentEdit = async (_id: string, newText: string) => {
-      const { error } = await supabase
-        .from("comments")
-        .update({ comment: newText, update_at: new Date().toISOString() })
-        .eq("_id", _id);
-        // console.log("DP: update Comment");
+      // 업데이트 쿼리 실행
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ exp: newExp, level: newLevel })
+        .eq("_id", userId);
+      // console.log("DP: update comment EXP");
 
-      if (!error) {
-        setComments((prev) =>
-          prev.map((c) =>
-            c._id === _id ? { ...c, comment: newText, update_at: new Date().toISOString() } : c
-          )
-        );
-      }
-    };
+      if (updateError) throw updateError;
+    } catch (err) {
+      console.error("댓글 등록 중 오류:", err);
+      alert("댓글 등록 중 문제가 발생했습니다.");
+    }
+  };
 
-    const handleCommentDelete = async (_id: string) => {
-      const ok = confirm("정말 삭제하시겠어요?");
-      if (!ok) return;
-  
-      const { error } = await supabase
-        .from("comments")
-        .delete()
-        .eq("_id", _id)
-        .eq("user_id", userId);
-        // console.log("DP: delete Comment");
+  // 댓글 수정
+  const handleCommentEdit = async (_id: string, newText: string) => {
+    const { error } = await supabase
+      .from("comments")
+      .update({ comment: newText, update_at: new Date().toISOString() })
+      .eq("_id", _id);
+    // console.log("DP: update Comment");
 
-      if (error) {
-        console.error(error);
-      } else {
-        setComments((prev) => prev.filter((c) => c._id !== _id));
-      }
-    };
+    if (!error) {
+      setComments((prev) =>
+        prev.map((c) =>
+          c._id === _id
+            ? { ...c, comment: newText, update_at: new Date().toISOString() }
+            : c
+        )
+      );
+    }
+  };
 
-    const handleDelete = async () => {
-      const { error } = await supabase
-      .from('posts')
+  const handleCommentDelete = async (_id: string) => {
+    const ok = confirm("정말 삭제하시겠어요?");
+    if (!ok) return;
+
+    const { error } = await supabase
+      .from("comments")
+      .delete()
+      .eq("_id", _id)
+      .eq("user_id", userId);
+    // console.log("DP: delete Comment");
+
+    if (error) {
+      console.error(error);
+    } else {
+      setComments((prev) => prev.filter((c) => c._id !== _id));
+    }
+  };
+
+  const handleDelete = async () => {
+    const { error } = await supabase
+      .from("posts")
       .delete() // 삭제
       .eq("_id", params?.postId);
     // console.log("DP: delete POST");
@@ -448,207 +484,227 @@ export default function DetailPost() {
       console.error(error);
     }
   };
-  if (isLoading) return <DetailPostSkeleton />;;
+  if (isLoading) return <DetailPostSkeleton />;
   return (
-    <div className="max-w-4xl mx-auto p-6 text-gray-100">
-      {/* ───────────── 본문 카드 ───────────── */}
-      <Card className="p-6">
-        {/* 작성자 프로필 */}
-        <div className="flex items-center gap-4">
-          <Link to={`/userPage/${writerId}`}>
-            <ProfileImage
-              className="w-16 h-16 rounded-full object-cover shrink-0"
-              src={profileImage}
-              alt={`${writerId}님의 이미지`}
+    <>
+      <div className="text-gray-100">
+        {/* ───────────── 본문 카드 ───────────── */}
+        <Card className="p-6">
+          {/* 작성자 프로필 */}
+          <div className="flex items-center gap-4">
+            <Link to={`/userPage/${writerId}`}>
+              <ProfileImage
+                className="w-16 h-16 rounded-full object-cover shrink-0"
+                src={profileImage}
+                alt={`${writerId}님의 이미지`}
               />
-          </Link>
-          <div className="flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-2xl font-extrabold leading-none">{nickname}</h3>
-              <span className="text-sm font-bold text-amber-400">{`Lv ${level || "0"}`}</span>
-              <Badge
-                className="px-2 py-0.5 whitespace-nowrap"
-                level={level}
-              />              
+            </Link>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-2xl font-extrabold leading-none">
+                  {nickname}
+                </h3>
+                <span className="text-sm font-bold text-amber-400">{`Lv ${level || "0"}`}</span>
+                <Badge
+                  className="px-2 py-0.5 whitespace-nowrap"
+                  level={level}
+                />
+              </div>
+              <p className="mt-2 text-sm text-gray-400">
+                {formaRelativeTime(createdAt)}
+              </p>
             </div>
-            <p className="mt-2 text-sm text-gray-400">{formaRelativeTime(createdAt)}</p>
           </div>
-        </div>
 
-        {/* 제목 */}
-        <h1 className="mt-6 text-xl font-semibold leading-snug">
-          {title}
-        </h1>
+          {/* 제목 */}
+          <h1 className="mt-6 text-xl font-semibold leading-snug">{title}</h1>
 
-        {/* 본문 */}
-        <div className="mt-4 space-y-4 text-sm text-gray-300 leading-relaxed whitespace-pre-line">
-          {content}
-        </div>
-        
-        {/* 간격 */}
-        <div className="h-4" />
-        
-        {/* 이미지 */}
-        <div className="mb-5">
-          <div className="grid grid-cols-2 gap-4 mb-5">
-          {images.map((img, idx) => {
-              if (!img) return null;
-              const imageLength = images.filter(Boolean).length;
-              const baseClass = "relative flex flex-col items-center justify-center w-full border border-[#D1D5DB] rounded-md cursor-pointer hover:border-blue-400 transition";
-              const additionClass = imageLength === 1 ? "h-80 col-span-2" : imageLength === 2 ? "h-80 col-span-1" : "h-40";
+          {/* 본문 */}
+          <div className="mt-4 space-y-4 text-sm text-gray-300 leading-relaxed whitespace-pre-line">
+            {content}
+          </div>
 
-              return (
-                <div
-                  key={idx}
-                  className={twMerge(baseClass, additionClass)}
-                >
-                  <img
-                    src={img}
-                    alt={`uploaded ${idx + 1}`}
-                    className="w-full h-full object-cover rounded-md"
-                  />
-                </div>
-              )
-            })}
+          {/* 간격 */}
+          <div className="h-4" />
+
+          {/* 이미지 */}
+          <div className="mb-5">
+            <div className="grid grid-cols-2 gap-4 mb-5">
+              {images.map((img, idx) => {
+                if (!img) return null;
+                const imageLength = images.filter(Boolean).length;
+                const baseClass =
+                  "relative flex flex-col items-center justify-center w-full border border-[#D1D5DB] rounded-md cursor-pointer hover:border-blue-400 transition";
+                const additionClass =
+                  imageLength === 1
+                    ? "h-80 col-span-2"
+                    : imageLength === 2
+                      ? "h-80 col-span-1"
+                      : "h-40";
+
+                return (
+                  <div
+                    key={idx}
+                    className={twMerge(baseClass, additionClass)}
+                    onClick={() => openModal(img)}
+                  >
+                    <img
+                      src={img}
+                      alt={`uploaded ${idx + 1}`}
+                      className="w-full h-full object-cover rounded-md"
+                    />
+                  </div>
+                );
+              })}
             </div>
-        </div>
+          </div>
 
-        {/* 해시태그 */}
-        <div
-          className={twMerge(
+          {/* 해시태그 */}
+          <div
+            className={twMerge(
               "mt-4 mb-[10px] w-full transition-all duration-100", // ✅ 본문과의 간격 mt-4 추가
               hashtags.length > 0 ? "h-[20px]" : "h-0"
-          )}
+            )}
           >
-          {hashtags.map((tag, idx) => {
+            {hashtags.map((tag, idx) => {
               const pastelColors = [
-              "bg-[#E0F7FA] text-[#027A9B]",
-              "bg-[#D8F5E0] text-[#2E7D32]",
-              "bg-[#FFE5D0] text-[#D84315]",
-              "bg-[#FFF1F7] text-[#C2185B]",
-              "bg-[#FFF9C4] text-[#B78900]",
+                "bg-[#E0F7FA] text-[#027A9B]",
+                "bg-[#D8F5E0] text-[#2E7D32]",
+                "bg-[#FFE5D0] text-[#D84315]",
+                "bg-[#FFF1F7] text-[#C2185B]",
+                "bg-[#FFF9C4] text-[#B78900]",
               ];
               return (
-              <span
+                <span
                   key={idx}
                   className={twMerge(
-                  "inline-flex gap-1 px-2 py-[2px] rounded-full mr-2",
-                  pastelColors[idx % pastelColors.length]
+                    "inline-flex gap-1 px-2 py-[2px] rounded-full mr-2",
+                    pastelColors[idx % pastelColors.length]
                   )}
-              >
+                >
                   #{tag}
-              </span>
+                </span>
               );
-          })}
-        </div>
+            })}
+          </div>
 
-        {/* 하단 버튼 */}
-        <div className="mt-6 flex items-center justify-between pt-4">
+          {/* 하단 버튼 */}
+          <div className="mt-6 flex items-center justify-between pt-4">
             {/* 좌측 좋아요 / 댓글 버튼 */}
             <div className="flex items-center gap-6 text-sm text-gray-400">
-            <button
+              <button
                 onClick={toggleLike}
                 className="flex items-center gap-1 focus:outline-none select-none"
-            >
+              >
                 <Heart
-                className={twMerge(
+                  className={twMerge(
                     "w-4 h-4 transition-transform duration-300",
                     liked
-                    ? "text-red-500 fill-red-500"
-                    : "text-gray-400 fill-transparent",
+                      ? "text-red-500 fill-red-500"
+                      : "text-gray-400 fill-transparent",
                     animating && "scale-125"
-                )}
+                  )}
                 />
                 {likeCount}
-            </button>
+              </button>
 
-            <button className="flex items-center gap-1 text-gray-400 focus:outline-none">
-                <MessageSquare className="w-4 h-4" />{comments.length}
-            </button>
+              <button className="flex items-center gap-1 text-gray-400 focus:outline-none">
+                <MessageSquare className="w-4 h-4" />
+                {comments.length}
+              </button>
             </div>
 
             {/* 우측 수정 / 삭제 버튼 */}
-            { isMyPost &&
-            <div className="flex gap-3">
+            {isMyPost && (
+              <div className="flex gap-3">
                 {/* 수정 버튼 */}
-                <button onClick={() => navigate(`/posts/${params?.postId}/modify`)}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#4A77E4] text-white font-medium text-sm hover:bg-[#3d68d0] transition"
+                <button
+                  onClick={() => navigate(`/posts/${params?.postId}/modify`)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#4A77E4] text-white font-medium text-sm hover:bg-[#3d68d0] transition"
                 >
-                    <SquarePen className="w-4 h-4" />
-                    수정
+                  <SquarePen className="w-4 h-4" />
+                  수정
                 </button>
 
                 {/* 삭제 버튼 */}
-                <button onClick={handleDelete}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#D94A3D] text-white font-medium text-sm hover:bg-[#c23c30] transition"
+                <button
+                  onClick={handleDelete}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#D94A3D] text-white font-medium text-sm hover:bg-[#c23c30] transition"
                 >
-                    <Trash2 className="w-4 h-4" />
-                    삭제
+                  <Trash2 className="w-4 h-4" />
+                  삭제
                 </button>
-            </div>
-            }
-        </div>
+              </div>
+            )}
+          </div>
+        </Card>
 
+        {/* 간격 */}
+        <div className="h-6" />
 
-      </Card>
+        {/* ───────────── 댓글 카드 ───────────── */}
+        <Card className="p-6">
+          <h2 className="font-semibold text-lg">댓글 ({comments.length})</h2>
 
-      {/* 간격 */}
-      <div className="h-6" />
-
-      {/* ───────────── 댓글 카드 ───────────── */}
-      <Card className="p-6">
-        <h2 className="font-semibold text-lg">댓글 ({comments.length})</h2>
-
-        {/* 댓글 입력 (NEW) */}
-        { isLogin &&
-        <form onSubmit={handleAddComment} className="mt-4 flex items-center gap-3">
-            <input
+          {/* 댓글 입력 (NEW) */}
+          {isLogin && (
+            <form
+              onSubmit={handleAddComment}
+              className="mt-4 flex items-center gap-3"
+            >
+              <input
                 type="text"
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 placeholder="댓글을 입력하세요."
                 className={twMerge(
-                "flex-1 h-10 rounded-lg px-4",
-                "bg-white text-[#1A1D25] placeholder-gray-400",
-                "border border-black/5 shadow-sm",
-                "focus:outline-none focus:ring-2 focus:ring-violet-400/60 focus:border-transparent"
+                  "flex-1 h-10 rounded-lg px-4",
+                  "bg-white text-[#1A1D25] placeholder-gray-400 text-sm",
+                  "border border-black/5 shadow-sm",
+                  "focus:outline-none focus:ring-2 focus:ring-violet-400/60 focus:border-transparent"
                 )}
-            />
-            <button
+              />
+              <button
                 type="submit"
                 disabled={!newComment.trim()}
                 className={twMerge(
-                "h-10 px-7 rounded-lg font-semibold text-white",
-                "bg-gradient-to-r from-violet-500 to-indigo-500",
-                "disabled:opacity-50 disabled:cursor-not-allowed"
+                  "h-10 px-7 rounded-lg font-semibold text-white",
+                  "bg-gradient-to-r from-violet-500 to-indigo-500",
+                  "disabled:opacity-50 disabled:cursor-not-allowed"
                 )}
-            >
-                <span className="text-[13px] font-thin">작성</span>
-            </button>
-        </form>
-        }
+              >
+                <span className="text-sm font-medium">작성</span>
+              </button>
+            </form>
+          )}
 
-        {/* 댓글 리스트 */}
-        {comments.length === 0 && (
-          <div className="text-gray-400 text-sm text-center py-6">아직 댓글이 없습니다.</div>
-        )}
-        {comments.map((c) =>
-          <Comment
-            key={c._id}
-            _id={c._id}
-            userId={c.user_id}
-            author={c.profiles?.display_name || "익명"}
-            level={c.profiles?.level || 0}
-            profileImage={c.profiles?.profile_image}
-            time={formaRelativeTime(c.created_at)}
-            content={c.comment}
-            isEdited={!!c.update_at && c.created_at !== c.update_at}
-            isMine={c.user_id === userId}
-            onEditSave={handleCommentEdit} // 저장 함수 연결
-            onDelete={handleCommentDelete}
-          />
-        )}
-      </Card>
-    </div>
+          {/* 댓글 리스트 */}
+          {comments.length === 0 && (
+            <div className="text-gray-400 text-sm text-center py-6">
+              아직 댓글이 없습니다.
+            </div>
+          )}
+          {comments.map((c) => (
+            <Comment
+              key={c._id}
+              _id={c._id}
+              userId={c.user_id}
+              author={c.profiles?.display_name || "익명"}
+              level={c.profiles?.level || 0}
+              profileImage={c.profiles?.profile_image}
+              time={formaRelativeTime(c.created_at)}
+              content={c.comment}
+              isEdited={!!c.update_at && c.created_at !== c.update_at}
+              isMine={c.user_id === userId}
+              onEditSave={handleCommentEdit} // 저장 함수 연결
+              onDelete={handleCommentDelete}
+            />
+          ))}
+        </Card>
+      </div>
+      <ImageModal isOpen={isModalOpened} onClose={closeModal}>
+        <DetailImageZoom src={modalImageSrc} />
+      </ImageModal>
+    </>
   );
 }
