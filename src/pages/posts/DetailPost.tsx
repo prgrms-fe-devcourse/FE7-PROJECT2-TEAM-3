@@ -17,9 +17,10 @@ import DetailImageZoom from "../../components/DetailImageZoom.tsx";
 
 export default function DetailPost() {
   // 모달 상태 관리
-  const [modalImageSrc, setModalImageSrc] = useState(null);
+  const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
   const [isModalOpened, setIsModalOpened] = useState(false);
-  const openModal = (src) => {
+  const openModal = (src: string | null) => {
+    if (!src) return;
     setModalImageSrc(src);
     setIsModalOpened(true);
   };
