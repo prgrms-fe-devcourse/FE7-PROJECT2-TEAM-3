@@ -63,10 +63,7 @@ const Comment = ({
           <div className="flex gap-2 flex-wrap items-center">
             <span className="font-semibold text-sm">{author}</span>
             <span className="text-xs font-bold text-amber-400">{`Lv.${level}`}</span>
-            <Badge
-              className="px-2 py-0.5 whitespace-nowrap"
-              level={level}
-            />
+            <Badge className="px-2 py-0.5 whitespace-nowrap" level={level} />
             <span className="text-xs text-gray-500">
               {time}
               {isEdited && " (수정됨)"}
@@ -104,7 +101,9 @@ const Comment = ({
             rows={4}
           />
         ) : (
-          <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-line">{content}</p>
+          <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-line">
+            {content}
+          </p>
         )}
       </div>
     </div>

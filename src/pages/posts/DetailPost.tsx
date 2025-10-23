@@ -1,7 +1,7 @@
-import React, {useState, useEffect, type FormEvent} from "react";
+import {useState, useEffect, type FormEvent} from "react";
 import { twMerge } from "tailwind-merge";
 import {  MessageSquare, Heart, SquarePen, Trash2 } from "lucide-react";
-import Comment from "./Comment";
+import Comment from "./Comment"
 import { useParams } from "react-router";
 import supabase from "../../utils/supabase";
 import { useNavigate } from "react-router";
@@ -10,171 +10,142 @@ import ProfileImage from "../../components/ui/ProfileImage.tsx";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import Badge from "../../components/ui/Badge.tsx";
-
-// 공통 카드 (shadow 제거 + 지정 배경색)
-const Card = ({
-  className,
-  children,
-}: React.PropsWithChildren<{ className?: string }>) => (
-  <div
-    className={twMerge(
-      "rounded-2xl border border-white/10 bg-[#1A1D25]",
-      "backdrop-blur-sm",
-      className
-    )}
-  >
-    {children}
-  </div>
-);
+import DetailPostSkeleton from "../../components/ui/loading/DetailPostSkeleton.tsx";
+import Card from "../../components/ui/Card.tsx";
 
 export default function DetailPost() {
-    // console.log("DetailPost()");
-    const navigate = useNavigate();
-    const goBackHandler = () => {
-      navigate(-1);
-    };
+  // console.log("DetailPost()");
+  const navigate = useNavigate();
+  const goBackHandler = () => {
+    navigate(-1);
+  };
+  const [isLoading, setIsLoading] = useState(false);
 
-    // 사용자 & 로그인
-    const [userId, setUserId] = useState<string | null>(null);
-    const [isLogin, setIsLogin] = useState<boolean>(false);
-    const [isMyPost, setIsMyPost] = useState<boolean>(false);
+  // 사용자 & 로그인
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isLogin, setIsLogin] = useState<boolean>(false);
+  const [isMyPost, setIsMyPost] = useState<boolean>(false);
 
-    // 글쓴이 영역
-    const [writerId, setWriterId] = useState<string>("");
-    const [profileImage, setProfileImage] = useState<string | undefined>(undefined);
-    const [nickname, setNickname] = useState<string>("");
-    const [level, setLevel] = useState<number>(0);
-    const [createdAt, setCreatedAt] = useState<string>("");
-    
-    // 본문 영역
-    const [title, setTitle] = useState<string>("");
-    const [content, setContent] = useState<string>("");
-    const [images, setImages] = useState<(string | null)[]>([null, null, null, null]);
-    const [hashtags, setHashtags] = useState<string[]>([])
- 
-    // 좋아요 & 댓글
-    const [liked, setLiked] = useState(false);
-    const [likeCount, setLikeCount] = useState(0);
-    const [animating, setAnimating] = useState(false);
-    const [newComment, setNewComment] = useState<string>('');
+  // 글쓴이 영역
+  const [writerId, setWriterId] = useState<string>("");
+  const [profileImage, setProfileImage] = useState<string | undefined>(undefined);
+  const [nickname, setNickname] = useState<string>("");
+  const [level, setLevel] = useState<number>(0);
+  const [createdAt, setCreatedAt] = useState<string>("");
+  
+  // 본문 영역
+  const [title, setTitle] = useState<string>("");
+  const [content, setContent] = useState<string>("");
+  const [images, setImages] = useState<(string | null)[]>([null, null, null, null]);
+  const [hashtags, setHashtags] = useState<string[]>([])
 
-    type CommentProfile = {
-      display_name: string;
-      profile_image: string | null;
-      exp: number;
-      level: number;
-    };
-    
-    type CommentType = {
-      _id: string;
-      post_id: string;
-      created_at: string;
-      user_id: string;
-      comment: string;
-      update_at: string | null;
-      profiles: CommentProfile;
-    };
+  // 좋아요 & 댓글
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [animating, setAnimating] = useState(false);
+  const [newComment, setNewComment] = useState<string>('');
 
-    const [comments, setComments] = useState<CommentType[]>([]);
-    // const [commentsCount, setCommentsCount] = useState(0);
-    const params = useParams();
-    
-    // 사용자 정보 및 게시글 가져오기
-    useEffect(() => {
-      const fetchData = async () => {
-        try {
-          console.log("페치");
-          let profile: { _id: string; email: string } | null = null;
-          // 사용자 정보 조회
-          const {
-            data: { user },
-          } = await supabase.auth.getUser();
-          console.log("user", user);
-          // console.log("DP: auth");
+  type CommentProfile = {
+    display_name: string;
+    profile_image: string | null;
+    exp: number;
+    level: number;
+  };
+  
+  type CommentType = {
+    _id: string;
+    post_id: string;
+    created_at: string;
+    user_id: string;
+    comment: string;
+    update_at: string | null;
+    profiles: CommentProfile;
+  };
 
-          if (!user) {
-            setIsLogin(false);
-          } else {
-            const { data, error } = await supabase
-              .from("profiles")
-              .select("_id, email")
-              .eq("email", user.email)
-              .single();
-            console.log("데이터: ", data);
-            // console.log("DP: get Profiles");
-            if (error || !data) throw new Error("프로필 정보를 찾을 수 없습니다.");
-            profile = data;
-            setUserId(profile._id);
-            setIsLogin(true);
-          }
-          console.log("프로필: ", profile);
+  const [comments, setComments] = useState<CommentType[]>([]);
+  const params = useParams();
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // 사용자 정보 및 게시글 가져오기
+        // console.log("페치");
+        setIsLoading(true);
+        let userProfile: { _id: string; email: string } | null = null;
+        // 사용자 정보 조회
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        // console.log("user", user);
+        // console.log("DP: auth");
 
-          // 게시글 조회
-          const { data: post, error: postError } = await supabase
-            .from("posts")
-            .select("_id, user_id, title, content, created_at")
-            .eq("_id", params?.postId)
+        if (!user) {
+          setIsLogin(false);
+        } else {
+          const { data, error } = await supabase
+            .from("profiles")
+            .select("_id, email")
+            .eq("email", user.email)
             .single();
-            // console.log("DP: get Post");
-          if (postError) throw postError;
-    
-          setTitle(post.title);
-          setContent(post.content);
-          setCreatedAt(post.created_at);
-          setWriterId(post.user_id);
-
-          console.log("포스트: ", post.title);
-          console.log("콘텐츠: ", post.content);
-          console.log("작성시간: ", post.created_at);
-          console.log("글 작성자: ", post.user_id);
-
-          // profile이 null이 아닌 경우에만 비교
-          if (profile) {
-            setIsMyPost(post.user_id === profile._id);
-          } else {
-            setIsMyPost(false);
-          }
-        } catch (e) {
-          console.error("데이터 로드 중 오류:", e);
-          alert(`데이터 로드 중 오류가 발생했습니다.\n${(e as Error).message}`);
+          // console.log("데이터: ", data);
+          // console.log("DP: get Profiles");
+          if (error || !data) throw new Error("프로필 정보를 찾을 수 없습니다.");
+          userProfile = data;
+          setUserId(userProfile._id);
+          setIsLogin(true);
         }
-      };
-      fetchData();
-    }, [params?.postId]);
+        // console.log("프로필: ", profile);
 
-    // 글쓴이 프로필 가져오기
-    useEffect(() => {
-      if (!writerId) return; // writerId가 있을 때만 실행
-      const fetchProfile = async () => {
-        const { data: profile, error } = await supabase
+        // 게시글 조회
+        const { data: post, error: postError } = await supabase
+          .from("posts")
+          .select("_id, user_id, title, content, created_at")
+          .eq("_id", params?.postId)
+          .single();
+          // console.log("DP: get Post");
+        if (postError) throw postError;
+  
+        setTitle(post.title);
+        setContent(post.content);
+        setCreatedAt(post.created_at);
+        setWriterId(post.user_id);
+
+        // console.log("포스트: ", post.title);
+        // console.log("콘텐츠: ", post.content);
+        // console.log("작성시간: ", post.created_at);
+        // console.log("글 작성자: ", post.user_id);
+
+        // 사용자 profile이 null이 아닌 경우에만 비교
+        if (userProfile) {
+          setIsMyPost(post.user_id === userProfile._id);
+        } else {
+          setIsMyPost(false);
+        }
+
+        // 글쓴이 프로필 가져오기
+        const { data: writerProfile, error: writerProfileError } = await supabase
           .from("profiles")
           .select("_id, display_name, profile_image, is_online, level")
-          .eq("_id", writerId)
+          .eq("_id", post.user_id)
           .single();
           // console.log("DP: get writerId");
-        if (error) {
-          console.error("글쓴이 프로필 불러오기 실패:", error);
+        if (writerProfileError) {
+          console.error("글쓴이 프로필 불러오기 실패:", writerProfileError);
         } else {
-          setNickname(profile.display_name);
-          setProfileImage(profile.profile_image);
-          setLevel(profile.level);
+          setNickname(writerProfile.display_name);
+          setProfileImage(writerProfile.profile_image);
+          setLevel(writerProfile.level);
         }
-      };
-      fetchProfile();
-    }, [writerId]);
 
-    // 본문 이미지 가져오기
-    useEffect(() => {
-      console.log("image");
-      const fetchImage = async () => {
-        const { data: imageRows, error } = await supabase
-        .from("images")
-        .select("src")
-        .eq("post_id", params?.postId);
-      // console.log("DP: get Images");
+        // 본문 이미지 가져오기
+        const { data: imageRows, error: imageError } = await supabase
+          .from("images")
+          .select("src")
+          .eq("post_id", params?.postId);
+        // console.log("DP: get Images");
 
-        if (error) {
-          console.error("이미지 불러오기 실패:", error);
+        if (imageError) {
+          console.error("이미지 불러오기 실패:", imageError);
         } else if (imageRows) {
           // src 필드만 추출해서 상태에 넣기
           const imageSrcList = imageRows.map((img) => img.src);
@@ -186,32 +157,62 @@ export default function DetailPost() {
         
           setImages(updatedImages);
         }
-      }
-      fetchImage();
-    }, [params?.postId]);
 
-    // 해시태그 가져오기
-    useEffect(() => {
-      console.log("hash");
-      const fetchHashtags = async () => {
-        const { data: hashtag, error } = await supabase
-        .from("hashtags")
-        .select("hashtag")
-        .eq("post_id", params?.postId);
-      // console.log("DP: get Hashtags");
+        // 해시태그 가져오기
+        const { data: hashtag, error: hashtagError } = await supabase
+          .from("hashtags")
+          .select("hashtag")
+          .eq("post_id", params?.postId);
+        // console.log("DP: get Hashtags");
 
-        if (error) {
-          console.error("해시태그 불러오기 실패:", error);
+        if (hashtagError) {
+          console.error("해시태그 불러오기 실패:", hashtagError);
         } else {
           setHashtags(hashtag.map((h) => h.hashtag));
-        }     
+        }
+
+        // 댓글 가져오기
+        // console.log("comment");
+        const { data: commentsObj, error } = await supabase
+        .from("comments")
+        .select(`
+                _id,
+                post_id,
+                created_at,
+                user_id,
+                comment,
+                update_at,
+                profiles: user_id (
+                  display_name,
+                  profile_image,
+                  exp,
+                  level
+                ) `)
+        .eq("post_id", params?.postId)
+        .order("created_at", { ascending: true });
+        // console.log("DP: get Comments");
+  
+        if (error) {
+          console.error("댓글 불러오기 실패:", error.message, error.details);
+          return;
+        } else {
+          if (commentsObj && JSON.stringify(commentsObj) !== JSON.stringify(comments)) {
+            setComments(commentsObj as unknown as CommentType[]);
+          }
+        }
+      } catch (e) {
+        console.error("데이터 로드 중 오류:", e);
+        alert(`데이터 로드 중 오류가 발생했습니다.\n${(e as Error).message}`);
+      } finally {
+        setIsLoading(false);
       }
-      fetchHashtags();
-    }, [params?.postId]);
+    };
+    fetchData();
+  }, [params?.postId]);
 
   // 하트 가져오기
   useEffect(() => {
-    console.log("like");
+    // console.log("like");
     const fetchLikes = async () => {
       const { data: likes, error } = await supabase
         .from("likes")
@@ -227,43 +228,6 @@ export default function DetailPost() {
     }
     fetchLikes();
   }, [params?.postId, userId]);
-
-
-  // 댓글 가져오기
-  useEffect(() => {
-    console.log("comment");
-    const fetchComments = async () => {
-      const { data: commentsObj, error } = await supabase
-      .from("comments")
-      .select(`
-              _id,
-              post_id,
-              created_at,
-              user_id,
-              comment,
-              update_at,
-              profiles: user_id (
-                display_name,
-                profile_image,
-                exp,
-                level
-              ) `)
-      .eq("post_id", params?.postId)
-      .order("created_at", { ascending: true });
-      // console.log("DP: get Comments");
-
-      if (error) {
-        console.error("댓글 불러오기 실패:", error.message, error.details);
-        return;
-      } else {
-        if (commentsObj && JSON.stringify(commentsObj) !== JSON.stringify(comments)) {
-          setComments(commentsObj as unknown as CommentType[]);
-        }
-        
-      }
-    }
-    fetchComments();
-  }, [params?.postId]);
 
   // 좋아요 토글 기능
   const toggleLike = async () => {
@@ -484,7 +448,7 @@ export default function DetailPost() {
       console.error(error);
     }
   };
-
+  if (isLoading) return <DetailPostSkeleton />;;
   return (
     <div className="max-w-4xl mx-auto p-6 text-gray-100">
       {/* ───────────── 본문 카드 ───────────── */}
