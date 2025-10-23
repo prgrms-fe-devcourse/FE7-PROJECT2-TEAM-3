@@ -115,18 +115,11 @@ export default function SetUpModal({ onClose }: SetUpModalProps) {
       </div>
 
       <div className="relative h-40 bg-[#303A4B]">
-        <Activity mode={formData.cover_image ? "visible" : "hidden"}>
-          <CoverImage
-            className="w-full h-full object-cover"
-            src={formData.cover_image}
-            alt={formData.name + "님의 배경 이미지"}
-          />
-        </Activity>
-        <Activity mode={!formData.cover_image ? "visible" : "hidden"}>
-          <div className="w-full h-full bg-[#303A4B] flex items-center justify-center text-gray-500">
-            배경 이미지를 추가하세요
-          </div>
-        </Activity>
+        <CoverImage
+          className="w-full h-full object-cover"
+          src={formData.cover_image}
+          alt={formData.name + "님의 배경 이미지"}
+        />
 
         <div className="absolute top-2 right-2 flex gap-2">
           <label className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-700 hover:bg-gray-600 cursor-pointer transition-colors">

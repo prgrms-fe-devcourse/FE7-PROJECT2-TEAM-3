@@ -25,6 +25,8 @@ export default function ProfileHeaderSection() {
   const { userId } = useParams();
   const myProfile = useAuthStore((state) => state.profile);
   const { findOrCreateChatRoom } = useChatRoom();
+  const [isLoading, setIsLoading] = useState(true);
+  const [posAndCommentIsLoading, setPosAndCommentIsLoading] = useState(true);
 
   // 팔로워, 팔로잉 수 상태
   const [followers, setFollowers] = useState<number>(0);
@@ -39,8 +41,8 @@ export default function ProfileHeaderSection() {
   // 진환
   // 작성글, 댓글 전환용 상태
   const [activeTab, setActiveTab] = useState<"posts" | "comments">("posts");
-  const [posts, setPosts] = useState<PostListItem[]>([]);
-  const [comments, setComments] = useState<FormattedComments[]>([]);
+  const [posts, setPosts] = useState<PostListItem[] | null>([]);
+  const [comments, setComments] = useState<FormattedComments[] | null>([]);
 
   // 모달 열기/닫기 함수
   const openSetUp = () => setIsSetUpOpened(true); // 프로필 수정 모달
@@ -63,56 +65,68 @@ export default function ProfileHeaderSection() {
   });
   // 해당 페이지 유저 프로필 정보 불러오기
   useEffect(() => {
-    if (userId) {
-      const fetchProfile = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("_id", userId)
-            .single();
-          if (error) {
-            throw error;
-          }
-          setProfile(data);
-        } catch (error) {
-          console.error(error);
+    if (!userId) return;
+
+    const loadMainData = async () => {
+      setIsLoading(true);
+
+      const profilePromise = supabase
+        .from("profiles")
+        .select("*")
+        .eq("_id", userId)
+        .single();
+
+      const followingPromise = supabase
+        .from("follows")
+        .select("following_id", { count: "exact", head: true })
+        .eq("follower_id", userId);
+
+      const followerPromise = supabase
+        .from("follows")
+        .select("follower_id", { count: "exact", head: true })
+        .eq("following_id", userId);
+
+      try {
+        const [profileResult, followingResult, followerResult] =
+          await Promise.all([
+            profilePromise,
+            followingPromise,
+            followerPromise,
+          ]);
+
+        if (profileResult.error) throw profileResult.error;
+        setProfile(profileResult.data);
+
+        // 팔로우/팔로워 수 업데이트
+        setFollowings(followingResult.count || 0);
+        setFollowers(followerResult.count || 0);
+
+        if (myProfile) {
+          const { count: isFollowingData } = await supabase
+            .from("follows")
+            .select("", { count: "exact", head: true })
+            .eq("follower_id", myProfile._id)
+            .eq("following_id", userId);
+          setIsFollowing(isFollowingData === 1 || false);
         }
-      };
-      fetchProfile();
-    }
-  }, [userId, myProfile]);
-  // 팔로잉 & 팔로우 수, 팔로잉 & 팔로우 목록 불러오기
-  useEffect(() => {
-    if (userId) {
-      const fetchfollows = async () => {
-        const { count: followingCount } = await supabase
-          .from("follows")
-          .select("following_id", { count: "exact", head: true })
-          .eq("follower_id", userId);
-        const { count: followerCount } = await supabase
-          .from("follows")
-          .select("follower_id", { count: "exact", head: true })
-          .eq("following_id", userId);
-        const { count: isFollowingData } = await supabase
-          .from("follows")
-          .select("", { count: "exact", head: true })
-          .eq("follower_id", myProfile?._id)
-          .eq("following_id", userId);
-        setFollowings(followingCount || 0);
-        setFollowers(followerCount || 0);
-        setIsFollowing(isFollowingData === 1 || false);
-      };
-      fetchfollows();
-    }
-  }, [userId, myProfile?._id, isFollowerOpend, isFollowingOpend]);
+      } catch (error) {
+        console.error("메인 데이터 로딩 실패:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadMainData();
+    // 팔로잉 & 팔로우 수, 팔로잉 & 팔로우 목록 불러오기
+  }, [userId, myProfile?._id, isFollowerOpend, isFollowingOpend, myProfile]);
 
   // 작성글 불러오는 로직
   useEffect(() => {
-    if (!profile._id) return;
-
+    if (!userId) return;
     const postFetch = async () => {
       try {
+        setPosts(null);
+        setPosAndCommentIsLoading(true);
         const { data: postsData, error: postsError } = await supabase
           .from("posts")
           .select(
@@ -127,7 +141,7 @@ export default function ProfileHeaderSection() {
             comments:comments(count),
             hashtags (hashtag)`
           )
-          .eq("user_id", profile._id);
+          .eq("user_id", userId);
 
         if (postsError) {
           console.error("데이터 불러오기 오류: ", postsError);
@@ -162,21 +176,24 @@ export default function ProfileHeaderSection() {
         }
       } catch (e) {
         console.error(e);
+      } finally {
+        setPosAndCommentIsLoading(false);
       }
     };
     postFetch();
-  }, [profile._id]);
+  }, [userId]);
 
   // 작성 댓글 불러오는 로직
   useEffect(() => {
-    if (!profile._id) return;
-
+    if (!userId) return;
     const fetchComments = async () => {
       try {
+        setComments(null);
+        setPosAndCommentIsLoading(true);
         const { data: comments, error: commentsError } = await supabase
           .from("comments")
           .select(`comment, created_at, post_id, postTitle: posts(title)`)
-          .eq("user_id", profile._id);
+          .eq("user_id", userId);
 
         const formmatedComments = (comments || []).map(
           (c: CommentListItem) => ({
@@ -192,10 +209,12 @@ export default function ProfileHeaderSection() {
         if (commentsError) throw commentsError;
       } catch (e) {
         console.error(e);
+      } finally {
+        setPosAndCommentIsLoading(false);
       }
     };
     fetchComments();
-  }, [profile._id]);
+  }, [userId]);
 
   //팔로우 하는 함수
   const followSubmit = async () => {
@@ -256,7 +275,60 @@ export default function ProfileHeaderSection() {
   const currentExp = Number(profile.exp ?? 0); // exp가 null일 경우를 대비
   const expPercentage = currentExp % maxExp; // 채운 경험치 계산
   const expRemaining = maxExp - expPercentage; // 남은 경험치 계산
-
+  if (isLoading) {
+    return (
+      <div className="w-full">
+        <div className="w-full h-40 bg-gray-700 rounded-t-lg animate-pulse"></div>
+        <div className="bg-[#161C27] rounded-b-lg p-6 shadow-lg relative h-64">
+          <div className="flex items-start gap-4 -mt-12">
+            <div className="w-24 h-24 rounded-full bg-gray-600 animate-pulse border-4 border-[#181c26] -ml-2"></div>
+            <div className="flex flex-col pt-12 space-y-2">
+              <div className="h-6 w-32 bg-gray-500 rounded animate-pulse"></div>
+              <div className="h-4 w-40 bg-gray-500 rounded animate-pulse"></div>
+            </div>
+          </div>
+          <div className="h-16 w-full bg-gray-700 mt-4 rounded animate-pulse"></div>
+          <div className="h-4 w-1/3 bg-gray-700 mt-4 rounded animate-pulse"></div>
+        </div>
+        <div className="flex justify-start border-b border-gray-700 animate-pulse my-4">
+          <div className="h-8 w-16 bg-gray-600 rounded-sm mr-2"></div>
+          <div className="h-8 w-16 bg-gray-700 rounded-sm"></div>
+        </div>
+        <article className="flex gap-3 p-6 border border-[#303A4B] rounded-lg bg-[#161C27] animate-pulse mb-4">
+          <div className="w-10 h-10 shrink-0">
+            <div className="w-full h-full rounded-full bg-gray-700"></div>
+          </div>
+          <div className="flex-1 flex flex-col gap-4">
+            <div className="flex items-center gap-2.5">
+              <div className="h-4 w-24 bg-gray-600 rounded"></div>
+              <div className="h-3 w-10 bg-gray-700 rounded"></div>
+              <div className="h-4 w-16 bg-gray-700 rounded-full"></div>
+              <div className="flex-1"></div>
+              <div className="h-3 w-12 bg-gray-700 rounded"></div>
+            </div>
+            <div className="flex flex-col gap-3">
+              <div className="h-5 w-3/4 bg-gray-500 rounded"></div>
+              <div className="space-y-1.5">
+                <div className="h-3 w-full bg-gray-700 rounded"></div>
+                <div className="h-3 w-[95%] bg-gray-700 rounded"></div>
+                <div className="h-3 w-[80%] bg-gray-700 rounded"></div>
+              </div>
+            </div>
+            <div className="flex justify-between mt-2">
+              <div className="flex gap-3">
+                <div className="h-4 w-8 bg-gray-700 rounded-full"></div>
+                <div className="h-4 w-8 bg-gray-700 rounded-full"></div>
+              </div>
+              <div className="flex gap-2">
+                <div className="h-5 w-12 bg-gray-700 rounded-full"></div>
+                <div className="h-5 w-16 bg-gray-700 rounded-full"></div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    );
+  }
   return (
     <div className="w-full">
       <div className="top-[104px] right-[352px] left-[352px]">
@@ -359,7 +431,11 @@ export default function ProfileHeaderSection() {
                   </button>
                 </Activity>
                 <button
-                  onClick={() => findOrCreateChatRoom(`${userId}`)}
+                  onClick={
+                    myProfile
+                      ? () => findOrCreateChatRoom(`${userId}`)
+                      : () => navigate("/login")
+                  }
                   className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-1 cursor-pointer"
                 >
                   채팅
@@ -398,7 +474,12 @@ export default function ProfileHeaderSection() {
         {/* 진환 파트 */}
         <div className="w-full mt-5 flex flex-col gap-6">
           <UserTabSwitcher activeTab={activeTab} setActiveTab={setActiveTab} />
-          {activeTab === "posts" && <UserPagePosts posts={posts} />}
+          {activeTab === "posts" && (
+            <UserPagePosts
+              isPostLoading={posAndCommentIsLoading}
+              posts={posts}
+            />
+          )}
           {activeTab === "comments" && <UserPageComments comments={comments} />}
         </div>
       </div>

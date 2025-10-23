@@ -4,7 +4,7 @@ import { formaRelativeTime } from "../../utils/formatRelativeTime";
 import type { FormattedComments } from "../../types/comment";
 
 interface Props {
-  comments: FormattedComments[];
+  comments: FormattedComments[] | null;
 }
 
 export default function UserPageComments({ comments }: Props) {
