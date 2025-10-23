@@ -194,18 +194,20 @@ export default function MessagesPage() {
               </div>
 
               <div className="flex-1 flex flex-col gap-4">
-                <div className="flex items-center gap-2.5">
-                  <strong className="text-white text-[16px]">
-                    {room.otherParticipant.display_name}
-                  </strong>
-                  <span className="text-[#F59E0B] text-[12px]">
-                    {`Lv ${room.otherParticipant.level || "0"}`}
-                  </span>
-                  <Badge
-                    className="flex px-3 h-[17px] items-center justify-center whitespace-nowrap overflow-hidden"
-                    level={room.otherParticipant.level}
-                  />
-                  <span className="text-xs text-gray-400 ml-auto">
+                <div className="flex items-center justify-between gap-2.5 flex-wrap">
+                  <div className="flex-center flex-wrap gap-2.5">
+                    <strong className="text-white text-[16px]">
+                      {room.otherParticipant.display_name}
+                    </strong>
+                    <span className="text-[#F59E0B] text-[12px]">
+                      {`Lv ${room.otherParticipant.level || "0"}`}
+                    </span>
+                    <Badge
+                      className="flex px-3 h-[17px] items-center justify-center whitespace-nowrap overflow-hidden"
+                      level={room.otherParticipant.level}
+                    />
+                  </div>
+                  <span className="text-xs text-gray-400">
                     {room.lastMessage.created_at
                       ? new Date(room.lastMessage.created_at).toLocaleString()
                       : ""}

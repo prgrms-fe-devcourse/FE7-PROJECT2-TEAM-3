@@ -104,7 +104,7 @@ export default function Posts({
           onClick={() =>
             navigate(channel ? `/channel/${channel}/write` : "/channel/write")
           }
-          className="fixed bottom-8 right-90 bg-gray-500 hover:bg-gray-400 text-white rounded-full w-15 h-15 flex items-center justify-center shadow-lg cursor-pointer transition hover:opacity-70 text-[0px]"
+          className="fixed bottom-24 sm:bottom-8 right-4 lg:right-90 bg-gray-500 hover:bg-gray-400 text-white rounded-full w-15 h-15 flex items-center justify-center shadow-lg cursor-pointer transition hover:opacity-70 text-[0px]"
         >
           글쓰기
           <Pencil />
