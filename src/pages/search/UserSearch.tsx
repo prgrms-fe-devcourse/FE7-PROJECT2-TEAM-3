@@ -8,6 +8,7 @@ import { Link } from "react-router";
 import { useAuthStore } from "../../stores/authStore";
 import UserSearchSkeleton from "../../components/ui/loading/UserSearchSkeleton";
 import Badge from "../../components/ui/Badge";
+import { useBreakpoint } from "../../hooks/useBreakPoint";
 
 export default function UserSearch() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -16,6 +17,8 @@ export default function UserSearch() {
   const myProfile = useAuthStore((state) => state.profile);
   const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
+
+  const {isMobile} = useBreakpoint();
 
   // 사용자 목록과 팔로우 목록을 동시에 가져오기
   useEffect(() => {
@@ -167,11 +170,11 @@ export default function UserSearch() {
                 <Link
                   key={user._id}
                   to={`/userPage/${user._id}`}
-                  className="flex gap-3 p-6 border border-[#303A4B] rounded-lg bg-[#161C27] cursor-pointer hover:bg-[#171f2b] hover:border-[#4E46A5]"
+                  className="flex flex-col sm:flex-row gap-3 p-6 border border-[#303A4B] rounded-lg bg-[#161C27] cursor-pointer hover:bg-[#171f2b] hover:border-[#4E46A5]"
                 >
                   <div
                     className={twMerge(
-                      "relative w-15 h-15 border-4 rounded-full shadow-[0px_0px_20px_0px_rgba(123,97,255,0.2)] ",
+                      "relative m-auto sm:m-0 w-24 h-24 sm:w-15 sm:h-15 border-4 rounded-full shadow-[0px_0px_20px_0px_rgba(123,97,255,0.2)] ",
                       user.is_online
                         ? "border-[#44387D] shadow-[0px_0px_20px_0px_rgba(123,97,255,0.5)]"
                         : "border-gray-400"
@@ -184,45 +187,84 @@ export default function UserSearch() {
                     />
                     <span
                       title={user.is_online ? "온라인" : "오프라인"}
-                      className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-[#1A2537] 
+                      className={`absolute bottom-0 right-0 w-5 h-5 sm:w-3 sm:h-3 rounded-full border-2 border-[#1A2537] 
                     ${user.is_online ? "bg-green-500" : "bg-gray-500"}`}
                     ></span>
                   </div>
-                  <div className="flex flex-col flex-1 gap-5">
-                    <div className="flex justify-between">
-                      <div className="flex-center gap-3">
-                        <strong className="text-white text-xl font-bold">
-                          {user.display_name}
-                        </strong>
-                        <span className="text-[#F59E0B] text-sm">
-                          Lv.{user.level}
-                        </span>
-                        <Badge
-                          className="flex px-3 h-[17px] items-center justify-center whitespace-nowrap overflow-hidden"
-                          level={user.level}
-                        />
+                  {!isMobile && (
+                    <div className="flex flex-col flex-1 gap-5">
+                      <div className="flex justify-between flex-col sm:flex-row">
+                        <div className="flex-center gap-3 flex-col w-full sm:w-auto sm:flex-row">
+                          <strong className="text-white text-xl font-bold">
+                            {user.display_name}
+                          </strong>
+                          <span className="text-[#F59E0B] text-sm">
+                            Lv.{user.level}
+                          </span>
+                          <Badge
+                            className="flex px-3 h-[17px] items-center justify-center whitespace-nowrap overflow-hidden"
+                            level={user.level}
+                          />
+                        </div>
+                        {myProfile && (
+                          <button
+                            className={twMerge(
+                              "font-bold py-2 px-4 rounded-lg text-sm transition-colors whitespace-nowrap h-fit order-1",
+                              isFollowing
+                                ? "bg-gray-600 hover:bg-gray-700 text-white"
+                                : "bg-[#5C4DCA] hover:bg-[#7b6cdb] text-white"
+                            )}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              toggleFollow(user._id);
+                            }}
+                          >
+                            {isFollowing ? "언팔로우" : "팔로우"}
+                          </button>
+                        )}
                       </div>
-                      {myProfile && (
-                        <button
-                          className={twMerge(
-                            "font-bold py-2 px-4 rounded-lg text-sm transition-colors whitespace-nowrap h-fit",
-                            isFollowing
-                              ? "bg-gray-600 hover:bg-gray-700 text-white"
-                              : "bg-[#5C4DCA] hover:bg-[#7b6cdb] text-white"
-                          )}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            toggleFollow(user._id);
-                          }}
-                        >
-                          {isFollowing ? "언팔로우" : "팔로우"}
-                        </button>
-                      )}
+                      <div className="text-[#D1D5DB] text-sm line-clamp-3 break-all">
+                        <p>{user.bio}</p>
+                      </div>
                     </div>
-                    <div className="text-[#D1D5DB] text-sm line-clamp-3 break-all">
-                      <p>{user.bio}</p>
+                  )}
+                  {isMobile && (
+                    <div className="flex flex-col flex-1 gap-5">
+                      <div className="flex justify-between flex-col sm:flex-row gap-5">
+                        <div className="flex-center gap-3 flex-col w-full sm:w-auto sm:flex-row">
+                          <strong className="text-white text-xl font-bold">
+                            {user.display_name}
+                          </strong>
+                          <span className="text-[#F59E0B] text-sm">
+                            Lv.{user.level}
+                          </span>
+                          <Badge
+                            className="flex px-3 h-[17px] items-center justify-center whitespace-nowrap overflow-hidden"
+                            level={user.level}
+                          />
+                        </div>
+                        {myProfile && (
+                          <button
+                            className={twMerge(
+                              "font-bold py-2 px-4 rounded-lg text-sm transition-colors whitespace-nowrap h-fit order-1",
+                              isFollowing
+                                ? "bg-gray-600 hover:bg-gray-700 text-white"
+                                : "bg-[#5C4DCA] hover:bg-[#7b6cdb] text-white"
+                            )}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              toggleFollow(user._id);
+                            }}
+                          >
+                            {isFollowing ? "언팔로우" : "팔로우"}
+                          </button>
+                        )}
+                      <div className="text-[#D1D5DB] text-sm line-clamp-3 break-all text-center">
+                        <p>{user.bio}</p>
+                      </div>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </Link>
               );
             })}

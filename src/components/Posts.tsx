@@ -20,7 +20,7 @@ export default function Posts({
           return (
             <article
               key={post._id}
-              className="flex gap-3 p-6 border border-[#303A4B] rounded-lg bg-[#161C27] cursor-pointer hover:bg-[#171f2b] hover:border-[#4E46A5]"
+              className="flex flex-wrap gap-3 p-6 border border-[#303A4B] rounded-lg bg-[#161C27] cursor-pointer hover:bg-[#171f2b] hover:border-[#4E46A5]"
               onClick={() => navigate(`/posts/${post._id}`)}
             >
               <div className="w-10 h-10">
@@ -32,7 +32,7 @@ export default function Posts({
               </div>
 
               <div className="flex-1 flex flex-col gap-4">
-                <div className="flex items-center gap-2.5">
+                <div className="flex flex-wrap items-center gap-2.5">
                   <div>
                     <strong className="text-white text-[16px]">
                       {post.user.display_name}
@@ -62,8 +62,8 @@ export default function Posts({
                   </p>
                 </div>
 
-                <div className="flex justify-between">
-                  <div className="flex gap-3">
+                <div className="flex justify-between flex-col sm:flex-row flex-wrap gap-3">
+                  <div className="flex gap-3 order-1 sm:order-0">
                     <p className="flex-center gap-1 text-gray-400 text-xs">
                       {post.likeCount <= 0 ? (
                         <Heart className="w-4.5 h-4.5 stroke-gray-400 fill-gray-400" />
