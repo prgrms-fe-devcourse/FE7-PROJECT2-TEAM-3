@@ -10,11 +10,11 @@ export default function UserPagePosts({
   posts,
 }: {
   isPostLoading: boolean;
-  posts: PostListItem[];
+  posts: PostListItem[] | null;
 }) {
   const navigate = useNavigate();
 
-  if (isPostLoading) {
+  if (isPostLoading || posts === null)
     return (
       <article className="flex gap-3 p-6 border border-[#303A4B] rounded-lg bg-[#161C27] animate-pulse mb-4">
         <div className="w-10 h-10 shrink-0">
@@ -49,16 +49,16 @@ export default function UserPagePosts({
         </div>
       </article>
     );
-  } else if (!isPostLoading && (!posts || posts.length === 0)) {
-    return (
-      <div className="text-center text-gray-400 mt-10">
-        아직 작성한 글이 없습니다.
-      </div>
-    );
-  } else {
-    return (
-      <>
-        <div>
+
+  return (
+    <>
+      {posts.length === 0 && (
+        <div className="text-center text-gray-400 mt-10">
+          아직 작성한 글이 없습니다.
+        </div>
+      )}
+      {posts.length > 0 && (
+        <div className="flex flex-col gap-6">
           {posts.map((post) => {
             return (
               <article
@@ -140,7 +140,7 @@ export default function UserPagePosts({
             );
           })}
         </div>
-      </>
-    );
-  }
+      )}
+    </>
+  );
 }

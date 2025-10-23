@@ -41,8 +41,8 @@ export default function ProfileHeaderSection() {
   // 진환
   // 작성글, 댓글 전환용 상태
   const [activeTab, setActiveTab] = useState<"posts" | "comments">("posts");
-  const [posts, setPosts] = useState<PostListItem[]>([]);
-  const [comments, setComments] = useState<FormattedComments[]>([]);
+  const [posts, setPosts] = useState<PostListItem[] | null>([]);
+  const [comments, setComments] = useState<FormattedComments[] | null>([]);
 
   // 모달 열기/닫기 함수
   const openSetUp = () => setIsSetUpOpened(true); // 프로필 수정 모달
@@ -122,11 +122,11 @@ export default function ProfileHeaderSection() {
 
   // 작성글 불러오는 로직
   useEffect(() => {
-    if (!profile._id) return;
-    setPosts([]);
-    setPosAndCommentIsLoading(true);
+    if (!userId) return;
     const postFetch = async () => {
       try {
+        setPosts(null);
+        setPosAndCommentIsLoading(true);
         const { data: postsData, error: postsError } = await supabase
           .from("posts")
           .select(
@@ -141,7 +141,7 @@ export default function ProfileHeaderSection() {
             comments:comments(count),
             hashtags (hashtag)`
           )
-          .eq("user_id", profile._id);
+          .eq("user_id", userId);
 
         if (postsError) {
           console.error("데이터 불러오기 오류: ", postsError);
@@ -181,19 +181,19 @@ export default function ProfileHeaderSection() {
       }
     };
     postFetch();
-  }, [profile._id]);
+  }, [userId]);
 
   // 작성 댓글 불러오는 로직
   useEffect(() => {
-    if (!profile._id) return;
-    setComments([]);
-    setPosAndCommentIsLoading(true);
+    if (!userId) return;
     const fetchComments = async () => {
       try {
+        setComments(null);
+        setPosAndCommentIsLoading(true);
         const { data: comments, error: commentsError } = await supabase
           .from("comments")
           .select(`comment, created_at, post_id, postTitle: posts(title)`)
-          .eq("user_id", profile._id);
+          .eq("user_id", userId);
 
         const formmatedComments = (comments || []).map(
           (c: CommentListItem) => ({
@@ -214,7 +214,7 @@ export default function ProfileHeaderSection() {
       }
     };
     fetchComments();
-  }, [profile._id]);
+  }, [userId]);
 
   //팔로우 하는 함수
   const followSubmit = async () => {
