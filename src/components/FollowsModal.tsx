@@ -86,7 +86,7 @@ export default function FollowsModal({
           throw followingError;
         }
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     };
     fetchFollows();
