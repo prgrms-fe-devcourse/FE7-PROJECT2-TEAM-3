@@ -79,7 +79,6 @@ export default function Notifications({
       }
     }
 
-    console.log(type, option);
     switch (type) {
       case "follow":
         navigate(`/userPage/${option}`);
@@ -96,9 +95,6 @@ export default function Notifications({
   };
 
   const deleteNotification = async (notificationId: string) => {
-    console.log("클릭됨");
-    console.log(notificationId);
-
     setNotifications([]);
     try {
       const { error } = await supabase
@@ -122,8 +118,16 @@ export default function Notifications({
           뒤로 가기
         </button>
         <button
-          onClick={() => deleteNotification(notifications[0].user_to_notify)}
-          className="px-3 py-1.5 rounded-md bg-[#D94A3D] text-white font-medium text-sm hover:bg-[#c23c30] cursor-pointer"
+          disabled={notifications.length === 0}
+          onClick={() => {
+            if (notifications.length === 0) return;
+            deleteNotification(notifications[0].user_to_notify);
+          }}
+          className={`px-3 py-1.5 rounded-md font-medium text-sm cursor-pointer ${
+            notifications.length === 0
+              ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+              : "bg-[#D94A3D] text-white hover:bg-[#c23c30]"
+          }`}
         >
           모두 삭제
         </button>
