@@ -4,6 +4,7 @@ import { useParams } from "react-router";
 import Posts from "../../components/Posts";
 import type { PostListItem, PostSearchItem } from "../../types/post";
 import PostSkeleton from "../../components/ui/loading/PostSkeleton";
+import { TriangleAlert } from "lucide-react";
 
 export default function PostsList() {
   const { channel } = useParams();
@@ -132,8 +133,9 @@ export default function PostsList() {
       )}
       {posts.length > 0 && <Posts posts={posts} channel={channel} />}
       {posts.length <= 0 && !isLoading && (
-        <div className="flex-center h-full bg-[#1A2537] border border-[#303A4B] rounded-lg text-gray-500">
-          <p>검색된 게시글이 없습니다.</p>
+        <div className="flex-1 flex-center flex-col h-full gap-5 bg-[#1A2537] border border-[#303A4B] rounded-lg text-gray-500">
+          <TriangleAlert className="w-20 h-20 stroke-1.5" />
+          <p>검색된 게시물이 없습니다.</p>
         </div>
       )}
     </>

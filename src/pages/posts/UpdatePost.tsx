@@ -85,7 +85,7 @@ export default function UpdatePost() {
     fetchPost();
     fetchImage();
     fetchHashtags();
-    console.log("Update Post: fetchPost");
+    // console.log("Update Post: fetchPost");
   }, [params?.postId]);
 
   // 이미지 업로드 핸들러
@@ -173,12 +173,11 @@ export default function UpdatePost() {
           content,
           user_id: userId,
           channel_id: channelId,
-        }
-      )
-      .eq("_id", params?.postId)
-      .select()
-      .single();
-      console.log("UpdatePost: handleSubmit 게시글 수정");
+        })
+        .eq("_id", params?.postId)
+        .select()
+        .single();
+      // console.log("UpdatePost: handleSubmit 게시글 수정");
       if (postError) throw postError;
       if (!postData) throw new Error("게시글 수정 실패: 데이터 없음");
 
@@ -254,7 +253,7 @@ export default function UpdatePost() {
       toast.success("게시글이 수정되었습니다.");
       navigate(`/channel/${channelId}`);
     } catch (e) {
-      console.log(e);
+      console.error(e);
       alert("게시글 등록 중 오류가 발생했습니다.");
     } finally {
       setIsSubmitting(false);
@@ -332,7 +331,7 @@ export default function UpdatePost() {
                       className="w-full h-full object-cover rounded-md"
                     />
                     <button
-                    aria-label="이미지 파일 삭제 버튼"
+                      aria-label="이미지 파일 삭제 버튼"
                       type="button"
                       onClick={() => removeImage(idx)}
                       className="absolute top-2 right-2 bg-black bg-opacity-60 text-white rounded-full px-2 py-1 text-xs"
@@ -347,7 +346,7 @@ export default function UpdatePost() {
                       Click to upload image {idx + 1}
                     </p>
                     <input
-                    aria-label="이미지 파일 업로드"
+                      aria-label="이미지 파일 업로드"
                       type="file"
                       accept="image/*"
                       className="absolute inset-0 opacity-0 cursor-pointer"
@@ -386,7 +385,7 @@ export default function UpdatePost() {
                 >
                   #{tag}
                   <button
-                  aria-label="해시태그 삭제 버튼"
+                    aria-label="해시태그 삭제 버튼"
                     type="button"
                     onClick={() => removeHashtag(tag)}
                     className="cursor-pointer"

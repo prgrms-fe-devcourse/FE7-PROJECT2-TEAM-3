@@ -30,7 +30,6 @@ export default function Modal({ isOpen, onClose, children }: ModalProps) {
       className="fixed top-0 left-0 z-10 w-full h-full flex-center bg-[rgba(0,0,0,0.3)] backdrop-blur-lg"
       onMouseDown={(e) => {
         if (e.target === overlayRef.current) onClose();
-        console.log(onClose());
       }}
     >
       <div

@@ -86,7 +86,6 @@ export default function Notifications({
       }
     }
 
-    console.log(type, option);
     switch (type) {
       case "follow":
         navigate(`/userPage/${option}`);
@@ -103,9 +102,6 @@ export default function Notifications({
   };
 
   const deleteNotification = async (notificationId: string) => {
-    console.log("클릭됨");
-    console.log(notificationId);
-
     setNotifications([]);
     try {
       const { error } = await supabase
@@ -130,13 +126,17 @@ export default function Notifications({
           >
             <ArrowLeft className="w-6 h-6 stroke-gray-300" />
           </button>
-          <button
-            onClick={() => deleteNotification(notifications[0].user_to_notify)}
-            className="flex-center w-10 h-10 rounded-full text-white font-medium text-sm hover:bg-[#161C27] cursor-pointer hover:opacity-70"
-            aria-label="알림 모두 지우기"
-          >
-            <Trash2 className="w-6 h-6 stroke-gray-300" />
-          </button>
+          {notifications.length > 0 && (
+            <button
+              onClick={() =>
+                deleteNotification(notifications[0].user_to_notify)
+              }
+              className="flex-center w-10 h-10 rounded-full text-white font-medium text-sm hover:bg-[#161C27] cursor-pointer hover:opacity-70"
+              aria-label="알림 모두 지우기"
+            >
+              <Trash2 className="w-6 h-6 stroke-gray-300" />
+            </button>
+          )}
         </div>
         <div className="flex flex-col flex-1 notifications p-4 text-gray-300 gap-3">
           {notifications.length === 0 ? (

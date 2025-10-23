@@ -63,7 +63,6 @@ export default function SearchModal({ onClose }: SearchModalProps) {
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
-              console.log(query);
             }}
             placeholder="채널의 게시물을 검색하세요."
             className="flex-1 bg-transparent outline-none text-gray-100 placeholder:text-gray-400"
@@ -72,6 +71,11 @@ export default function SearchModal({ onClose }: SearchModalProps) {
       </form>
       <div className="">
         <h3 className="p-5 font-bold text-white">최근 검색어</h3>
+        {recentQueries.length <= 0 && (
+          <p className="pl-5 pr-10 py-4 border-t border-t-[#303A4B] text-xs text-gray-400 whitespace-nowrap overflow-hidden overflow-ellipsis">
+            최근 검색어가 없습니다.
+          </p>
+        )}
         {recentQueries.length > 0 && (
           <ul>
             {recentQueries.map((recent, idx) => (

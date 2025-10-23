@@ -14,7 +14,7 @@ export default function Login() {
       });
       if (error) throw error;
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 

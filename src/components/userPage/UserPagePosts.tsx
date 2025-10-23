@@ -17,7 +17,7 @@ export default function UserPagePosts({ posts }: { posts: PostListItem[] }) {
   }
   return (
     <>
-      <div>
+      <div className="flex flex-col gap-6">
         {posts.map((post) => {
           return (
             <article
