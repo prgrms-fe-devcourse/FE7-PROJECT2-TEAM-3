@@ -136,7 +136,13 @@ export default function MessagesPage() {
       </div>
       {chatRooms.length === 0 ? (
         <div className="h-64 flex justify-center items-center">
-          <p className="text-gray-500 text-base">아직 대화가 없습니다.</p>
+          {myProfile ? (
+            <p className="text-gray-500 text-base">아직 대화가 없습니다.</p>
+          ) : (
+            <p className="text-gray-500 text-base">
+              로그인 유저만 사용 가능합니다.
+            </p>
+          )}
         </div>
       ) : (
         <div className="flex flex-col gap-4">
