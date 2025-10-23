@@ -19,6 +19,7 @@ export default function Header() {
   };
 
   const { isXs, isXl } = useBreakpoint();
+  const isProcessing = true;
 
   return (
     <>
@@ -107,26 +108,28 @@ export default function Header() {
             채팅 목록
           </NavLink>
         </nav>
-        <div className={twMerge("p-4", isXs && "flex-1")}>
-          {/* 라이트모드 */}
-          <button
-            className="button button flex justify-between items-center w-full p-3 xl:px-4 xl:py-3 bg-gradient-to-r from-[#234A45] via-[#31305D] to-[#252849] shadow-[0px_0px_20px_0px_rgba(123,97,255,0.2)] rounded-lg border border-[#44387D] cursor-pointer"
-            onClick={darkmodeHandler}
-          >
-            <div className="flex-center w-full xl:w-auto xl:gap-3 font-bold text-white text-[0px] xl:text-xl">
-              <MoonStar className="w-6 h-6 xl:w-7.5 xl:h-7.5 stroke-[#F59E0B] fill-[#F59E0B]" />
-              다크모드
-            </div>
-            {isXl && (
-              <div className="relative w-10 h-5 bg-[#8B5CF6] rounded-4xl">
-                <span className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-white text-[0px]">
-                  스위치
-                </span>
+        {isProcessing && (
+          <div className={twMerge("p-4", isXs && "flex-1")}>
+            {/* 라이트모드 */}
+            <button
+              className="button button flex justify-between items-center w-full p-3 xl:px-4 xl:py-3 bg-gradient-to-r from-[#234A45] via-[#31305D] to-[#252849] shadow-[0px_0px_20px_0px_rgba(123,97,255,0.2)] rounded-lg border border-[#44387D] cursor-pointer"
+              onClick={darkmodeHandler}
+            >
+              <div className="flex-center w-full xl:w-auto xl:gap-3 font-bold text-white text-[0px] xl:text-xl">
+                <MoonStar className="w-6 h-6 xl:w-7.5 xl:h-7.5 stroke-[#F59E0B] fill-[#F59E0B]" />
+                다크모드
               </div>
-            )}
-          </button>
-          {/* 다크모드 */}
-        </div>
+              {isXl && (
+                <div className="relative w-10 h-5 bg-[#8B5CF6] rounded-4xl">
+                  <span className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-white text-[0px]">
+                    스위치
+                  </span>
+                </div>
+              )}
+            </button>
+            {/* 다크모드 */}
+          </div>
+        )}
       </header>
     </>
   );
