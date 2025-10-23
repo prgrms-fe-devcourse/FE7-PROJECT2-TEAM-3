@@ -1,5 +1,5 @@
 import Card from "../Card";
-import Skeleton from "./skeleton";
+import Skeleton from "./Skeleton";
 
 export default function DetailPostSkeleton() {
   return (
