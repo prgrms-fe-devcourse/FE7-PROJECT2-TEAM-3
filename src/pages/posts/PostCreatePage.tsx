@@ -240,7 +240,7 @@ export default function PostCreatePage() {
 
       navigate(`/channel/${channelId}`);
     } catch (e) {
-      console.log(e);
+      console.error(e);
       alert("게시글 등록 중 오류가 발생했습니다.");
     } finally {
       setIsSubmitting(false);
@@ -371,7 +371,7 @@ export default function PostCreatePage() {
                 >
                   #{tag}
                   <button
-                  aria-label="해시태그 지우기"
+                    aria-label="해시태그 지우기"
                     type="button"
                     onClick={() => removeHashtag(tag)}
                     className="cursor-pointer"
