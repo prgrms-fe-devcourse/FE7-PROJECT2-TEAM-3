@@ -1,4 +1,3 @@
-// components/SearchModal.tsx
 import { useEffect, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 import { useNavigate } from "react-router";

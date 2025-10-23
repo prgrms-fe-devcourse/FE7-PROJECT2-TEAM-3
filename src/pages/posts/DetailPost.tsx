@@ -10,6 +10,8 @@ import ProfileImage from "../../components/ui/ProfileImage.tsx";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import Badge from "../../components/ui/Badge.tsx";
+import DetailImageZoom from "../../components/DetailImageZoom.tsx";
+import ImageModal from "../../components/ImageModal.tsx";
 
 // 공통 카드 (shadow 제거 + 지정 배경색)
 const Card = ({
@@ -28,6 +30,19 @@ const Card = ({
 );
 
 export default function DetailPost() {
+  // 모달 상태 관리
+  const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
+  const [isModalOpened, setIsModalOpened] = useState(false);
+  const openModal = (src: string | null) => {
+    if (!src) return;
+    setModalImageSrc(src);
+    setIsModalOpened(true);
+  };
+  const closeModal = () => {
+    setModalImageSrc(null);
+    setIsModalOpened(false);
+  };
+
   // console.log("DetailPost()");
   const navigate = useNavigate();
   const goBackHandler = () => {
@@ -505,213 +520,225 @@ export default function DetailPost() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 text-gray-100">
-      {/* ───────────── 본문 카드 ───────────── */}
-      <Card className="p-6">
-        {/* 작성자 프로필 */}
-        <div className="flex items-center gap-4">
-          <Link to={`/userPage/${writerId}`}>
-            <ProfileImage
-              className="w-16 h-16 rounded-full object-cover shrink-0"
-              src={profileImage}
-              alt={`${writerId}님의 이미지`}
-            />
-          </Link>
-          <div className="flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-2xl font-extrabold leading-none">
-                {nickname}
-              </h3>
-              <span className="text-sm font-bold text-amber-400">{`Lv ${level || "0"}`}</span>
-              <Badge className="px-2 py-0.5 whitespace-nowrap" level={level} />
+    <>
+      <div className="text-gray-100">
+        {/* ───────────── 본문 카드 ───────────── */}
+        <Card className="p-6">
+          {/* 작성자 프로필 */}
+          <div className="flex items-center gap-4">
+            <Link to={`/userPage/${writerId}`}>
+              <ProfileImage
+                className="w-16 h-16 rounded-full object-cover shrink-0"
+                src={profileImage}
+                alt={`${writerId}님의 이미지`}
+              />
+            </Link>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-2xl font-extrabold leading-none">
+                  {nickname}
+                </h3>
+                <span className="text-sm font-bold text-amber-400">{`Lv ${level || "0"}`}</span>
+                <Badge
+                  className="px-2 py-0.5 whitespace-nowrap"
+                  level={level}
+                />
+              </div>
+              <p className="mt-2 text-sm text-gray-400">
+                {formaRelativeTime(createdAt)}
+              </p>
             </div>
-            <p className="mt-2 text-sm text-gray-400">
-              {formaRelativeTime(createdAt)}
-            </p>
           </div>
-        </div>
 
-        {/* 제목 */}
-        <h1 className="mt-6 text-xl font-semibold leading-snug">{title}</h1>
+          {/* 제목 */}
+          <h1 className="mt-6 text-xl font-semibold leading-snug">{title}</h1>
 
-        {/* 본문 */}
-        <div className="mt-4 space-y-4 text-sm text-gray-300 leading-relaxed whitespace-pre-line">
-          {content}
-        </div>
+          {/* 본문 */}
+          <div className="mt-4 space-y-4 text-sm text-gray-300 leading-relaxed whitespace-pre-line">
+            {content}
+          </div>
 
-        {/* 간격 */}
-        <div className="h-4" />
+          {/* 간격 */}
+          <div className="h-4" />
 
-        {/* 이미지 */}
-        <div className="mb-5">
-          <div className="grid grid-cols-2 gap-4 mb-5">
-            {images.map((img, idx) => {
-              if (!img) return null;
-              const imageLength = images.filter(Boolean).length;
-              const baseClass =
-                "relative flex flex-col items-center justify-center w-full border border-[#D1D5DB] rounded-md cursor-pointer hover:border-blue-400 transition";
-              const additionClass =
-                imageLength === 1
-                  ? "h-80 col-span-2"
-                  : imageLength === 2
-                    ? "h-80 col-span-1"
-                    : "h-40";
+          {/* 이미지 */}
+          <div className="mb-5">
+            <div className="grid grid-cols-2 gap-4 mb-5">
+              {images.map((img, idx) => {
+                if (!img) return null;
+                const imageLength = images.filter(Boolean).length;
+                const baseClass =
+                  "relative flex flex-col items-center justify-center w-full border border-[#D1D5DB] rounded-md cursor-pointer hover:border-blue-400 transition";
+                const additionClass =
+                  imageLength === 1
+                    ? "h-80 col-span-2"
+                    : imageLength === 2
+                      ? "h-80 col-span-1"
+                      : "h-40";
 
+                return (
+                  <div
+                    key={idx}
+                    className={twMerge(baseClass, additionClass)}
+                    onClick={() => openModal(img)}
+                  >
+                    <img
+                      src={img}
+                      alt={`uploaded ${idx + 1}`}
+                      className="w-full h-full object-cover rounded-md"
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 해시태그 */}
+          <div
+            className={twMerge(
+              "mt-4 mb-[10px] w-full transition-all duration-100", // ✅ 본문과의 간격 mt-4 추가
+              hashtags.length > 0 ? "h-[20px]" : "h-0"
+            )}
+          >
+            {hashtags.map((tag, idx) => {
+              const pastelColors = [
+                "bg-[#E0F7FA] text-[#027A9B]",
+                "bg-[#D8F5E0] text-[#2E7D32]",
+                "bg-[#FFE5D0] text-[#D84315]",
+                "bg-[#FFF1F7] text-[#C2185B]",
+                "bg-[#FFF9C4] text-[#B78900]",
+              ];
               return (
-                <div key={idx} className={twMerge(baseClass, additionClass)}>
-                  <img
-                    src={img}
-                    alt={`uploaded ${idx + 1}`}
-                    className="w-full h-full object-cover rounded-md"
-                  />
-                </div>
+                <span
+                  key={idx}
+                  className={twMerge(
+                    "inline-flex gap-1 px-2 py-[2px] rounded-full mr-2",
+                    pastelColors[idx % pastelColors.length]
+                  )}
+                >
+                  #{tag}
+                </span>
               );
             })}
           </div>
-        </div>
 
-        {/* 해시태그 */}
-        <div
-          className={twMerge(
-            "mt-4 mb-[10px] w-full transition-all duration-100", // ✅ 본문과의 간격 mt-4 추가
-            hashtags.length > 0 ? "h-[20px]" : "h-0"
-          )}
-        >
-          {hashtags.map((tag, idx) => {
-            const pastelColors = [
-              "bg-[#E0F7FA] text-[#027A9B]",
-              "bg-[#D8F5E0] text-[#2E7D32]",
-              "bg-[#FFE5D0] text-[#D84315]",
-              "bg-[#FFF1F7] text-[#C2185B]",
-              "bg-[#FFF9C4] text-[#B78900]",
-            ];
-            return (
-              <span
-                key={idx}
-                className={twMerge(
-                  "inline-flex gap-1 px-2 py-[2px] rounded-full mr-2",
-                  pastelColors[idx % pastelColors.length]
-                )}
-              >
-                #{tag}
-              </span>
-            );
-          })}
-        </div>
-
-        {/* 하단 버튼 */}
-        <div className="mt-6 flex items-center justify-between pt-4">
-          {/* 좌측 좋아요 / 댓글 버튼 */}
-          <div className="flex items-center gap-6 text-sm text-gray-400">
-            <button
-              onClick={toggleLike}
-              className="flex items-center gap-1 focus:outline-none select-none"
-            >
-              <Heart
-                className={twMerge(
-                  "w-4 h-4 transition-transform duration-300",
-                  liked
-                    ? "text-red-500 fill-red-500"
-                    : "text-gray-400 fill-transparent",
-                  animating && "scale-125"
-                )}
-              />
-              {likeCount}
-            </button>
-
-            <button className="flex items-center gap-1 text-gray-400 focus:outline-none">
-              <MessageSquare className="w-4 h-4" />
-              {comments.length}
-            </button>
-          </div>
-
-          {/* 우측 수정 / 삭제 버튼 */}
-          {isMyPost && (
-            <div className="flex gap-3">
-              {/* 수정 버튼 */}
+          {/* 하단 버튼 */}
+          <div className="mt-6 flex items-center justify-between pt-4">
+            {/* 좌측 좋아요 / 댓글 버튼 */}
+            <div className="flex items-center gap-6 text-sm text-gray-400">
               <button
-                onClick={() => navigate(`/posts/${params?.postId}/modify`)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#4A77E4] text-white font-medium text-sm hover:bg-[#3d68d0] transition"
+                onClick={toggleLike}
+                className="flex items-center gap-1 focus:outline-none select-none"
               >
-                <SquarePen className="w-4 h-4" />
-                수정
+                <Heart
+                  className={twMerge(
+                    "w-4 h-4 transition-transform duration-300",
+                    liked
+                      ? "text-red-500 fill-red-500"
+                      : "text-gray-400 fill-transparent",
+                    animating && "scale-125"
+                  )}
+                />
+                {likeCount}
               </button>
 
-              {/* 삭제 버튼 */}
-              <button
-                onClick={handleDelete}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#D94A3D] text-white font-medium text-sm hover:bg-[#c23c30] transition"
-              >
-                <Trash2 className="w-4 h-4" />
-                삭제
+              <button className="flex items-center gap-1 text-gray-400 focus:outline-none">
+                <MessageSquare className="w-4 h-4" />
+                {comments.length}
               </button>
             </div>
-          )}
-        </div>
-      </Card>
 
-      {/* 간격 */}
-      <div className="h-6" />
+            {/* 우측 수정 / 삭제 버튼 */}
+            {isMyPost && (
+              <div className="flex gap-3">
+                {/* 수정 버튼 */}
+                <button
+                  onClick={() => navigate(`/posts/${params?.postId}/modify`)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#4A77E4] text-white font-medium text-sm hover:bg-[#3d68d0] transition"
+                >
+                  <SquarePen className="w-4 h-4" />
+                  수정
+                </button>
 
-      {/* ───────────── 댓글 카드 ───────────── */}
-      <Card className="p-6">
-        <h2 className="font-semibold text-lg">댓글 ({comments.length})</h2>
-
-        {/* 댓글 입력 (NEW) */}
-        {isLogin && (
-          <form
-            onSubmit={handleAddComment}
-            className="mt-4 flex items-center gap-3"
-          >
-            <input
-              type="text"
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="댓글을 입력하세요."
-              className={twMerge(
-                "flex-1 h-10 rounded-lg px-4",
-                "bg-white text-[#1A1D25] placeholder-gray-400",
-                "border border-black/5 shadow-sm",
-                "focus:outline-none focus:ring-2 focus:ring-violet-400/60 focus:border-transparent"
-              )}
-            />
-            <button
-              type="submit"
-              disabled={!newComment.trim()}
-              className={twMerge(
-                "h-10 px-7 rounded-lg font-semibold text-white",
-                "bg-gradient-to-r from-violet-500 to-indigo-500",
-                "disabled:opacity-50 disabled:cursor-not-allowed"
-              )}
-            >
-              <span className="text-[13px] font-thin">작성</span>
-            </button>
-          </form>
-        )}
-
-        {/* 댓글 리스트 */}
-        {comments.length === 0 && (
-          <div className="text-gray-400 text-sm text-center py-6">
-            아직 댓글이 없습니다.
+                {/* 삭제 버튼 */}
+                <button
+                  onClick={handleDelete}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#D94A3D] text-white font-medium text-sm hover:bg-[#c23c30] transition"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  삭제
+                </button>
+              </div>
+            )}
           </div>
-        )}
-        {comments.map((c) => (
-          <Comment
-            key={c._id}
-            _id={c._id}
-            userId={c.user_id}
-            author={c.profiles?.display_name || "익명"}
-            level={c.profiles?.level || 0}
-            profileImage={c.profiles?.profile_image}
-            time={formaRelativeTime(c.created_at)}
-            content={c.comment}
-            isEdited={!!c.update_at && c.created_at !== c.update_at}
-            isMine={c.user_id === userId}
-            onEditSave={handleCommentEdit} // 저장 함수 연결
-            onDelete={handleCommentDelete}
-          />
-        ))}
-      </Card>
-    </div>
+        </Card>
+
+        {/* 간격 */}
+        <div className="h-6" />
+
+        {/* ───────────── 댓글 카드 ───────────── */}
+        <Card className="p-6">
+          <h2 className="font-semibold text-lg">댓글 ({comments.length})</h2>
+
+          {/* 댓글 입력 (NEW) */}
+          {isLogin && (
+            <form
+              onSubmit={handleAddComment}
+              className="mt-4 flex items-center gap-3"
+            >
+              <input
+                type="text"
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="댓글을 입력하세요."
+                className={twMerge(
+                  "flex-1 h-10 rounded-lg px-4",
+                  "bg-white text-[#1A1D25] placeholder-gray-400",
+                  "border border-black/5 shadow-sm",
+                  "focus:outline-none focus:ring-2 focus:ring-violet-400/60 focus:border-transparent"
+                )}
+              />
+              <button
+                type="submit"
+                disabled={!newComment.trim()}
+                className={twMerge(
+                  "h-10 px-7 rounded-lg font-semibold text-white",
+                  "bg-gradient-to-r from-violet-500 to-indigo-500",
+                  "disabled:opacity-50 disabled:cursor-not-allowed"
+                )}
+              >
+                <span className="text-[13px] font-thin">작성</span>
+              </button>
+            </form>
+          )}
+
+          {/* 댓글 리스트 */}
+          {comments.length === 0 && (
+            <div className="text-gray-400 text-sm text-center py-6">
+              아직 댓글이 없습니다.
+            </div>
+          )}
+          {comments.map((c) => (
+            <Comment
+              key={c._id}
+              _id={c._id}
+              userId={c.user_id}
+              author={c.profiles?.display_name || "익명"}
+              level={c.profiles?.level || 0}
+              profileImage={c.profiles?.profile_image}
+              time={formaRelativeTime(c.created_at)}
+              content={c.comment}
+              isEdited={!!c.update_at && c.created_at !== c.update_at}
+              isMine={c.user_id === userId}
+              onEditSave={handleCommentEdit} // 저장 함수 연결
+              onDelete={handleCommentDelete}
+            />
+          ))}
+        </Card>
+      </div>
+      <ImageModal isOpen={isModalOpened} onClose={closeModal}>
+        <DetailImageZoom src={modalImageSrc} />
+      </ImageModal>
+    </>
   );
 }
