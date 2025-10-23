@@ -27,14 +27,14 @@ export default function Modal({ isOpen, onClose, children }: ModalProps) {
   return createPortal(
     <div
       ref={overlayRef}
-      className="fixed top-0 left-0 w-full h-full flex-center bg-[rgba(0,0,0,0.3)] backdrop-blur-lg"
+      className="fixed top-0 left-0 z-10 w-full h-full flex-center bg-[rgba(0,0,0,0.3)] backdrop-blur-lg"
       onMouseDown={(e) => {
         if (e.target === overlayRef.current) onClose();
         console.log(onClose());
       }}
     >
       <div
-        className="w-full max-w-150 bg-[#1A2537] border border-[#303A4B] rounded-lg"
+        className="w-full max-w-8/10 md:max-w-150 bg-[#1A2537] border border-[#303A4B] rounded-lg"
         onMouseDown={(e) => e.stopPropagation()}
       >
         {children}

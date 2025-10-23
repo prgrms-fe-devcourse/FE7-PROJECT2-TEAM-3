@@ -7,6 +7,8 @@ import NewImg from "../../assets/image/planet_new.png";
 import BestImg from "../../assets/image/planet_best.png";
 import WeirdImg from "../../assets/image/planet_weird.png";
 import { Info } from "lucide-react";
+import { Activity, useState } from "react";
+import { useBreakpoint } from "../../hooks/useBreakPoint";
 
 type Star = {
   id?: string;
@@ -17,6 +19,9 @@ type Star = {
 };
 
 export default function Constellation() {
+  const [isHelp, setIsHelp] = useState(false);
+  const { isSm } = useBreakpoint();
+
   const navigate = useNavigate();
 
   const stars: Star[] = [
@@ -54,13 +59,20 @@ export default function Constellation() {
     { position: [5.21, 48.1] },
   ];
 
+  const handleInfo = () => {
+    if (isSm) return;
+    setIsHelp(!isHelp);
+  };
+
   return (
-    <div className="viewer-container w-[calc(100vw-642px)] h-full">
+    <div className="viewer-container w-full sm:w-[calc(100vw-81px)] lg:w-[calc(100vw-402px)] xl:w-[calc(100vw-642px)] h-full">
       <TransformWrapper
         initialScale={1}
         minScale={0.5}
         maxScale={10}
         limitToBounds={true} // 캔버스 밖으로 드래그 가능?
+        wheel={{ smoothStep: 0.005 }}
+        pinch={{ step: 5 }}
         doubleClick={{ disabled: true }} // 더블클릭 줌 비활성화
       >
         <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
@@ -110,9 +122,14 @@ export default function Constellation() {
           </div>
         </TransformComponent>
       </TransformWrapper>
-      <div className="flex-center gap-2.5 absolute bottom-4 left-4 p-3 bg-[rgba(0,0,0,0.5)] border border-[rgba(229,231,235,0.2)] rounded-lg font-medium text-white text-xs">
+      <div
+        className="flex-center gap-2.5 absolute bottom-4 left-4 p-3 bg-[rgba(0,0,0,0.5)] border border-[rgba(229,231,235,0.2)] rounded-lg font-medium text-white text-xs"
+        onClick={handleInfo}
+      >
         <Info className="w-5 h-5 stroke-white" />
-        <p>화면을 드래그나 줌인, 줌아웃하여 행성을 탐색할 수 있습니다.</p>
+        <Activity mode={isSm || isHelp ? "visible" : "hidden"}>
+          <p>화면을 드래그나 줌인, 줌아웃하여 행성을 탐색할 수 있습니다.</p>
+        </Activity>
       </div>
     </div>
   );
