@@ -1,5 +1,4 @@
 import { twMerge } from "tailwind-merge";
-import NoCoverImage from "../../assets/image/no_cover_image.png";
 
 export default function CoverImage({
   className,
@@ -22,7 +21,9 @@ export default function CoverImage({
       {!src && (
         <img
           className={twMerge("object-cover", className)}
-          src={NoCoverImage}
+          src={
+            "https://images.unsplash.com/photo-1523821741446-edb2b68bb7a0?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1740"
+          }
           alt={alt}
         />
       )}
