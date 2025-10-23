@@ -94,14 +94,18 @@ export default function ProfileHeaderSection() {
           .from("follows")
           .select("follower_id", { count: "exact", head: true })
           .eq("following_id", userId);
-        const { count: isFollowingData } = await supabase
-          .from("follows")
-          .select("", { count: "exact", head: true })
-          .eq("follower_id", myProfile?._id)
-          .eq("following_id", userId);
+
         setFollowings(followingCount || 0);
         setFollowers(followerCount || 0);
-        setIsFollowing(isFollowingData === 1 || false);
+
+        if (myProfile) {
+          const { count: isFollowingData } = await supabase
+            .from("follows")
+            .select("", { count: "exact", head: true })
+            .eq("follower_id", myProfile._id)
+            .eq("following_id", userId);
+          setIsFollowing(isFollowingData === 1 || false);
+        }
       };
       fetchfollows();
     }
@@ -359,7 +363,11 @@ export default function ProfileHeaderSection() {
                   </button>
                 </Activity>
                 <button
-                  onClick={() => findOrCreateChatRoom(`${userId}`)}
+                  onClick={
+                    myProfile
+                      ? () => findOrCreateChatRoom(`${userId}`)
+                      : () => navigate("/login")
+                  }
                   className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-1 cursor-pointer"
                 >
                   채팅
