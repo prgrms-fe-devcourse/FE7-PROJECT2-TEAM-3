@@ -47,9 +47,6 @@ export default function PostsList() {
         } else {
           if (selectedChannel !== "all") {
             query = query.eq("channel_id", selectedChannel);
-          } else {
-            // 전체: 허용된 채널만 로드하고 싶다면 다음 주석을 해제하세요
-            // query = query.in("channel_id", ["bestCombo", "new", "todayPick", "weird"]);
           }
         }
         const { data, error } = await query;
@@ -106,24 +103,41 @@ export default function PostsList() {
     }
   };
 
-  if (isLoading && !hasFetchedOnce)
+  if (isLoading || !hasFetchedOnce)
     return (
       <>
-        <div className="scrollbar-hide flex gap-3 mb-6 overflow-x-auto">
-          {CHANNELS.map((c) => (
-            <button
-              key={c.id}
-              onClick={() => setSelectedChannel(c.id)}
-              className={
-                selectedChannel === c.id
-                  ? "px-6 py-2.5 rounded-md bg-[#1F2232] border border-[#6D5DD3] text-white text-sm font-semibold shadow-[0_0_10px_rgba(109,93,211,0.4)] hover:shadow-[0_0_15px_rgba(109,93,211,0.6)] transition-all duration-200 cursor-pointer"
-                  : "px-6 py-2.5 rounded-md bg-[#161C27] border border-[#303A4B] text-gray-300 text-sm font-medium hover:border-[#6D5DD3] hover:text-white hover:shadow-[0_0_8px_rgba(109,93,211,0.3)] transition-all duration-200 cursor-pointer"
-              }
-            >
-              {c.label}
-            </button>
-          ))}
-        </div>
+        {!channel && (
+          <div className="scrollbar-hide flex flex-col gap-3 mb-6 overflow-x-auto">
+            <div className="flex items-baseline justify-between text-2xl font-bold text-white tracking-wide mb-4 border-b border-[#303A4B] pb-4">
+              <h1>
+                {CHANNELS.filter((c) => c.id === selectedChannel)[0].label}
+              </h1>
+              <span className="text-xs text-gray-300">
+                {posts.length}개의 포스트
+              </span>
+            </div>
+            <div className="flex gap-3 mb-6 flex-wrap">
+              {CHANNELS.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => setSelectedChannel(c.id)}
+                  className={
+                    selectedChannel === c.id
+                      ? "px-6 py-2.5 rounded-md bg-[#1F2232] border border-[#6D5DD3] text-white text-sm font-semibold shadow-[0_0_10px_rgba(109,93,211,0.4)] hover:shadow-[0_0_15px_rgba(109,93,211,0.6)] transition-all duration-200 cursor-pointer"
+                      : "px-6 py-2.5 rounded-md bg-[#161C27] border border-[#303A4B] text-gray-300 text-sm font-medium hover:border-[#6D5DD3] hover:text-white hover:shadow-[0_0_8px_rgba(109,93,211,0.3)] transition-all duration-200 cursor-pointer"
+                  }
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        {channel && (
+          <h1 className="text-2xl font-bold text-white tracking-wide mb-4 border-b border-[#303A4B] pb-2">
+            {formattedChannel(channel)}
+          </h1>
+        )}
         <PostSkeleton line={3} />
       </>
     );
@@ -131,10 +145,13 @@ export default function PostsList() {
     <>
       {!channel && (
         <div className="scrollbar-hide flex flex-col gap-3 mb-6 overflow-x-auto">
-          <h1 className="text-2xl font-bold text-white tracking-wide mb-4 border-b border-[#303A4B] pb-2">
-            {"전체채널"}
-          </h1>
-          <div>
+          <div className="flex items-baseline justify-between text-2xl font-bold text-white tracking-wide mb-4 border-b border-[#303A4B] pb-4">
+            <h1>{CHANNELS.filter((c) => c.id === selectedChannel)[0].label}</h1>
+            <span className="text-xs text-gray-300">
+              {posts.length}개의 포스트
+            </span>
+          </div>
+          <div className="flex gap-3 mb-6 flex-wrap">
             {CHANNELS.map((c) => (
               <button
                 key={c.id}

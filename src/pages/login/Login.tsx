@@ -19,7 +19,7 @@ export default function Login() {
   };
 
   return (
-    <div className="max-w-md mx-auto">
+    <div className="max-w-md mx-10 sm:mx-auto">
       <div
         className="bg-[#161C27] rounded-lg p-8 md:p-10 
             shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"

@@ -340,7 +340,7 @@ export default function ProfileHeaderSection() {
           />
         </div>
         <div className="bg-[#161C27] rounded-b-lg p-6 shadow-lg relative">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center flex-wrap">
             <div className="flex items-start gap-2 -mt-12">
               <div className="border-8 rounded-full border-[#181c26] bg-[#181c26] -ml-2">
                 <div
@@ -391,7 +391,7 @@ export default function ProfileHeaderSection() {
               </div>
             </div>
             {/* 우측 버튼 그룹 */}
-            <Activity mode={userId === myProfile?._id ? "visible" : "hidden"}>
+            <Activity mode={userId == myProfile?._id ? "visible" : "hidden"}>
               <div className="flex gap-2 self-start pt-2">
                 <button
                   className="bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-1 cursor-pointer"

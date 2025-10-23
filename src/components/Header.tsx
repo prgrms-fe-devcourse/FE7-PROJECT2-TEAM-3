@@ -108,7 +108,7 @@ export default function Header() {
             채팅 목록
           </NavLink>
         </nav>
-        {isProcessing && (
+        {!isProcessing && (
           <div className={twMerge("p-4", isXs && "flex-1")}>
             {/* 라이트모드 */}
             <button
