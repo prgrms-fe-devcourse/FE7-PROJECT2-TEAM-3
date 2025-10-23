@@ -92,29 +92,22 @@ export default function PostsList() {
     fetchPosts();
   }, [channel, selectedChannel]);
 
-  if (isLoading && !hasFetchedOnce) return (
-    <>
-      <div className="scrollbar-hide flex gap-3 mb-6 overflow-x-auto">
-        {CHANNELS.map((c) => (
-          <button
-            key={c.id}
-            onClick={() => setSelectedChannel(c.id)}
-            className={
-              selectedChannel === c.id
-                ? "px-6 py-2.5 rounded-md bg-[#1F2232] border border-[#6D5DD3] text-white text-sm font-semibold shadow-[0_0_10px_rgba(109,93,211,0.4)] hover:shadow-[0_0_15px_rgba(109,93,211,0.6)] transition-all duration-200 cursor-pointer"
-                : "px-6 py-2.5 rounded-md bg-[#161C27] border border-[#303A4B] text-gray-300 text-sm font-medium hover:border-[#6D5DD3] hover:text-white hover:shadow-[0_0_8px_rgba(109,93,211,0.3)] transition-all duration-200 cursor-pointer"
-            }
-          >
-            {c.label}
-          </button>
-        ))}
-      </div>
-      <PostSkeleton line={3} />
-    </>
-  );
-  return (
-    <>
-      {!channel && (
+  const formattedChannel = (str: string) => {
+    switch (str) {
+      case "todayPick":
+        return "오치추";
+      case "new":
+        return "신메뉴";
+      case "weird":
+        return "괴식";
+      case "bestCombo":
+        return "꿀조합";
+    }
+  };
+
+  if (isLoading && !hasFetchedOnce)
+    return (
+      <>
         <div className="scrollbar-hide flex gap-3 mb-6 overflow-x-auto">
           {CHANNELS.map((c) => (
             <button
@@ -130,12 +123,43 @@ export default function PostsList() {
             </button>
           ))}
         </div>
+        <PostSkeleton line={3} />
+      </>
+    );
+  return (
+    <>
+      {!channel && (
+        <div className="scrollbar-hide flex flex-col gap-3 mb-6 overflow-x-auto">
+          <h1 className="text-2xl font-bold text-white tracking-wide mb-4 border-b border-[#303A4B] pb-2">
+            {"전체채널"}
+          </h1>
+          <div>
+            {CHANNELS.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => setSelectedChannel(c.id)}
+                className={
+                  selectedChannel === c.id
+                    ? "px-6 py-2.5 rounded-md bg-[#1F2232] border border-[#6D5DD3] text-white text-sm font-semibold shadow-[0_0_10px_rgba(109,93,211,0.4)] hover:shadow-[0_0_15px_rgba(109,93,211,0.6)] transition-all duration-200 cursor-pointer"
+                    : "px-6 py-2.5 rounded-md bg-[#161C27] border border-[#303A4B] text-gray-300 text-sm font-medium hover:border-[#6D5DD3] hover:text-white hover:shadow-[0_0_8px_rgba(109,93,211,0.3)] transition-all duration-200 cursor-pointer"
+                }
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      {channel && (
+        <h1 className="text-2xl font-bold text-white tracking-wide mb-4 border-b border-[#303A4B] pb-2">
+          {formattedChannel(channel)}
+        </h1>
       )}
       {posts.length > 0 && <Posts posts={posts} channel={channel} />}
       {posts.length <= 0 && !isLoading && (
         <div className="flex-1 flex-center flex-col h-full gap-5 bg-[#1A2537] border border-[#303A4B] rounded-lg text-gray-500">
           <TriangleAlert className="w-20 h-20 stroke-1.5" />
-          <p>검색된 게시물이 없습니다.</p>
+          <p>게시된 게시물이 없습니다.</p>
         </div>
       )}
     </>
