@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import supabase from "../../utils/supabase";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import Posts from "../../components/Posts";
 import type { PostListItem, PostSearchItem } from "../../types/post";
 import PostSkeleton from "../../components/ui/loading/PostSkeleton";
-import { TriangleAlert } from "lucide-react";
+import { Pencil, TriangleAlert } from "lucide-react";
 
 export default function PostsList() {
+  const navigate = useNavigate();
   const { channel } = useParams();
   const CHANNELS = [
     { id: "all", label: "전체" },
@@ -160,6 +161,15 @@ export default function PostsList() {
         <div className="flex-1 flex-center flex-col h-full gap-5 bg-[#1A2537] border border-[#303A4B] rounded-lg text-gray-500">
           <TriangleAlert className="w-20 h-20 stroke-1.5" />
           <p>게시된 게시물이 없습니다.</p>
+          <button
+            onClick={() =>
+              navigate(channel ? `/channel/${channel}/write` : "/channel/write")
+            }
+            className="fixed bottom-8 right-90 bg-gray-500 hover:bg-gray-400 text-white rounded-full w-15 h-15 flex items-center justify-center shadow-lg cursor-pointer transition hover:opacity-70 text-[0px]"
+          >
+            글쓰기
+            <Pencil />
+          </button>
         </div>
       )}
     </>
