@@ -520,7 +520,7 @@ export default function DetailPost() {
 
   return (
     <>
-      <div className="max-w-4xl mx-auto p-6 text-gray-100">
+      <div className="text-gray-100">
         {/* ───────────── 본문 카드 ───────────── */}
         <Card className="p-6">
           {/* 작성자 프로필 */}
