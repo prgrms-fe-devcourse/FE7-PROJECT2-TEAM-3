@@ -17,12 +17,12 @@ export default function UserPagePosts({ posts }: { posts: PostListItem[] }) {
   }
   return (
     <>
-      <div>
+      <div className="flex flex-col gap-6">
         {posts.map((post) => {
           return (
             <article
               key={post._id}
-              className="flex gap-3 p-6 border border-[#303A4B] rounded-lg bg-[#161C27] cursor-pointer hover:bg-[#171f2b] hover:border-[#4E46A5]"
+              className="flex gap-3 mb-4 p-6 border border-[#303A4B] rounded-lg bg-[#161C27] cursor-pointer hover:bg-[#171f2b] hover:border-[#4E46A5]"
               onClick={() => navigate(`/posts/${post._id}`)}
             >
               <div className="w-10 h-10">
