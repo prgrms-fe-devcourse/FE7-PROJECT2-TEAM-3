@@ -43,7 +43,7 @@ export default function FollowList({
       }
       if (error) throw error;
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
   //언팔로우 하는 함수

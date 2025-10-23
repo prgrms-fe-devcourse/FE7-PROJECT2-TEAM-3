@@ -31,11 +31,13 @@ export default function Sidebar() {
   const toggleSidebar = () => setIsSideOpened((p) => !p);
 
   useEffect(() => {
-    if (!isLogined?._id) return;
+    if (!isLogined?._id) {
+      setIsNotiOpened(false);
+      return;
+    }
 
     let mounted = true;
 
-    // ✅ 기존 알림 불러오기 (약간 지연시켜 안정성 확보)
     const fetchNotifications = async () => {
       try {
         const { data, error } = await supabase
@@ -73,7 +75,6 @@ export default function Sidebar() {
 
     const delayedFetch = setTimeout(fetchNotifications, 300);
 
-    // ✅ 단건 join 데이터 재조회 함수
     const fetchJoinedNotification = async (id: string, retries = 3) => {
       for (let i = 0; i < retries; i++) {
         const { data, error } = await supabase
@@ -93,16 +94,14 @@ export default function Sidebar() {
           .single();
 
         if (!error && data?.actor) return data;
-        await new Promise((r) => setTimeout(r, 300)); // 재시도 대기
+        await new Promise((r) => setTimeout(r, 300));
       }
       return null;
     };
 
-    // ✅ 실시간 구독 (INSERT)
     const channel = supabase
       .channel("realtime-notifications")
       .on(
-        // 👈 1. INSERT 구독
         "postgres_changes",
         {
           event: "INSERT",
@@ -115,7 +114,6 @@ export default function Sidebar() {
         }
       )
       .on(
-        // 👈 2. DELETE 구독 (여기를 추가!)
         "postgres_changes",
         {
           event: "DELETE",
@@ -124,11 +122,7 @@ export default function Sidebar() {
           filter: `user_to_notify=eq.${isLogined._id}`,
         },
         (payload) => {
-          // payload.old에 삭제된 데이터가 포함됩니다.
-          console.log("🗑️ 다른 곳에서 알림 삭제됨:", payload.old);
-
           if (mounted) {
-            // 로컬 state에서도 해당 ID를 가진 알림을 제거합니다.
             setNotifications((prev) =>
               prev.filter(
                 (notification) => notification._id !== payload.old._id
@@ -139,13 +133,12 @@ export default function Sidebar() {
       )
       .subscribe();
 
-    // ✅ cleanup
     return () => {
       mounted = false;
       clearTimeout(delayedFetch);
       supabase.removeChannel(channel);
     };
-  }, [isLogined?._id]);
+  }, [isLogined]);
 
   return (
     <>

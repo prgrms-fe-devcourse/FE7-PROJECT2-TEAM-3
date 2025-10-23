@@ -28,7 +28,7 @@ export default function UserSetting() {
         navigate("/home");
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 

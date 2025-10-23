@@ -1,9 +1,8 @@
-import { useEffect, useRef } from "react";
+import { X } from "lucide-react";
+import { useEffect } from "react";
 import { createPortal } from "react-dom";
 
-export default function Modal({ isOpen, onClose, children }: ModalProps) {
-  const overlayRef = useRef<HTMLDivElement>(null);
-
+export default function ImageModal({ isOpen, onClose, children }: ModalProps) {
   useEffect(() => {
     if (!isOpen) return;
 
@@ -25,19 +24,15 @@ export default function Modal({ isOpen, onClose, children }: ModalProps) {
   if (!isOpen) return null;
 
   return createPortal(
-    <div
-      ref={overlayRef}
-      className="fixed top-0 left-0 z-10 w-full h-full flex-center bg-[rgba(0,0,0,0.3)] backdrop-blur-lg"
-      onMouseDown={(e) => {
-        if (e.target === overlayRef.current) onClose();
-      }}
-    >
-      <div
-        className="w-full max-w-8/10 md:max-w-150 bg-[#1A2537] border border-[#303A4B] rounded-lg"
-        onMouseDown={(e) => e.stopPropagation()}
+    <div className="fixed top-0 left-0 z-10 w-full h-full flex-center bg-[rgba(0,0,0,0.3)] backdrop-blur-lg">
+      <button
+        aria-label="모달 닫기"
+        className="fixed right-10 top-10 z-50 p-2 flex-center bg-[rgba(0,0,0,0.8)] rounded-full hover:opacity-50 cursor-pointer"
+        onClick={onClose}
       >
-        {children}
-      </div>
+        <X className="stroke-white w-8 h-8 stroke-1" />
+      </button>
+      <div className="w-dvw h-dvh">{children}</div>
     </div>,
     document.body
   );

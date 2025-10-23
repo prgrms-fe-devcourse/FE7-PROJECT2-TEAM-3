@@ -230,7 +230,7 @@ export default function ProfileHeaderSection() {
         setFollowers((prevCount) => prevCount + 1);
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
   //언팔로우 하는 함수
