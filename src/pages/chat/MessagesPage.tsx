@@ -6,6 +6,7 @@ import ProfileImage from "../../components/ui/ProfileImage";
 import Badge from "../../components/ui/Badge";
 import { twMerge } from "tailwind-merge";
 import ChatSkeleton from "../../components/ui/loading/ChatSkeleton";
+import { MailX, UserRoundX } from "lucide-react";
 
 type ChatRoomInboxItem = {
   roomId: string;
@@ -144,8 +145,9 @@ export default function MessagesPage() {
 
   if (!myProfile) {
     return (
-      <div className="h-64 flex justify-center items-center">
-        <p className="text-gray-500 text-base">
+      <div className="h-full flex-center flex-col gap-5 bg-[#1A2537] border border-[#303A4B] rounded-lg text-gray-500">
+        <UserRoundX className="w-20 h-20 stroke-1.5" />
+        <p>
           로그인 유저만 사용 가능합니다.
         </p>
       </div>
@@ -154,8 +156,9 @@ export default function MessagesPage() {
 
   if (chatRooms.length === 0) {
     return (
-      <div className="h-64 flex justify-center items-center">
-        <p className="text-gray-500 text-base">아직 대화가 없습니다.</p>
+      <div className="h-full flex-center flex-col gap-5 bg-[#1A2537] border border-[#303A4B] rounded-lg text-gray-500">
+        <MailX className="w-20 h-20 stroke-1.5" />
+        <p>아직 대화가 없습니다.</p>
       </div>
     );
   }
