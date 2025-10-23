@@ -31,7 +31,10 @@ export default function Sidebar() {
   const toggleSidebar = () => setIsSideOpened((p) => !p);
 
   useEffect(() => {
-    if (!isLogined?._id) return;
+    if (!isLogined?._id) {
+      setIsNotiOpened(false);
+      return;
+    }
 
     let mounted = true;
 
@@ -145,7 +148,7 @@ export default function Sidebar() {
       clearTimeout(delayedFetch);
       supabase.removeChannel(channel);
     };
-  }, [isLogined?._id]);
+  }, [isLogined]);
 
   return (
     <>
